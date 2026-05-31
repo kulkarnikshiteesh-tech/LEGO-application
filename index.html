@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kshiteesh Kulkarni — Since Last Application</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --yellow: #FFC906;
+      --yellow-dark: #E6B400;
+      --red: #DA291C;
+      --blue: #006CB7;
+      --blue-dark: #004A8F;
+      --green: #00A650;
+      --black: #1D1D1B;
+      --white: #FFFFFF;
+      --grey-light: #F2F2F0;
+      --grey-mid: #D9D9D6;
+      --grey-text: #5A5A58;
+      --stud-size: 20px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--grey-light);
+      color: var(--black);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    /* STUD PATTERN */
+    .studs {
+      background-image: radial-gradient(circle, rgba(0,0,0,0.12) 3px, transparent 3px);
+      background-size: 28px 28px;
+    }
+
+    .studs-white {
+      background-image: radial-gradient(circle, rgba(255,255,255,0.2) 3px, transparent 3px);
+      background-size: 28px 28px;
+    }
+
+    .studs-yellow {
+      background-image: radial-gradient(circle, rgba(0,0,0,0.1) 3px, transparent 3px);
+      background-size: 28px 28px;
+    }
+
+    /* HEADER */
+    .site-header {
+      background: var(--yellow);
+      padding: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header-stud-band {
+      height: 40px;
+      background: var(--yellow-dark);
+      background-image: radial-gradient(circle, rgba(255,255,255,0.3) 5px, transparent 5px);
+      background-size: 40px 40px;
+      background-position: 20px center;
+    }
+
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 56px 80px 64px;
+      position: relative;
+    }
+
+    .header-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--black);
+      color: var(--yellow);
+      font-family: 'Nunito', sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 4px;
+      margin-bottom: 24px;
+    }
+
+    .header-name {
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(44px, 6vw, 80px);
+      font-weight: 900;
+      line-height: 1.0;
+      color: var(--black);
+      margin-bottom: 6px;
+    }
+
+    .header-tagline {
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(22px, 3vw, 36px);
+      font-weight: 700;
+      color: var(--black);
+      opacity: 0.5;
+      margin-bottom: 28px;
+    }
+
+    .header-sub {
+      font-size: 17px;
+      color: var(--black);
+      opacity: 0.75;
+      max-width: 520px;
+      line-height: 1.65;
+    }
+
+    .header-chips {
+      margin-top: 32px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      background: var(--white);
+      color: var(--black);
+      font-family: 'Nunito', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 7px 16px;
+      border-radius: 100px;
+      border: 2px solid rgba(0,0,0,0.12);
+    }
+
+    .chip.red { background: var(--red); color: var(--white); border-color: var(--red); }
+    .chip.blue { background: var(--blue); color: var(--white); border-color: var(--blue); }
+
+    /* BRICK ACCENT */
+    .brick-bar {
+      height: 8px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--red) 0px, var(--red) 60px,
+        var(--yellow) 60px, var(--yellow) 120px,
+        var(--blue) 120px, var(--blue) 180px,
+        var(--green) 180px, var(--green) 240px
+      );
+    }
+
+    /* NAV */
+    .section-nav {
+      position: sticky;
+      top: 0;
+      background: var(--black);
+      z-index: 100;
+    }
+
+    .section-nav ul {
+      max-width: 1400px;
+      margin: 0 auto;
+      list-style: none;
+      display: flex;
+      padding: 0 80px;
+    }
+
+    .section-nav li a {
+      display: block;
+      padding: 15px 22px 13px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      border-bottom: 3px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .section-nav li a:hover {
+      color: var(--yellow);
+      border-bottom-color: var(--yellow);
+    }
+
+    /* MAIN */
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 80px 120px;
+    }
+
+    /* SECTION HEADER */
+    .section { padding-top: 80px; }
+
+    .section-label {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      margin-bottom: 40px;
+    }
+
+    .section-color-bar {
+      width: 8px;
+      border-radius: 4px;
+      margin-right: 20px;
+      flex-shrink: 0;
+    }
+
+    .section-color-bar.red { background: var(--red); }
+    .section-color-bar.blue { background: var(--blue); }
+    .section-color-bar.green { background: var(--green); }
+    .section-color-bar.yellow { background: var(--yellow-dark); }
+
+    .section-text-group { display: flex; flex-direction: column; justify-content: center; }
+
+    .section-eyebrow {
+      font-family: 'Nunito', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--grey-text);
+      margin-bottom: 4px;
+    }
+
+    .section-title {
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(28px, 3.5vw, 44px);
+      font-weight: 900;
+      color: var(--black);
+      line-height: 1.1;
+    }
+
+    .section-desc {
+      font-size: 15px;
+      color: var(--grey-text);
+      max-width: 560px;
+      margin-top: 8px;
+      line-height: 1.65;
+    }
+
+    /* PRODUCT GRID */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .product-grid.two-col { grid-template-columns: repeat(2, 1fr); }
+
+    /* CARD */
+    .product-card {
+      background: var(--white);
+      border: 3px solid var(--black);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 4px 4px 0px var(--black);
+    }
+
+    .product-card:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0px var(--black);
+    }
+
+    /* CAROUSEL */
+    .carousel {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4/3;
+      overflow: hidden;
+      border-bottom: 3px solid var(--black);
+    }
+
+    .carousel-track {
+      display: flex;
+      width: 200%;
+      height: 100%;
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .carousel-slide {
+      width: 50%;
+      height: 100%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .carousel-slide.photo-slide { background: #F0EDE5; }
+    .carousel-slide.video-slide { background: var(--black); }
+
+    .slide-icon-wrap {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 2px solid rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .video-slide .slide-icon-wrap {
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    .slide-text {
+      font-family: 'Nunito', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(0,0,0,0.35);
+    }
+
+    .video-slide .slide-text { color: rgba(255,255,255,0.3); }
+
+    /* CAROUSEL CONTROLS */
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 2px solid var(--black);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      box-shadow: 2px 2px 0 var(--black);
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      font-size: 14px;
+      color: var(--black);
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    .carousel-btn:hover {
+      transform: translateY(-50%) translate(-1px, -1px);
+      box-shadow: 3px 3px 0 var(--black);
+    }
+
+    .carousel-btn:active {
+      transform: translateY(-50%) translate(1px, 1px);
+      box-shadow: 1px 1px 0 var(--black);
+    }
+
+    .carousel-btn.prev { left: 10px; }
+    .carousel-btn.next { right: 10px; }
+
+    .carousel-dots {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      z-index: 10;
+    }
+
+    .carousel-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      border: 2px solid rgba(0,0,0,0.2);
+      cursor: pointer;
+      padding: 0;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .carousel[data-active="0"] .carousel-dot:nth-child(1) { background: var(--black); border-color: var(--black); transform: scale(1.2); }
+    .carousel[data-active="0"] .carousel-dot:nth-child(2) { background: rgba(0,0,0,0.15); border-color: rgba(0,0,0,0.15); }
+    .carousel[data-active="1"] .carousel-dot:nth-child(1) { background: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.3); }
+    .carousel[data-active="1"] .carousel-dot:nth-child(2) { background: var(--white); border-color: var(--white); transform: scale(1.2); }
+
+    /* CARD BODY */
+    .card-body { padding: 22px 24px 24px; }
+
+    .card-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .tag {
+      font-family: 'Nunito', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 4px;
+      border: 2px solid currentColor;
+    }
+
+    .tag.red { color: var(--red); background: #FFF0EE; }
+    .tag.blue { color: var(--blue); background: #EBF4FF; }
+    .tag.green { color: var(--green); background: #EAFAF2; }
+    .tag.yellow { color: #7A5E00; background: #FFF8D6; }
+    .tag.grey { color: var(--grey-text); background: var(--grey-light); border-color: var(--grey-mid); }
+
+    .card-title {
+      font-family: 'Nunito', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--black);
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    .card-desc {
+      font-size: 14px;
+      color: var(--grey-text);
+      line-height: 1.6;
+    }
+
+    /* WIDE CARD */
+    .product-card.wide {
+      grid-column: span 2;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .product-card.wide .carousel {
+      aspect-ratio: unset;
+      min-height: 300px;
+      border-bottom: none;
+      border-right: 3px solid var(--black);
+    }
+
+    .product-card.wide .card-body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .product-card.wide .card-title { font-size: 26px; margin-top: 8px; }
+    .product-card.wide .card-desc { font-size: 15px; margin-top: 12px; }
+
+    /* LEARNINGS */
+    .learnings-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .learning-card {
+      background: var(--white);
+      border: 3px solid var(--black);
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 4px 4px 0 var(--black);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .learning-card:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0 var(--black);
+    }
+
+    .learning-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      border: 2px solid var(--black);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .learning-icon.red { background: var(--red); }
+    .learning-icon.blue { background: var(--blue); }
+    .learning-icon.yellow { background: var(--yellow); }
+    .learning-icon.green { background: var(--green); }
+
+    .learning-title {
+      font-family: 'Nunito', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      margin-bottom: 12px;
+      color: var(--black);
+    }
+
+    .learning-body {
+      font-size: 14px;
+      color: var(--grey-text);
+      line-height: 1.65;
+    }
+
+    .learning-body ul { margin-top: 10px; padding-left: 16px; }
+    .learning-body li { margin-bottom: 6px; }
+
+    /* WHY NOW */
+    .why-section { padding-top: 80px; }
+
+    .why-now {
+      background: var(--yellow);
+      border: 3px solid var(--black);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 6px 6px 0 var(--black);
+    }
+
+    .why-header {
+      padding: 56px 64px 48px;
+      border-bottom: 3px solid var(--black);
+      position: relative;
+    }
+
+    .why-header .section-color-bar { background: var(--black); }
+
+    .why-header .section-eyebrow { color: rgba(0,0,0,0.5); }
+    .why-header .section-title { color: var(--black); }
+
+    .why-stud-accent {
+      position: absolute;
+      right: 64px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      opacity: 0.2;
+    }
+
+    .stud-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--black);
+    }
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .why-item {
+      padding: 40px 48px;
+      border-right: 3px solid var(--black);
+      border-bottom: 3px solid var(--black);
+    }
+
+    .why-item:nth-child(even) { border-right: none; }
+    .why-item:nth-child(3), .why-item:nth-child(4) { border-bottom: none; }
+
+    .why-item-number {
+      font-family: 'Nunito', sans-serif;
+      font-size: 56px;
+      font-weight: 900;
+      color: rgba(0,0,0,0.1);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .why-item-title {
+      font-family: 'Nunito', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--black);
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+
+    .why-item-body {
+      font-size: 15px;
+      color: rgba(0,0,0,0.65);
+      line-height: 1.7;
+    }
+
+    .why-footer {
+      padding: 40px 64px;
+      background: var(--black);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .why-footer-text {
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(16px, 2vw, 22px);
+      font-weight: 700;
+      color: var(--white);
+      max-width: 600px;
+      line-height: 1.5;
+    }
+
+    .why-footer-text em {
+      color: var(--yellow);
+      font-style: normal;
+    }
+
+    .why-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--yellow);
+      color: var(--black);
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      font-weight: 900;
+      padding: 14px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      border: 2px solid var(--yellow);
+      box-shadow: 3px 3px 0 rgba(255,255,255,0.3);
+      white-space: nowrap;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    .why-cta:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 4px 4px 0 rgba(255,255,255,0.3);
+    }
+
+    /* DIVIDER */
+    .divider {
+      height: 3px;
+      background: var(--grey-mid);
+      margin-top: 80px;
+    }
+
+    /* FOOTER */
+    .site-footer {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 36px 80px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-name {
+      font-family: 'Nunito', sans-serif;
+      font-size: 16px;
+      font-weight: 900;
+      color: var(--black);
+    }
+
+    .footer-links { display: flex; gap: 24px; }
+
+    .footer-links a {
+      font-family: 'Nunito', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--grey-text);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--blue); }
+
+    /* RESPONSIVE */
+    @media (max-width: 1000px) {
+      .site-header .header-inner, main, .site-footer { padding-left: 24px; padding-right: 24px; }
+      .section-nav ul { padding: 0 24px; }
+      .product-grid { grid-template-columns: 1fr; }
+      .product-grid.two-col { grid-template-columns: 1fr; }
+      .product-card.wide { grid-column: span 1; grid-template-columns: 1fr; }
+      .product-card.wide .carousel { border-right: none; border-bottom: 3px solid var(--black); }
+      .learnings-grid { grid-template-columns: 1fr; }
+      .why-grid { grid-template-columns: 1fr; }
+      .why-item { border-right: none; border-bottom: 3px solid var(--black); }
+      .why-item:last-child { border-bottom: none; }
+      .why-header, .why-footer { padding-left: 32px; padding-right: 32px; }
+      .why-stud-accent { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-stud-band studs-yellow"></div>
+    <div class="header-inner">
+      <div class="header-eyebrow">LEGO DESiGN &mdash; Senior Interactive Play Designer</div>
+      <h1 class="header-name">Kshiteesh Kulkarni</h1>
+      <p class="header-tagline">One year later. More built.</p>
+      <p class="header-sub">This page captures everything new since I last applied -- new products, new skills, new responsibilities.</p>
+      <div class="header-chips">
+        <span class="chip">Chief Maker, OIMake</span>
+        <span class="chip blue">Hyderabad, India</span>
+        <span class="chip red">Open to relocation</span>
+      </div>
+    </div>
+    <div class="brick-bar"></div>
+  </header>
+
+  <!-- NAV -->
+  <nav class="section-nav">
+    <ul>
+      <li><a href="#team-products">01 Team products</a></li>
+      <li><a href="#my-products">02 My work</a></li>
+      <li><a href="#learnings">03 Responsibilities</a></li>
+      <li><a href="#why-now">04 Why now</a></li>
+    </ul>
+  </nav>
+
+  <main>
+
+    <!-- SECTION 1 -->
+    <section class="section" id="team-products">
+      <div class="section-label">
+        <div class="section-color-bar red"></div>
+        <div class="section-text-group">
+          <span class="section-eyebrow">01</span>
+          <h2 class="section-title">Products my team designed</h2>
+          <p class="section-desc">Directed and reviewed by me -- concept briefs, design direction, prototype reviews, and final sign-off.</p>
+        </div>
+      </div>
+
+      <div class="product-grid">
+
+        <div class="product-card">
+          <div class="carousel" data-active="0">
+            <div class="carousel-track">
+              <div class="carousel-slide photo-slide">
+                <div class="slide-icon-wrap">🖼</div>
+                <span class="slide-text">Photo</span>
+              </div>
+              <div class="carousel-slide video-slide">
+                <div class="slide-icon-wrap">▶</div>
+                <span class="slide-text">Video</span>
+              </div>
+            </div>
+            <button class="carousel-btn prev">&#8592;</button>
+            <button class="carousel-btn next">&#8594;</button>
+            <div class="carousel-dots">
+              <button class="carousel-dot"></button>
+              <button class="carousel-dot"></button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-tags">
+              <span class="tag red">STEM Toy</span>
+              <span class="tag grey">Team</span>
+            </div>
+            <h3 class="card-title">Product Name</h3>
+            <p class="card-desc">What it is, who it's for, what makes it interesting. Keep it tight.</p>
+          </div>
+        </div>
+
+        <div class="product-card">
+          <div class="carousel" data-active="0">
+            <div class="carousel-track">
+              <div class="carousel-slide photo-slide">
+                <div class="slide-icon-wrap">🖼</div>
+                <span class="slide-text">Photo</span>
+              </div>
+              <div class="carousel-slide video-slide">
+                <div class="slide-icon-wrap">▶</div>
+                <span class="slide-text">Video</span>
+              </div>
+            </div>
+            <button class="carousel-btn prev">&#8592;</button>
+            <button class="carousel-btn next">&#8594;</button>
+            <div class="carousel-dots">
+              <button class="carousel-dot"></button>
+              <button class="carousel-dot"></button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-tags">
+              <span class="tag blue">Educational</span>
+              <span class="tag grey">Team</span>
+            </div>
+            <h3 class="card-title">Product Name</h3>
+            <p class="card-desc">What it is, who it's for, what makes it interesting.</p>
+          </div>
+        </div>
+
+        <div class="product-card">
+          <div class="carousel" data-active="0">
+            <div class="carousel-track">
+              <div class="carousel-slide photo-slide">
+                <div class="slide-icon-wrap">🖼</div>
+                <span class="slide-text">Photo</span>
+              </div>
+              <div class="carousel-slide video-slide">
+                <div class="slide-icon-wrap">▶</div>
+                <span class="slide-text">Video</span>
+              </div>
+            </div>
+            <button class="carousel-btn prev">&#8592;</button>
+            <button class="carousel-btn next">&#8594;</button>
+            <div class="carousel-dots">
+              <button class="carousel-dot"></button>
+              <button class="carousel-dot"></button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-tags">
+              <span class="tag green">Robotics</span>
+              <span class="tag grey">Team</span>
+            </div>
+            <h3 class="card-title">Product Name</h3>
+            <p class="card-desc">What it is, who it's for, what makes it interesting.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 2 -->
+    <section class="section" id="my-products">
+      <div class="section-label">
+        <div class="section-color-bar blue"></div>
+        <div class="section-text-group">
+          <span class="section-eyebrow">02</span>
+          <h2 class="section-title">Products I designed</h2>
+          <p class="section-desc">Work where I was the primary designer -- hands-on from concept sketch to production-ready output.</p>
+        </div>
+      </div>
+
+      <div class="product-grid two-col">
+
+        <div class="product-card wide">
+          <div class="carousel" data-active="0">
+            <div class="carousel-track">
+              <div class="carousel-slide photo-slide">
+                <div class="slide-icon-wrap">🖼</div>
+                <span class="slide-text">Photo</span>
+              </div>
+              <div class="carousel-slide video-slide">
+                <div class="slide-icon-wrap">▶</div>
+                <span class="slide-text">Video</span>
+              </div>
+            </div>
+            <button class="carousel-btn prev">&#8592;</button>
+            <button class="carousel-btn next">&#8594;</button>
+            <div class="carousel-dots">
+              <button class="carousel-dot"></button>
+              <button class="carousel-dot"></button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-tags">
+              <span class="tag red">Connected Hardware</span>
+              <span class="tag yellow">ESP32</span>
+            </div>
+            <h3 class="card-title">Product Name</h3>
+            <p class="card-desc">Hero product. 3-4 lines -- the problem, what the product does, the design challenge, and what's notable about it.</p>
+          </div>
+        </div>
+
+        <div class="product-card">
+          <div class="carousel" data-active="0">
+            <div class="carousel-track">
+              <div class="carousel-slide photo-slide">
+                <div class="slide-icon-wrap">🖼</div>
+                <span class="slide-text">Photo</span>
+              </div>
+              <div class="carousel-slide video-slide">
+                <div class="slide-icon-wrap">▶</div>
+                <span class="slide-text">Video</span>
+              </div>
+            </div>
+            <button class="carousel-btn prev">&#8592;</button>
+            <button class="carousel-btn next">&#8594;</button>
+            <div class="carousel-dots">
+              <button class="carousel-dot"></button>
+              <button class="carousel-dot"></button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-tags">
+              <span class="tag green">Play</span>
+              <span class="tag grey">Self-directed</span>
+            </div>
+            <h3 class="card-title">Product Name</h3>
+            <p class="card-desc">What you designed specifically.</p>
+          </div>
+        </div>
+
+        <div class="product-card">
+          <div class="carousel" data-active="0">
+            <div class="carousel-track">
+              <div class="carousel-slide photo-slide">
+                <div class="slide-icon-wrap">🖼</div>
+                <span class="slide-text">Photo</span>
+              </div>
+              <div class="carousel-slide video-slide">
+                <div class="slide-icon-wrap">▶</div>
+                <span class="slide-text">Video</span>
+              </div>
+            </div>
+            <button class="carousel-btn prev">&#8592;</button>
+            <button class="carousel-btn next">&#8594;</button>
+            <div class="carousel-dots">
+              <button class="carousel-dot"></button>
+              <button class="carousel-dot"></button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-tags">
+              <span class="tag blue">Prototype</span>
+              <span class="tag grey">Self-directed</span>
+            </div>
+            <h3 class="card-title">Product Name</h3>
+            <p class="card-desc">What you designed specifically.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 3 -->
+    <section class="section" id="learnings">
+      <div class="section-label">
+        <div class="section-color-bar green"></div>
+        <div class="section-text-group">
+          <span class="section-eyebrow">03</span>
+          <h2 class="section-title">Responsibilities + learnings</h2>
+          <p class="section-desc">What changed in my role this year, and what I deliberately built.</p>
+        </div>
+      </div>
+
+      <div class="learnings-grid">
+
+        <div class="learning-card">
+          <div class="learning-icon red">⚡</div>
+          <h3 class="learning-title">Responsibility title</h3>
+          <div class="learning-body">
+            <p>Brief description of what expanded or changed in your role.</p>
+            <ul>
+              <li>Specific thing you took on</li>
+              <li>Specific outcome or change</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="learning-card">
+          <div class="learning-icon blue">🔧</div>
+          <h3 class="learning-title">Responsibility title</h3>
+          <div class="learning-body">
+            <p>Brief description of what expanded or changed in your role.</p>
+            <ul>
+              <li>Specific thing you took on</li>
+              <li>Specific outcome or change</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="learning-card">
+          <div class="learning-icon yellow">📡</div>
+          <h3 class="learning-title">Learning: Connected hardware</h3>
+          <div class="learning-body">
+            <p>The ESP32 / Arduino / Micro:bit work -- what you built, what you learned, where it's going.</p>
+            <ul>
+              <li>Specific skill or project</li>
+              <li>How it connects to interactive play design</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="learning-card">
+          <div class="learning-icon green">📐</div>
+          <h3 class="learning-title">Learning title</h3>
+          <div class="learning-body">
+            <p>Another learning from this year. Specific skill, specific context, specific outcome.</p>
+            <ul>
+              <li>Specific thing you learned</li>
+              <li>How you applied it</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 4: WHY NOW -->
+    <section class="section why-section" id="why-now">
+      <div class="why-now">
+
+        <div class="why-header">
+          <div class="section-label" style="margin-bottom:0">
+            <div class="section-color-bar" style="background:var(--black)"></div>
+            <div class="section-text-group">
+              <span class="section-eyebrow" style="color:rgba(0,0,0,0.5)">04</span>
+              <h2 class="section-title">Why I'm the right fit now</h2>
+            </div>
+          </div>
+          <div class="why-stud-accent">
+            <div class="stud-dot"></div><div class="stud-dot"></div><div class="stud-dot"></div><div class="stud-dot"></div><div class="stud-dot"></div>
+            <div class="stud-dot"></div><div class="stud-dot"></div><div class="stud-dot"></div><div class="stud-dot"></div><div class="stud-dot"></div>
+            <div class="stud-dot"></div><div class="stud-dot"></div><div class="stud-dot"></div><div class="stud-dot"></div><div class="stud-dot"></div>
+          </div>
+        </div>
+
+        <div class="why-grid">
+
+          <div class="why-item">
+            <div class="why-item-number">01</div>
+            <h3 class="why-item-title">Connected hardware, hands-on</h3>
+            <p class="why-item-body">Since my last application, Makerverse has an ESP32-based product actively in development. I've worked hands-on with Arduino, Micro:bit, and ESP32 -- designing, prototyping, and testing. This is the practical electronics prototyping this role requires, not delegated work.</p>
+          </div>
+
+          <div class="why-item">
+            <div class="why-item-number">02</div>
+            <h3 class="why-item-title">More products, more depth</h3>
+            <p class="why-item-body">The products on this page didn't exist at my last application. [X] new products designed and shipped at Makerverse. Each one goes through the same child-centered, playful, manufacturable design process this role asks for -- and I've led every one of them.</p>
+          </div>
+
+          <div class="why-item">
+            <div class="why-item-number">03</div>
+            <h3 class="why-item-title">This is already my day job</h3>
+            <p class="why-item-body">The intersection of physical play, digital interaction, and child development is exactly where Makerverse lives. I didn't pivot toward this role -- this role describes what I already do, at scale, with a real team, in real production. The evidence has grown.</p>
+          </div>
+
+          <div class="why-item">
+            <div class="why-item-number">04</div>
+            <h3 class="why-item-title">Why LEGO, specifically</h3>
+            <p class="why-item-body">I'm applying because there isn't a more aligned place on earth for someone who designs play for children. Not as a stepping stone -- as a destination. Billund is where this kind of work is taken most seriously, and I want to be part of that.</p>
+          </div>
+
+        </div>
+
+        <div class="why-footer">
+          <p class="why-footer-text">I've spent a year building more, learning more, and leading more. <em>The work speaks for itself -- this page is the proof.</em></p>
+          <a href="mailto:kulkarnikshiteesh@gmail.com" class="why-cta">Get in touch &#8594;</a>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <div class="divider" style="max-width:1400px; margin: 0 auto;"></div>
+  <footer class="site-footer">
+    <span class="footer-name">Kshiteesh Kulkarni</span>
+    <div class="footer-links">
+      <a href="https://iamadesigneer.framer.website" target="_blank">Portfolio</a>
+      <a href="https://makeable-dfm.vercel.app" target="_blank">Makeable</a>
+      <a href="mailto:kulkarnikshiteesh@gmail.com">Email</a>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.carousel').forEach(carousel => {
+      const track = carousel.querySelector('.carousel-track');
+      const dots = carousel.querySelectorAll('.carousel-dot');
+      let active = 0;
+
+      function goTo(index) {
+        active = index;
+        track.style.transform = `translateX(-${active * 50}%)`;
+        carousel.setAttribute('data-active', active);
+      }
+
+      carousel.querySelector('.next').addEventListener('click', () => goTo((active + 1) % 2));
+      carousel.querySelector('.prev').addEventListener('click', () => goTo((active + 1) % 2));
+      dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
+    });
+  </script>
+
+</body>
+</html>
