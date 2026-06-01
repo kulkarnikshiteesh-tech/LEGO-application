@@ -1094,21 +1094,229 @@
     </div>
   </footer>
 
+  <!-- MODAL / LIGHTBOX -->
+  <style>
+    .product-card { cursor: pointer; }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(29,29,27,0.78);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--white);
+      border: 3px solid var(--black);
+      border-radius: 16px;
+      box-shadow: 8px 8px 0 var(--black);
+      width: 100%;
+      max-width: 960px;
+      max-height: 88vh;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      position: relative;
+      animation: modalPop 0.18s ease-out;
+    }
+    @keyframes modalPop {
+      from { transform: scale(0.96); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 2px solid var(--black);
+      box-shadow: 2px 2px 0 var(--black);
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      font-size: 18px;
+      color: var(--black);
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .modal-close:hover { transform: translate(-1px,-1px); box-shadow: 3px 3px 0 var(--black); }
+    .modal-body { overflow-y: auto; }
+    .modal-media {
+      position: relative;
+      width: 100%;
+      height: 440px;
+      max-height: 52vh;
+      overflow: hidden;
+      border-bottom: 3px solid var(--black);
+      background: #F0EDE5;
+    }
+    .modal-track { display: flex; height: 100%; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
+    .modal-track .carousel-slide { height: 100%; }
+    .modal-track .carousel-slide img,
+    .modal-track .carousel-slide video {
+      width: 100%; height: 100%; object-fit: contain; background: #000;
+    }
+    .modal-track .slide-icon-wrap { width: 72px; height: 72px; font-size: 30px; }
+    .modal-info { padding: 28px 32px 32px; }
+    .modal-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .modal-title {
+      font-family: 'Nunito', sans-serif;
+      font-size: 30px;
+      font-weight: 900;
+      color: var(--black);
+      margin-bottom: 14px;
+      line-height: 1.15;
+    }
+    .modal-desc { font-size: 16px; color: var(--grey-text); line-height: 1.7; }
+    .modal-buy {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      margin-top: 22px;
+      background: var(--yellow);
+      color: var(--black);
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      font-size: 14px;
+      padding: 12px 22px;
+      border: 2px solid var(--black);
+      border-radius: 8px;
+      box-shadow: 3px 3px 0 var(--black);
+      text-decoration: none;
+    }
+    .modal-buy:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--black); }
+    @media (max-width: 700px) {
+      .modal-media { height: 280px; }
+      .modal-title { font-size: 24px; }
+    }
+  </style>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <button class="modal-close" id="modalClose" aria-label="Close">&#10005;</button>
+      <div class="modal-body">
+        <div class="modal-media">
+          <div class="modal-track" id="modalTrack"></div>
+          <button class="carousel-btn prev" id="modalPrev">&#8592;</button>
+          <button class="carousel-btn next" id="modalNext">&#8594;</button>
+          <div class="carousel-dots" id="modalDots"></div>
+        </div>
+        <div class="modal-info">
+          <div class="modal-tags" id="modalTags"></div>
+          <h3 class="modal-title" id="modalTitle"></h3>
+          <p class="modal-desc" id="modalDesc"></p>
+          <a class="modal-buy" id="modalBuy" target="_blank" rel="noopener">View on Amazon &#8594;</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
-    document.querySelectorAll('.carousel').forEach(carousel => {
+    // --- Card carousels (2-slide placeholder version) ---
+    document.querySelectorAll('.product-card .carousel').forEach(carousel => {
       const track = carousel.querySelector('.carousel-track');
       const dots = carousel.querySelectorAll('.carousel-dot');
+      const slideCount = carousel.querySelectorAll('.carousel-slide').length;
       let active = 0;
 
       function goTo(index) {
-        active = index;
-        track.style.transform = `translateX(-${active * 50}%)`;
+        active = (index + slideCount) % slideCount;
+        track.style.transform = `translateX(-${active * (100 / slideCount)}%)`;
         carousel.setAttribute('data-active', active);
       }
+      const next = carousel.querySelector('.next');
+      const prev = carousel.querySelector('.prev');
+      if (next) next.addEventListener('click', e => { e.stopPropagation(); goTo(active + 1); });
+      if (prev) prev.addEventListener('click', e => { e.stopPropagation(); goTo(active - 1); });
+      dots.forEach((dot, i) => dot.addEventListener('click', e => { e.stopPropagation(); goTo(i); }));
+    });
 
-      carousel.querySelector('.next').addEventListener('click', () => goTo((active + 1) % 2));
-      carousel.querySelector('.prev').addEventListener('click', () => goTo((active + 1) % 2));
-      dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
+    // --- Modal / lightbox ---
+    const overlay = document.getElementById('modalOverlay');
+    const mTrack = document.getElementById('modalTrack');
+    const mDots = document.getElementById('modalDots');
+    const mPrev = document.getElementById('modalPrev');
+    const mNext = document.getElementById('modalNext');
+    const mTags = document.getElementById('modalTags');
+    const mTitle = document.getElementById('modalTitle');
+    const mDesc = document.getElementById('modalDesc');
+    const mBuy = document.getElementById('modalBuy');
+    let mActive = 0, mCount = 0;
+
+    function renderModalCarousel() {
+      mTrack.style.width = (mCount * 100) + '%';
+      Array.from(mTrack.children).forEach(c => { c.style.flex = '0 0 ' + (100 / mCount) + '%'; });
+      updateModal();
+    }
+    function updateModal() {
+      mTrack.style.transform = 'translateX(-' + (mActive * (100 / mCount)) + '%)';
+      Array.from(mDots.children).forEach((d, i) => d.classList.toggle('active', i === mActive));
+    }
+    function goModal(i) { mActive = (i + mCount) % mCount; updateModal(); }
+
+    function openModal(card) {
+      // text content
+      const titleEl = card.querySelector('.card-title');
+      const descEl = card.querySelector('.card-desc');
+      const tagsEl = card.querySelector('.card-tags');
+      mTitle.textContent = titleEl ? titleEl.textContent : '';
+      mDesc.textContent = descEl ? descEl.textContent : '';
+      mTags.innerHTML = tagsEl ? tagsEl.innerHTML : '';
+      // amazon link (set via data-amazon when real content is generated)
+      const amazon = card.getAttribute('data-amazon');
+      if (amazon) { mBuy.href = amazon; mBuy.style.display = 'inline-flex'; }
+      else { mBuy.style.display = 'none'; }
+      // media: clone slides from the card carousel
+      const slides = card.querySelectorAll('.carousel-slide');
+      mTrack.innerHTML = '';
+      slides.forEach(s => mTrack.appendChild(s.cloneNode(true)));
+      mCount = slides.length;
+      mActive = 0;
+      mDots.innerHTML = '';
+      for (let i = 0; i < mCount; i++) {
+        const b = document.createElement('button');
+        b.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+        b.addEventListener('click', () => goModal(i));
+        mDots.appendChild(b);
+      }
+      const showNav = mCount > 1;
+      mPrev.style.display = mNext.style.display = mDots.style.display = showNav ? '' : 'none';
+      renderModalCarousel();
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+      // pause any playing video in modal
+      mTrack.querySelectorAll('video').forEach(v => v.pause());
+    }
+
+    document.querySelectorAll('.product-card').forEach(card => {
+      card.addEventListener('click', e => {
+        if (e.target.closest('.carousel-btn') || e.target.closest('.carousel-dot')) return;
+        openModal(card);
+      });
+    });
+
+    mPrev.addEventListener('click', () => goModal(mActive - 1));
+    mNext.addEventListener('click', () => goModal(mActive + 1));
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+    document.addEventListener('keydown', e => {
+      if (!overlay.classList.contains('open')) return;
+      if (e.key === 'Escape') closeModal();
+      else if (e.key === 'ArrowRight') goModal(mActive + 1);
+      else if (e.key === 'ArrowLeft') goModal(mActive - 1);
     });
   </script>
 
