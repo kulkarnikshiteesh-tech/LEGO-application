@@ -447,6 +447,14 @@
     .product-card.wide .card-title { font-size: 26px; margin-top: 8px; }
     .product-card.wide .card-desc { font-size: 15px; margin-top: 12px; }
 
+    /* FLIPPED WIDE CARD: media right, text left */
+    .product-card.wide.flip .carousel {
+      order: 2;
+      border-right: none;
+      border-left: 3px solid var(--black);
+    }
+    .product-card.wide.flip .card-body { order: 1; }
+
     /* LEARNINGS */
     .learnings-grid {
       display: grid;
@@ -725,6 +733,7 @@
 
       <div class="product-grid two-col">
 
+        <!-- HERO A: media left, text right -->
         <div class="product-card wide">
           <div class="carousel" data-active="0">
             <div class="carousel-track">
@@ -749,12 +758,13 @@
               <span class="tag red">Connected Hardware</span>
               <span class="tag yellow">ESP32</span>
             </div>
-            <h3 class="card-title">Product Name</h3>
+            <h3 class="card-title">Hero Product One</h3>
             <p class="card-desc">Hero product. 3-4 lines -- the problem, what the product does, the design challenge, and what's notable about it.</p>
           </div>
         </div>
 
-        <div class="product-card">
+        <!-- HERO B: text left, media right (flipped) -->
+        <div class="product-card wide flip">
           <div class="carousel" data-active="0">
             <div class="carousel-track">
               <div class="carousel-slide photo-slide">
@@ -778,11 +788,12 @@
               <span class="tag green">Play</span>
               <span class="tag grey">Self-directed</span>
             </div>
-            <h3 class="card-title">Product Name</h3>
-            <p class="card-desc">What you designed specifically.</p>
+            <h3 class="card-title">Hero Product Two</h3>
+            <p class="card-desc">Second hero. Layout flips -- description on the left, media on the right. Same 3-4 line depth.</p>
           </div>
         </div>
 
+        <!-- REGULAR CARD 1 -->
         <div class="product-card">
           <div class="carousel" data-active="0">
             <div class="carousel-track">
@@ -807,7 +818,37 @@
               <span class="tag blue">Prototype</span>
               <span class="tag grey">Self-directed</span>
             </div>
-            <h3 class="card-title">Product Name</h3>
+            <h3 class="card-title">Product Three</h3>
+            <p class="card-desc">What you designed specifically.</p>
+          </div>
+        </div>
+
+        <!-- REGULAR CARD 2 -->
+        <div class="product-card">
+          <div class="carousel" data-active="0">
+            <div class="carousel-track">
+              <div class="carousel-slide photo-slide">
+                <div class="slide-icon-wrap">🖼</div>
+                <span class="slide-text">Photo</span>
+              </div>
+              <div class="carousel-slide video-slide">
+                <div class="slide-icon-wrap">▶</div>
+                <span class="slide-text">Video</span>
+              </div>
+            </div>
+            <button class="carousel-btn prev">&#8592;</button>
+            <button class="carousel-btn next">&#8594;</button>
+            <div class="carousel-dots">
+              <button class="carousel-dot"></button>
+              <button class="carousel-dot"></button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-tags">
+              <span class="tag orange">Concept</span>
+              <span class="tag grey">Self-directed</span>
+            </div>
+            <h3 class="card-title">Product Four</h3>
             <p class="card-desc">What you designed specifically.</p>
           </div>
         </div>
