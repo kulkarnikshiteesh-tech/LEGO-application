@@ -762,6 +762,7 @@
     <!-- SECTION 3 -->
 
 
+
     <section class="section" id="learnings">
       <div class="section-label">
         <div class="section-color-bar green"></div>
@@ -895,6 +896,8 @@
   <!-- MODAL / LIGHTBOX -->
   <style>
     .product-card { cursor: pointer; }
+    .card-buy { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; background: var(--yellow); color: var(--black); font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 12px; letter-spacing: 0.02em; padding: 8px 15px; border: 2px solid var(--black); border-radius: 6px; box-shadow: 2px 2px 0 var(--black); text-decoration: none; }
+    .card-buy:hover { transform: translate(-1px,-1px); box-shadow: 3px 3px 0 var(--black); }
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -1027,11 +1030,12 @@
       var wide = (p.layout==='hero'||p.layout==='heroflip');
       var cls = 'product-card'+(wide?' wide':'')+(p.layout==='heroflip'?' flip':'');
       var play = p.coverVideo ? '<span class="cover-play">&#9658;</span>' : '';
+      var buy = p.link ? '<a class="card-buy" href="'+p.link+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">'+(p.linkLabel||'View on Amazon')+' &#8594;</a>' : '';
       return '<div class="'+cls+'" data-id="'+p.id+'">'
         + '<div class="cover"><img src="'+p.cover+'" alt="'+p.title+'" loading="lazy">'+play+'</div>'
         + '<div class="card-body"><div class="card-tags">'+tagHTML(p.tags)+'</div>'
         + '<h3 class="card-title">'+p.title+'</h3>'
-        + '<p class="card-desc">'+p.short+'</p></div></div>';
+        + '<p class="card-desc">'+p.short+'</p>'+buy+'</div></div>';
     }
 
     var myGrid = document.getElementById('myGrid');
