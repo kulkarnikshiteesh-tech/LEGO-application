@@ -455,6 +455,17 @@
     }
     .product-card.wide.flip .card-body { order: 1; }
 
+    /* COVER (card thumbnail) */
+    .cover { position: relative; width: 100%; aspect-ratio: 4/3; overflow: hidden; border-bottom: 3px solid var(--black); background: #F0EDE5; }
+    .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .cover-play { position: absolute; inset: 0; margin: auto; width: 62px; height: 62px; border-radius: 50%; background: rgba(255,255,255,0.92); border: 2px solid var(--black); display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--black); box-shadow: 2px 2px 0 var(--black); padding-left: 4px; }
+    .product-card.wide .cover { aspect-ratio: unset; height: 100%; min-height: 320px; border-bottom: none; border-right: 3px solid var(--black); }
+    .product-card.wide.flip .cover { order: 2; border-right: none; border-left: 3px solid var(--black); }
+    @media (max-width: 1000px) {
+      .product-card.wide .cover { border-right: none; border-bottom: 3px solid var(--black); min-height: 240px; }
+      .product-card.wide.flip .cover { border-left: none; border-bottom: 3px solid var(--black); }
+    }
+
     /* LEARNINGS */
     .learnings-grid {
       display: grid;
@@ -727,133 +738,10 @@
         <div class="section-text-group">
           <span class="section-eyebrow">01</span>
           <h2 class="section-title">Products I designed</h2>
-          <p class="section-desc">Work where I was the primary designer -- hands-on from concept sketch to production-ready output.</p>
+          <p class="section-desc">Work where I was the primary designer -- hands-on from concept to production.</p>
         </div>
       </div>
-
-      <div class="product-grid two-col">
-
-        <!-- HERO A: media left, text right -->
-        <div class="product-card wide">
-          <div class="carousel" data-active="0">
-            <div class="carousel-track">
-              <div class="carousel-slide photo-slide">
-                <div class="slide-icon-wrap">🖼</div>
-                <span class="slide-text">Photo</span>
-              </div>
-              <div class="carousel-slide video-slide">
-                <div class="slide-icon-wrap">▶</div>
-                <span class="slide-text">Video</span>
-              </div>
-            </div>
-            <button class="carousel-btn prev">&#8592;</button>
-            <button class="carousel-btn next">&#8594;</button>
-            <div class="carousel-dots">
-              <button class="carousel-dot"></button>
-              <button class="carousel-dot"></button>
-            </div>
-          </div>
-          <div class="card-body">
-            <div class="card-tags">
-              <span class="tag red">Connected Hardware</span>
-              <span class="tag yellow">ESP32</span>
-            </div>
-            <h3 class="card-title">Hero Product One</h3>
-            <p class="card-desc">Hero product. 3-4 lines -- the problem, what the product does, the design challenge, and what's notable about it.</p>
-          </div>
-        </div>
-
-        <!-- HERO B: text left, media right (flipped) -->
-        <div class="product-card wide flip">
-          <div class="carousel" data-active="0">
-            <div class="carousel-track">
-              <div class="carousel-slide photo-slide">
-                <div class="slide-icon-wrap">🖼</div>
-                <span class="slide-text">Photo</span>
-              </div>
-              <div class="carousel-slide video-slide">
-                <div class="slide-icon-wrap">▶</div>
-                <span class="slide-text">Video</span>
-              </div>
-            </div>
-            <button class="carousel-btn prev">&#8592;</button>
-            <button class="carousel-btn next">&#8594;</button>
-            <div class="carousel-dots">
-              <button class="carousel-dot"></button>
-              <button class="carousel-dot"></button>
-            </div>
-          </div>
-          <div class="card-body">
-            <div class="card-tags">
-              <span class="tag green">Play</span>
-              <span class="tag grey">Self-directed</span>
-            </div>
-            <h3 class="card-title">Hero Product Two</h3>
-            <p class="card-desc">Second hero. Layout flips -- description on the left, media on the right. Same 3-4 line depth.</p>
-          </div>
-        </div>
-
-        <!-- REGULAR CARD 1 -->
-        <div class="product-card">
-          <div class="carousel" data-active="0">
-            <div class="carousel-track">
-              <div class="carousel-slide photo-slide">
-                <div class="slide-icon-wrap">🖼</div>
-                <span class="slide-text">Photo</span>
-              </div>
-              <div class="carousel-slide video-slide">
-                <div class="slide-icon-wrap">▶</div>
-                <span class="slide-text">Video</span>
-              </div>
-            </div>
-            <button class="carousel-btn prev">&#8592;</button>
-            <button class="carousel-btn next">&#8594;</button>
-            <div class="carousel-dots">
-              <button class="carousel-dot"></button>
-              <button class="carousel-dot"></button>
-            </div>
-          </div>
-          <div class="card-body">
-            <div class="card-tags">
-              <span class="tag blue">Prototype</span>
-              <span class="tag grey">Self-directed</span>
-            </div>
-            <h3 class="card-title">Product Three</h3>
-            <p class="card-desc">What you designed specifically.</p>
-          </div>
-        </div>
-
-        <!-- REGULAR CARD 2 -->
-        <div class="product-card">
-          <div class="carousel" data-active="0">
-            <div class="carousel-track">
-              <div class="carousel-slide photo-slide">
-                <div class="slide-icon-wrap">🖼</div>
-                <span class="slide-text">Photo</span>
-              </div>
-              <div class="carousel-slide video-slide">
-                <div class="slide-icon-wrap">▶</div>
-                <span class="slide-text">Video</span>
-              </div>
-            </div>
-            <button class="carousel-btn prev">&#8592;</button>
-            <button class="carousel-btn next">&#8594;</button>
-            <div class="carousel-dots">
-              <button class="carousel-dot"></button>
-              <button class="carousel-dot"></button>
-            </div>
-          </div>
-          <div class="card-body">
-            <div class="card-tags">
-              <span class="tag orange">Concept</span>
-              <span class="tag grey">Self-directed</span>
-            </div>
-            <h3 class="card-title">Product Four</h3>
-            <p class="card-desc">What you designed specifically.</p>
-          </div>
-        </div>
-
-      </div>
+      <div class="product-grid two-col" id="myGrid"></div>
     </section>
 
     <div class="divider"></div>
@@ -868,102 +756,11 @@
           <p class="section-desc">Directed and reviewed by me -- concept briefs, design direction, prototype reviews, and final sign-off.</p>
         </div>
       </div>
-
-      <div class="product-grid">
-
-        <div class="product-card">
-          <div class="carousel" data-active="0">
-            <div class="carousel-track">
-              <div class="carousel-slide photo-slide">
-                <div class="slide-icon-wrap">🖼</div>
-                <span class="slide-text">Photo</span>
-              </div>
-              <div class="carousel-slide video-slide">
-                <div class="slide-icon-wrap">▶</div>
-                <span class="slide-text">Video</span>
-              </div>
-            </div>
-            <button class="carousel-btn prev">&#8592;</button>
-            <button class="carousel-btn next">&#8594;</button>
-            <div class="carousel-dots">
-              <button class="carousel-dot"></button>
-              <button class="carousel-dot"></button>
-            </div>
-          </div>
-          <div class="card-body">
-            <div class="card-tags">
-              <span class="tag red">STEM Toy</span>
-              <span class="tag grey">Team</span>
-            </div>
-            <h3 class="card-title">Product Name</h3>
-            <p class="card-desc">What it is, who it's for, what makes it interesting. Keep it tight.</p>
-          </div>
-        </div>
-
-        <div class="product-card">
-          <div class="carousel" data-active="0">
-            <div class="carousel-track">
-              <div class="carousel-slide photo-slide">
-                <div class="slide-icon-wrap">🖼</div>
-                <span class="slide-text">Photo</span>
-              </div>
-              <div class="carousel-slide video-slide">
-                <div class="slide-icon-wrap">▶</div>
-                <span class="slide-text">Video</span>
-              </div>
-            </div>
-            <button class="carousel-btn prev">&#8592;</button>
-            <button class="carousel-btn next">&#8594;</button>
-            <div class="carousel-dots">
-              <button class="carousel-dot"></button>
-              <button class="carousel-dot"></button>
-            </div>
-          </div>
-          <div class="card-body">
-            <div class="card-tags">
-              <span class="tag blue">Educational</span>
-              <span class="tag grey">Team</span>
-            </div>
-            <h3 class="card-title">Product Name</h3>
-            <p class="card-desc">What it is, who it's for, what makes it interesting.</p>
-          </div>
-        </div>
-
-        <div class="product-card">
-          <div class="carousel" data-active="0">
-            <div class="carousel-track">
-              <div class="carousel-slide photo-slide">
-                <div class="slide-icon-wrap">🖼</div>
-                <span class="slide-text">Photo</span>
-              </div>
-              <div class="carousel-slide video-slide">
-                <div class="slide-icon-wrap">▶</div>
-                <span class="slide-text">Video</span>
-              </div>
-            </div>
-            <button class="carousel-btn prev">&#8592;</button>
-            <button class="carousel-btn next">&#8594;</button>
-            <div class="carousel-dots">
-              <button class="carousel-dot"></button>
-              <button class="carousel-dot"></button>
-            </div>
-          </div>
-          <div class="card-body">
-            <div class="card-tags">
-              <span class="tag green">Robotics</span>
-              <span class="tag grey">Team</span>
-            </div>
-            <h3 class="card-title">Product Name</h3>
-            <p class="card-desc">What it is, who it's for, what makes it interesting.</p>
-          </div>
-        </div>
-
-      </div>
+      <div class="product-grid" id="teamGrid"></div>
     </section>
 
-    <div class="divider"></div>
-
     <!-- SECTION 3 -->
+
     <section class="section" id="learnings">
       <div class="section-label">
         <div class="section-color-bar green"></div>
@@ -1057,7 +854,7 @@
           <div class="why-item">
             <div class="why-item-number">02</div>
             <h3 class="why-item-title">More products, more depth</h3>
-            <p class="why-item-body">The products on this page didn't exist at my last application. [X] new products designed and shipped at Makerverse. Each one goes through the same child-centered, playful, manufacturable design process this role asks for -- and I've led every one of them.</p>
+            <p class="why-item-body">The products on this page didn't exist at my last application. A new range of STEM kits, several now selling on Amazon, plus a coding robot in development. Each goes through the same child-centered, playful, manufacturable design process this role asks for.</p>
           </div>
 
           <div class="why-item">
@@ -1221,102 +1018,75 @@
   </div>
 
   <script>
-    // --- Card carousels (2-slide placeholder version) ---
-    document.querySelectorAll('.product-card .carousel').forEach(carousel => {
-      const track = carousel.querySelector('.carousel-track');
-      const dots = carousel.querySelectorAll('.carousel-dot');
-      const slideCount = carousel.querySelectorAll('.carousel-slide').length;
-      let active = 0;
+    const PRODUCTS = [{"id": "no-code-robot", "group": "my", "layout": "hero", "title": "No-code Robot", "tags": [{"t": "Early childhood", "c": "blue"}, {"t": "Computational thinking", "c": "green"}, {"t": "No-code", "c": "yellow"}, {"t": "Under development", "c": "grey"}], "link": null, "linkLabel": null, "cover": "assets/no-code-robot/cover.jpg", "coverVideo": true, "short": "A coding robot for pre-primary kids: they sequence arrow-key steps to move it across a map, building computational thinking. Under development.", "full": "A robot for pre-primary children that builds computational thinking. Kids navigate a path on a map by feeding the robot a simple sequence of arrow-key instructions. We tested the first-stage prototype at several kindergartens. This second-stage prototype adds characters as simple swappable skins that change with the theme. The current prototype uses an ESP32 microcontroller, BO motors and a buzzer. I am responsible for the concept and design; our electronics R&D team handles board development.", "media": [{"type": "video", "src": "assets/no-code-robot/1.mp4"}, {"type": "video", "src": "assets/no-code-robot/2.mp4"}, {"type": "image", "src": "assets/no-code-robot/3.png"}, {"type": "image", "src": "assets/no-code-robot/4.jpg"}]}, {"id": "dust-ninja", "group": "my", "layout": "heroflip", "title": "Dust Ninja", "tags": [{"t": "Robotics", "c": "red"}, {"t": "Electronics", "c": "blue"}, {"t": "Motors", "c": "grey"}, {"t": "DIY", "c": "grey"}], "link": "https://www.amazon.in/OIMake-Cleaning-Control-Awesome-Science/dp/B0GVDMBBNH", "linkLabel": "View on Amazon", "cover": "assets/dust-ninja/1.jpg", "coverVideo": false, "short": "A robotics kit where kids build a real sweeping robot, learning science, engineering and electronics hands-on.", "full": "A robotics kit that teaches science, engineering, and electronics through a hands-on build. Kids assemble a working sweeping robot while they learn.", "media": [{"type": "image", "src": "assets/dust-ninja/1.jpg"}, {"type": "video", "src": "assets/dust-ninja/2.mp4"}]}, {"id": "projecto", "group": "my", "layout": "card", "title": "Projecto", "tags": [{"t": "Electronics", "c": "blue"}, {"t": "Gadget", "c": "grey"}, {"t": "Science", "c": "green"}, {"t": "DIY", "c": "grey"}], "link": "https://www.amazon.in/Projecto-MakerVerse-Projector-Making-Science/dp/B0FKTRQHT2", "linkLabel": "View on Amazon", "cover": "assets/projecto/1.jpg", "coverVideo": false, "short": "Kids build a working projector from scratch, learning basic electronics.", "full": "Projecto lets kids build a working projector from scratch. It introduces basic electronics concepts (LED, switch, power, polarity) through simple connections, helping kids understand how circuits and light interact.", "media": [{"type": "image", "src": "assets/projecto/1.jpg"}, {"type": "video", "src": "assets/projecto/2.mp4"}]}, {"id": "makeable-dfm", "group": "my", "layout": "card", "title": "Makeable-DFM", "tags": [{"t": "DFM", "c": "blue"}, {"t": "Injection molding", "c": "grey"}, {"t": "Costing", "c": "grey"}, {"t": "Live, not monetized", "c": "grey"}], "link": "https://makeable-dfm.vercel.app", "linkLabel": "View live tool", "cover": "assets/makeable-dfm/1.png", "coverVideo": false, "short": "A DFM analysis tool I built solo (with AI) for injection-moulded parts: moldability, material and tooling-cost analysis.", "full": "Across a decade of working with product design interns, I saw a recurring gap in understanding manufacturing processes, material selection, and design for manufacturing. I built this tool on my own, with the help of AI, to address it. It analyses injection-moulding compatibility, suggests materials, and estimates costs based on the Indian tooling industry. It has been through more than 25 revisions for critical features such as undercut detection, tooling suggestions, and wall-thickness analysis, drawn from my real industry experience.", "media": [{"type": "image", "src": "assets/makeable-dfm/1.png"}, {"type": "video", "src": "assets/makeable-dfm/2.mp4"}]}, {"id": "lumobug-mini", "group": "team", "layout": "card", "title": "LumoBug Mini", "tags": [{"t": "Robotics", "c": "red"}, {"t": "Sensors", "c": "yellow"}, {"t": "Art", "c": "green"}, {"t": "DIY", "c": "grey"}], "link": "https://www.amazon.in/OIMake-LumoBug-Mini-STEM-Robot/dp/B0H1M6R91D", "linkLabel": "View on Amazon", "cover": "assets/lumobug-mini/1.jpg", "coverVideo": false, "short": "A light-sensing robot bug with four LDR-driven modes. Kids colour and decorate its wings.", "full": "Powered by an LDR (light-dependent resistor) sensor, the LumoBug Mini has four modes: Follow the Light, Avoid the Light, Stop on Light, and Free Run. The kit includes wings kids can colour and decorate, turning the robot into a personalised bug character.", "media": [{"type": "image", "src": "assets/lumobug-mini/1.jpg"}, {"type": "video", "src": "assets/lumobug-mini/2.mp4"}]}, {"id": "task-champ", "group": "team", "layout": "card", "title": "Task Champ", "tags": [{"t": "Electronics", "c": "blue"}, {"t": "Sensors", "c": "yellow"}, {"t": "Gadget", "c": "grey"}, {"t": "DIY", "c": "grey"}], "link": "https://www.amazon.in/OIMake-Electronics-Learning-Management-Birthday/dp/B0GVDT72MD", "linkLabel": "View on Amazon", "cover": "assets/task-champ/1.jpg", "coverVideo": false, "short": "Kids build and wire a task board with a sensor that glows green when all tasks are done.", "full": "Kids build the board, write tasks on dry-erase panels, and wire a sensor circuit. When every task is flipped to 'done', light reaches the sensor and the LED glows green. Real electronics kids wire themselves.", "media": [{"type": "image", "src": "assets/task-champ/1.jpg"}, {"type": "video", "src": "assets/task-champ/2.mp4"}]}, {"id": "autorickshaw", "group": "team", "layout": "card", "title": "Autorickshaw", "tags": [{"t": "Robotics", "c": "red"}, {"t": "Parallel circuits", "c": "grey"}, {"t": "DIY", "c": "grey"}], "link": "https://www.amazon.in/OIMake-Headlights-Electricity-Electronics-Mechanical/dp/B0GV84B15G", "linkLabel": "View on Amazon", "cover": "assets/autorickshaw/1.png", "coverVideo": false, "short": "Build a toy autorickshaw and learn about motors, electricity, parallel circuits and robotics.", "full": "The autorickshaw is part of India's identity, with a version in every city. By building this toy, children learn about motors, electricity, parallel circuits and robotics.", "media": [{"type": "image", "src": "assets/autorickshaw/1.png"}, {"type": "video", "src": "assets/autorickshaw/2.mp4"}]}, {"id": "cherry-blossom-lamp", "group": "team", "layout": "card", "title": "Cherry Blossom Lamp", "tags": [{"t": "Electronics", "c": "blue"}, {"t": "Art", "c": "green"}, {"t": "DIY", "c": "grey"}], "link": "https://www.amazon.in/OIMake-Blossom-Electricity-Science-Project/dp/B0GVDGG9FB", "linkLabel": "View on Amazon", "cover": "assets/cherry-blossom-lamp/1.png", "coverVideo": false, "short": "A hand-painted, hand-wired lamp kids display in their room. Art meets STEM.", "full": "A hand-painted, hand-wired lamp that kids will proudly display in their room. Art meets STEM: STEAM.", "media": [{"type": "image", "src": "assets/cherry-blossom-lamp/1.png"}, {"type": "video", "src": "assets/cherry-blossom-lamp/2.mp4"}]}, {"id": "led-light-bag", "group": "team", "layout": "card", "title": "LED Light Bag", "tags": [{"t": "Electronics", "c": "blue"}, {"t": "Wearable", "c": "yellow"}, {"t": "Art", "c": "green"}, {"t": "DIY", "c": "grey"}], "link": "https://www.amazon.in/OIMake-Wearable-Glowing-Unique-Designs/dp/B0GYPKMQ11", "linkLabel": "View on Amazon", "cover": "assets/led-light-bag/1.png", "coverVideo": false, "short": "Build a wearable glowing light bag and learn about LEDs and parallel connections.", "full": "Design and build your own wearable glowing light bag, learning about LEDs and parallel connections along the way.", "media": [{"type": "image", "src": "assets/led-light-bag/1.png"}, {"type": "video", "src": "assets/led-light-bag/2.mp4"}]}, {"id": "lightup-fridge-magnet", "group": "team", "layout": "card", "title": "Light-up Fridge Magnet", "tags": [{"t": "Electronics", "c": "blue"}, {"t": "Art", "c": "green"}, {"t": "DIY", "c": "grey"}], "link": "https://www.amazon.in/OIMake-Light-Up-Building-Activity-Engraved/dp/B0H1M7LBNZ", "linkLabel": "View on Amazon", "cover": "assets/lightup-fridge-magnet/1.jpg", "coverVideo": false, "short": "An engraved wooden fridge magnet kids paint and customise into a one-of-a-kind piece.", "full": "A circular wooden disc with a magnet and intricate engraved patterns. Kids use their favourite paints to customise the design, making each magnet a one-of-a-kind piece.", "media": [{"type": "image", "src": "assets/lightup-fridge-magnet/1.jpg"}, {"type": "image", "src": "assets/lightup-fridge-magnet/2.png"}, {"type": "video", "src": "assets/lightup-fridge-magnet/3.mp4"}]}];
 
-      function goTo(index) {
-        active = (index + slideCount) % slideCount;
-        track.style.transform = `translateX(-${active * (100 / slideCount)}%)`;
-        carousel.setAttribute('data-active', active);
-      }
-      const next = carousel.querySelector('.next');
-      const prev = carousel.querySelector('.prev');
-      if (next) next.addEventListener('click', e => { e.stopPropagation(); goTo(active + 1); });
-      if (prev) prev.addEventListener('click', e => { e.stopPropagation(); goTo(active - 1); });
-      dots.forEach((dot, i) => dot.addEventListener('click', e => { e.stopPropagation(); goTo(i); }));
+    function tagHTML(tags){return tags.map(function(t){return '<span class="tag '+t.c+'">'+t.t+'</span>';}).join('');}
+
+    function cardHTML(p){
+      var wide = (p.layout==='hero'||p.layout==='heroflip');
+      var cls = 'product-card'+(wide?' wide':'')+(p.layout==='heroflip'?' flip':'');
+      var play = p.coverVideo ? '<span class="cover-play">&#9658;</span>' : '';
+      return '<div class="'+cls+'" data-id="'+p.id+'">'
+        + '<div class="cover"><img src="'+p.cover+'" alt="'+p.title+'" loading="lazy">'+play+'</div>'
+        + '<div class="card-body"><div class="card-tags">'+tagHTML(p.tags)+'</div>'
+        + '<h3 class="card-title">'+p.title+'</h3>'
+        + '<p class="card-desc">'+p.short+'</p></div></div>';
+    }
+
+    var myGrid = document.getElementById('myGrid');
+    var teamGrid = document.getElementById('teamGrid');
+    PRODUCTS.forEach(function(p){
+      (p.group==='my'?myGrid:teamGrid).insertAdjacentHTML('beforeend', cardHTML(p));
     });
 
-    // --- Modal / lightbox ---
-    const overlay = document.getElementById('modalOverlay');
-    const mTrack = document.getElementById('modalTrack');
-    const mDots = document.getElementById('modalDots');
-    const mPrev = document.getElementById('modalPrev');
-    const mNext = document.getElementById('modalNext');
-    const mTags = document.getElementById('modalTags');
-    const mTitle = document.getElementById('modalTitle');
-    const mDesc = document.getElementById('modalDesc');
-    const mBuy = document.getElementById('modalBuy');
-    let mActive = 0, mCount = 0;
+    // --- Modal ---
+    var overlay=document.getElementById('modalOverlay'),mTrack=document.getElementById('modalTrack'),
+        mDots=document.getElementById('modalDots'),mPrev=document.getElementById('modalPrev'),
+        mNext=document.getElementById('modalNext'),mTags=document.getElementById('modalTags'),
+        mTitle=document.getElementById('modalTitle'),mDesc=document.getElementById('modalDesc'),
+        mBuy=document.getElementById('modalBuy');
+    var mActive=0,mCount=0;
+    function updateModal(){mTrack.style.transform='translateX(-'+(mActive*(100/mCount))+'%)';
+      Array.prototype.forEach.call(mDots.children,function(d,i){d.classList.toggle('active',i===mActive);});}
+    function goModal(i){mActive=(i+mCount)%mCount;updateModal();
+      mTrack.querySelectorAll('video').forEach(function(v){v.pause();});}
+    function openModal(p){
+      mTitle.textContent=p.title; mDesc.textContent=p.full; mTags.innerHTML=tagHTML(p.tags);
+      if(p.link){mBuy.href=p.link; mBuy.textContent=(p.linkLabel||'View on Amazon')+' \u2192'; mBuy.style.display='inline-flex';}
+      else{mBuy.style.display='none';}
+      mTrack.innerHTML=''; mCount=p.media.length;
+      p.media.forEach(function(m){
+        var slide=document.createElement('div'); slide.className='carousel-slide';
+        if(m.type==='video'){slide.innerHTML='<video controls preload="metadata" playsinline src="'+m.src+'"></video>';}
+        else{slide.innerHTML='<img loading="lazy" src="'+m.src+'" alt="'+p.title+'">';}
+        slide.style.flex='0 0 '+(100/mCount)+'%'; mTrack.appendChild(slide);
+      });
+      mTrack.style.width=(mCount*100)+'%'; mActive=0;
+      mDots.innerHTML='';
+      for(var i=0;i<mCount;i++){(function(i){var b=document.createElement('button');
+        b.className='carousel-dot'+(i===0?' active':''); b.addEventListener('click',function(){goModal(i);});
+        mDots.appendChild(b);})(i);}
+      var nav=mCount>1?'':'none'; mPrev.style.display=mNext.style.display=mDots.style.display=nav;
+      updateModal(); overlay.classList.add('open'); document.body.style.overflow='hidden';
+    }
+    function closeModal(){overlay.classList.remove('open');document.body.style.overflow='';
+      mTrack.querySelectorAll('video').forEach(function(v){v.pause();});}
 
-    function renderModalCarousel() {
-      mTrack.style.width = (mCount * 100) + '%';
-      Array.from(mTrack.children).forEach(c => { c.style.flex = '0 0 ' + (100 / mCount) + '%'; });
-      updateModal();
-    }
-    function updateModal() {
-      mTrack.style.transform = 'translateX(-' + (mActive * (100 / mCount)) + '%)';
-      Array.from(mDots.children).forEach((d, i) => d.classList.toggle('active', i === mActive));
-    }
-    function goModal(i) { mActive = (i + mCount) % mCount; updateModal(); }
-
-    function openModal(card) {
-      // text content
-      const titleEl = card.querySelector('.card-title');
-      const descEl = card.querySelector('.card-desc');
-      const tagsEl = card.querySelector('.card-tags');
-      mTitle.textContent = titleEl ? titleEl.textContent : '';
-      mDesc.textContent = descEl ? descEl.textContent : '';
-      mTags.innerHTML = tagsEl ? tagsEl.innerHTML : '';
-      // amazon link (set via data-amazon when real content is generated)
-      const amazon = card.getAttribute('data-amazon');
-      if (amazon) { mBuy.href = amazon; mBuy.style.display = 'inline-flex'; }
-      else { mBuy.style.display = 'none'; }
-      // media: clone slides from the card carousel
-      const slides = card.querySelectorAll('.carousel-slide');
-      mTrack.innerHTML = '';
-      slides.forEach(s => mTrack.appendChild(s.cloneNode(true)));
-      mCount = slides.length;
-      mActive = 0;
-      mDots.innerHTML = '';
-      for (let i = 0; i < mCount; i++) {
-        const b = document.createElement('button');
-        b.className = 'carousel-dot' + (i === 0 ? ' active' : '');
-        b.addEventListener('click', () => goModal(i));
-        mDots.appendChild(b);
-      }
-      const showNav = mCount > 1;
-      mPrev.style.display = mNext.style.display = mDots.style.display = showNav ? '' : 'none';
-      renderModalCarousel();
-      overlay.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeModal() {
-      overlay.classList.remove('open');
-      document.body.style.overflow = '';
-      // pause any playing video in modal
-      mTrack.querySelectorAll('video').forEach(v => v.pause());
-    }
-
-    document.querySelectorAll('.product-card').forEach(card => {
-      card.addEventListener('click', e => {
-        if (e.target.closest('.carousel-btn') || e.target.closest('.carousel-dot')) return;
-        openModal(card);
+    document.querySelectorAll('.product-card').forEach(function(card){
+      card.addEventListener('click',function(){
+        var p=PRODUCTS.find(function(x){return x.id===card.getAttribute('data-id');});
+        if(p) openModal(p);
       });
     });
-
-    mPrev.addEventListener('click', () => goModal(mActive - 1));
-    mNext.addEventListener('click', () => goModal(mActive + 1));
-    document.getElementById('modalClose').addEventListener('click', closeModal);
-    overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
-    document.addEventListener('keydown', e => {
-      if (!overlay.classList.contains('open')) return;
-      if (e.key === 'Escape') closeModal();
-      else if (e.key === 'ArrowRight') goModal(mActive + 1);
-      else if (e.key === 'ArrowLeft') goModal(mActive - 1);
+    mPrev.addEventListener('click',function(){goModal(mActive-1);});
+    mNext.addEventListener('click',function(){goModal(mActive+1);});
+    document.getElementById('modalClose').addEventListener('click',closeModal);
+    overlay.addEventListener('click',function(e){if(e.target===overlay)closeModal();});
+    document.addEventListener('keydown',function(e){
+      if(!overlay.classList.contains('open'))return;
+      if(e.key==='Escape')closeModal();
+      else if(e.key==='ArrowRight')goModal(mActive+1);
+      else if(e.key==='ArrowLeft')goModal(mActive-1);
     });
   </script>
 
