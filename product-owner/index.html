@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kshiteesh Kulkarni — Product Owner, SMART Play</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e1116;
+    --surface:#161b22;
+    --surface-2:#1c232d;
+    --line:#2a323d;
+    --ink:#f4f6f8;
+    --muted:#9aa6b2;
+    --lego-yellow:#ffcf00;
+    --lego-red:#e3000b;
+    --lego-blue:#0057a8;
+    --lego-green:#00852b;
+    --accent:#ffcf00;
+    --maxw:1180px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:
+     radial-gradient(rgba(255,255,255,.035) 1px,transparent 1.4px) 0 0/26px 26px,
+     radial-gradient(42% 40% at 0% 0%,rgba(255,207,0,.10),transparent 60%),
+     radial-gradient(46% 42% at 102% 2%,rgba(0,87,168,.16),transparent 60%),
+     radial-gradient(50% 46% at 100% 100%,rgba(0,133,43,.12),transparent 60%),
+     radial-gradient(46% 42% at 0% 100%,rgba(227,0,11,.10),transparent 60%)}
+  h1,h2,h3,.display{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;line-height:1.05;letter-spacing:-.02em}
+  section{padding:108px 24px;border-top:1px solid var(--line)}
+  .wrap{max-width:var(--maxw);margin:0 auto}
+  .eyebrow{font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:16px}
+  .stud{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent);margin-right:8px;vertical-align:middle}
+  .lead{color:var(--muted);font-size:1.05rem;max-width:62ch}
+
+  /* PROGRESS BAR */
+  .progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:60;background:linear-gradient(90deg,var(--lego-yellow),var(--lego-red));box-shadow:0 0 12px rgba(255,207,0,.5)}
+
+  /* ============ HERO CARD ============ */
+  .hero{min-height:100vh;display:flex;align-items:center;padding:90px 24px 60px}
+  .hero-card{width:100%;max-width:var(--maxw);margin:0 auto;
+    background:linear-gradient(150deg,#1a2230 0%,#141b25 55%,#10161e 100%);
+    border:1.5px solid rgba(255,255,255,.08);border-radius:26px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 48px 110px -30px rgba(0,0,0,.7);
+    padding:40px;display:grid;grid-template-columns:auto 1fr;gap:60px;align-items:start;position:relative;overflow:hidden}
+  .hero-card::before{content:"";position:absolute;top:0;left:0;right:55%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent)}
+  .hero-card::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 50% 46% at var(--mx,26%) var(--my,46%),rgba(0,120,210,.14),transparent 62%);transition:background .12s linear}
+
+  /* --- game side (left) --- */
+  .game-side{position:relative;z-index:2;display:flex;align-items:center;gap:22px}
+  .control-col{display:flex;flex-direction:column;align-items:center;gap:16px}
+  .board{position:relative;width:340px;aspect-ratio:1;flex:none;border-radius:14px;overflow:hidden;border:1px solid var(--line);
+    background:radial-gradient(130% 130% at 28% 16%,#222e3b,#0e141b)}
+  .grid-lines{position:absolute;inset:0;z-index:0;pointer-events:none}
+  .grid-lines line{stroke:rgba(255,255,255,.2);stroke-width:1.4;vector-effect:non-scaling-stroke}
+  .pad{position:absolute;width:20%;height:20%;display:flex;align-items:center;justify-content:center}
+  .home{padding:4%}
+  .home svg{width:100%;height:100%;filter:drop-shadow(0 3px 6px rgba(0,0,0,.45));position:relative;z-index:1}
+  .home-glow{position:absolute;inset:-6%;border-radius:14px;background:radial-gradient(circle,rgba(255,207,0,.24),transparent 68%);animation:homepulse 2.2s ease-in-out infinite;z-index:0}
+  @keyframes homepulse{0%,100%{opacity:.45}50%{opacity:1}}
+  .apple{transition:opacity .25s,transform .25s}
+  .apple svg{width:52%;height:52%;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))}
+  .apple.gone{opacity:0;transform:scale(.1)}
+
+  /* KIDO — single fixed element that lives in the grid and rides the rail */
+  #kido{position:fixed;left:0;top:0;width:60px;height:60px;z-index:57;pointer-events:none;display:flex;align-items:center;justify-content:center;will-change:left,top,width,height}
+  #kido .kbody{width:100%;height:100%;filter:drop-shadow(0 5px 8px rgba(0,0,0,.5));animation:kidoidle 3s ease-in-out infinite}
+  @keyframes kidoidle{0%,100%{transform:translateY(0)}50%{transform:translateY(-5%)}}
+  #kido.bump .kbody{animation:bump .3s}
+  @keyframes bump{0%,100%{transform:translate(0,0)}30%{transform:translate(-5px,0)}70%{transform:translate(5px,0)}}
+  #kido.happy .kbody{animation:happy .55s ease}
+  @keyframes happy{0%,100%{transform:translateY(0) scale(1)}35%{transform:translateY(-22%) scale(1.06)}}
+  #kido.walking .kbody{animation:walkwobble .62s ease}
+  @keyframes walkwobble{0%{transform:rotate(0)}22%{transform:rotate(-10deg)}55%{transform:rotate(9deg)}80%{transform:rotate(-4deg)}100%{transform:rotate(0)}}
+  #kido .eye{animation:kido-blink 4s infinite;transform-origin:center;transform-box:fill-box}
+  @keyframes kido-blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.12)}}
+  #kido .carry{position:absolute;top:-6%;right:-4%;width:42%;height:42%;opacity:0;transform:scale(.4);transition:.25s;z-index:6}
+  #kido .carry.on{opacity:1;transform:scale(1)}
+  #kido .carry svg{width:100%;height:100%;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
+
+  /* controls */
+  .dirpad{display:grid;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:10px;justify-content:center}
+  .dbtn{border-radius:50%;background:var(--surface-2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.12s;padding:0}
+  .dbtn:hover{border-color:var(--lego-yellow);background:#243040}
+  .dbtn:active{transform:scale(.88)}
+  .dbtn svg{width:48%;height:48%}
+  .dbtn polygon{fill:var(--lego-yellow)}
+  .dup{grid-area:1/2}.dleft{grid-area:2/1}.dright{grid-area:2/3}.ddown{grid-area:3/2}
+  .dreset{grid-area:2/2;border-radius:50%;background:transparent;border:1px solid var(--line);color:var(--muted);cursor:pointer;font-size:1.1rem;transition:.12s}
+  .dreset:hover{color:var(--ink);border-color:var(--muted);transform:rotate(-40deg)}
+  .ginfo{font-size:.84rem;color:var(--muted);text-align:center;max-width:170px;min-height:2.6em;transition:.2s}
+  .ginfo.win{color:var(--lego-yellow);font-weight:700;font-family:'Bricolage Grotesque';font-size:.98rem}
+  .confetti{position:absolute;width:9px;height:9px;border-radius:2px;z-index:9;pointer-events:none}
+
+  /* --- hero intro (right) --- */
+  .hero-intro{position:relative;z-index:2;padding-top:6px}
+  .hero-intro .wave{font-size:.82rem;letter-spacing:.16em;text-transform:uppercase;color:var(--lego-yellow);font-weight:600;margin-bottom:18px}
+  .hero-intro h1{font-size:clamp(3rem,5.6vw,4.8rem);color:#fff}
+  .hero-intro h1 .hl{color:var(--lego-yellow)}
+  .hero-intro p{color:var(--muted);font-size:1.12rem;max-width:48ch;margin-top:24px}
+  .hero-intro .scroll-cue{margin-top:30px;display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.84rem}
+  .hero-intro .scroll-cue .arrow{width:22px;height:22px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;animation:bob 1.6s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+
+  /* STATION RAIL — appears after the hero */
+  .rail{position:fixed;left:82px;top:50%;transform:translateY(-50%) translateX(-14px);z-index:55;opacity:0;pointer-events:none;transition:opacity .45s ease,transform .45s ease}
+  .rail.show{opacity:1;transform:translateY(-50%);pointer-events:auto}
+  .stations{position:relative;list-style:none;display:flex;flex-direction:column;gap:24px}
+  .rail-line{position:absolute;left:5px;top:8px;bottom:8px;width:2px;background:var(--line);border-radius:2px;z-index:0}
+  .rail-fill{position:absolute;left:5px;top:8px;width:2px;background:linear-gradient(var(--lego-yellow),var(--lego-red));border-radius:2px;height:0;transition:height .35s ease;z-index:1}
+  .stations li{position:relative;padding-left:28px;cursor:pointer;z-index:2;display:flex;flex-direction:column;justify-content:center;min-height:24px}
+  .stations .dot{position:absolute;left:0;top:50%;transform:translateY(-50%);width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--line);transition:.3s}
+  .stations li:hover .dot{border-color:var(--muted)}
+  .stations li.active .dot{background:var(--lego-yellow);border-color:var(--lego-yellow);box-shadow:0 0 0 5px rgba(255,207,0,.16)}
+  .stations .nm{font-size:.6rem;letter-spacing:.14em;color:var(--muted);opacity:.6}
+  .stations .lbl{font-size:.82rem;color:var(--muted);white-space:nowrap;transition:.3s;font-weight:500}
+  .stations li:hover .lbl{color:var(--ink)}
+  .stations li.active .lbl{color:var(--ink);font-weight:600}
+
+  /* MOBILE CHIPS */
+  .chipbar{display:none}
+
+  /* SECTION HEADERS */
+  .sec-h{font-size:clamp(2.3rem,4.8vw,3.5rem);line-height:1.04;margin-bottom:26px;max-width:19ch;color:#fff}
+  .sec-h .num{display:flex;align-items:center;gap:12px;color:#fff;font-size:1rem;font-family:'Inter';font-weight:700;text-transform:uppercase;margin-bottom:22px;letter-spacing:.09em}
+  .sec-h .num::before{content:"";width:15px;height:15px;border-radius:4px;background:var(--ac,var(--lego-yellow));box-shadow:0 0 16px var(--ac,var(--lego-yellow));flex:none}
+
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;transition:transform .25s,border-color .25s,box-shadow .25s}
+  .stat:hover{transform:translateY(-4px);border-color:#3a4654;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+  .stat .big{font-family:'Bricolage Grotesque';font-weight:800;font-size:2rem;color:var(--lego-yellow)}
+  .stat .lbl{color:var(--muted);font-size:.85rem;margin-top:6px}
+
+  .ba{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:30px}
+  .ba figure{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:transform .25s,border-color .25s,box-shadow .25s}
+  .ba figure:hover{transform:translateY(-4px);border-color:#3a4654;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+  .ba .imgslot{aspect-ratio:4/3;display:flex;align-items:center;justify-content:center}
+  .ba figcaption{padding:12px 16px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--line)}
+  .tag{display:inline-block;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:99px;font-weight:600}
+  .tag.before{background:rgba(227,0,11,.14);color:#ff6b73}
+  .tag.after{background:rgba(0,133,43,.16);color:#4cd07d}
+  .ph{outline:1px dashed #3a4a5a;color:#6d7d8c;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
+
+  /* before/after compare slider */
+  .compare{position:relative;width:100%;aspect-ratio:16/10;border-radius:16px;overflow:hidden;border:1px solid var(--line);user-select:none;touch-action:none;cursor:ew-resize;background:#0c1117;margin-top:30px;--pos:50%}
+  .compare img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+  .compare .before-img{clip-path:inset(0 calc(100% - var(--pos)) 0 0);z-index:2}
+  .cmp-handle{position:absolute;top:0;bottom:0;left:var(--pos);width:2px;background:var(--lego-yellow);z-index:3;box-shadow:0 0 10px rgba(255,207,0,.6)}
+  .cmp-handle::after{content:"\2194";position:absolute;top:50%;left:50%;width:40px;height:40px;border-radius:50%;background:var(--lego-yellow);color:#0f141b;font-size:19px;font-weight:700;display:flex;align-items:center;justify-content:center;transform:translate(-50%,-50%);box-shadow:0 3px 12px rgba(0,0,0,.5)}
+  .cmp-tag{position:absolute;top:12px;z-index:4;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:4px 11px;border-radius:99px;color:#fff}
+  .cmp-tag.before{left:12px;background:rgba(227,0,11,.88)}
+  .cmp-tag.after{right:12px;background:rgba(0,133,43,.92)}
+  .cmp-hint{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);z-index:4;font-size:.72rem;color:rgba(255,255,255,.75);background:rgba(0,0,0,.45);padding:4px 11px;border-radius:99px;pointer-events:none;transition:opacity .3s}
+  .compare.touched .cmp-hint{opacity:0}
+  .cap{color:var(--muted);font-size:.92rem;margin-top:14px;max-width:62ch}
+  .figrow{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:24px}
+  .figrow figure{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:transform .25s,border-color .25s,box-shadow .25s}
+  .figrow figure:hover{transform:translateY(-4px);border-color:#3a4654;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+  .figrow img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+  .figrow figcaption{padding:12px 16px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--line)}
+  .figwide{margin-top:26px;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .figwide img{width:100%;aspect-ratio:21/9;object-fit:cover;display:block}
+  .figwide figcaption{padding:14px 18px;font-size:.88rem;color:var(--muted);border-top:1px solid var(--line)}
+  /* per-project link (Amazon or portfolio) */
+  .proj-link{display:inline-flex;align-items:center;gap:8px;margin-top:22px;font-size:.88rem;font-weight:600;color:var(--lego-yellow);text-decoration:none;border:1px solid var(--line);padding:10px 18px;border-radius:99px;transition:transform .2s,border-color .2s,background .2s}
+  .proj-link:hover{border-color:var(--lego-yellow);background:rgba(255,207,0,.07);transform:translateY(-2px)}
+  /* case blocks — distinguish separate stories under one section */
+  .case{margin-top:42px}
+  .case + .case{border-top:1px solid var(--line);padding-top:42px}
+  .case-head{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+  .case-tag{font-family:'Bricolage Grotesque';font-weight:800;font-size:.72rem;letter-spacing:.06em;color:#0f141b;background:var(--lego-yellow);padding:4px 12px;border-radius:99px;text-transform:uppercase}
+  .case-name{font-size:.76rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-weight:600}
+  .case h3{font-family:'Bricolage Grotesque';font-weight:800;font-size:clamp(1.25rem,2.3vw,1.7rem);line-height:1.12;margin:4px 0 16px;color:#fff;max-width:26ch}
+  /* galleries — show the whole product (contain), nothing cropped */
+  .gallery{display:grid;gap:18px;margin-top:26px}
+  .gallery.g3{grid-template-columns:repeat(3,1fr)}
+  .gallery.g2{grid-template-columns:repeat(2,1fr)}
+  .gallery figure{background:#0c1117;border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:transform .25s,border-color .25s,box-shadow .25s}
+  .gallery figure:hover{transform:translateY(-4px);border-color:#3a4654;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+  .gallery .imgwrap{aspect-ratio:4/3;background:radial-gradient(circle at 50% 38%,#1a232e,#0b1016);display:flex;align-items:center;justify-content:center;padding:12px}
+  .gallery img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;border-radius:6px;display:block}
+  .gallery figcaption{padding:13px 16px;font-size:.84rem;color:var(--muted);border-top:1px solid var(--line)}
+  .gallery .step{font-family:'Bricolage Grotesque';font-weight:800;color:var(--lego-yellow);font-size:.82rem;margin-right:7px}
+  .figfull{margin-top:24px;background:#0c1117;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .figfull .imgwrap{aspect-ratio:16/9;background:radial-gradient(circle at 50% 40%,#18212c,#0b1016);display:flex;align-items:center;justify-content:center;padding:16px}
+  .figfull img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+  .figfull figcaption{padding:13px 18px;font-size:.86rem;color:var(--muted);border-top:1px solid var(--line)}
+  @media(max-width:720px){.gallery.g3,.gallery.g2{grid-template-columns:1fr}}
+  @media(max-width:620px){.figrow{grid-template-columns:1fr}}
+
+  .proof{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:34px}
+  .pcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;min-height:118px;transition:transform .25s,border-color .25s,box-shadow .25s}
+  .pcard:hover{transform:translateY(-4px);border-color:#3a4654;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+  .pcard h4{font-family:'Bricolage Grotesque';font-weight:600;font-size:1.05rem;margin-bottom:6px}
+  .pcard p{color:var(--muted);font-size:.85rem}
+
+  /* proof cards with thumbnail */
+  .pcard.has-img{padding:0;overflow:hidden;display:flex;flex-direction:column}
+  .pcard.has-img .thumb{aspect-ratio:4/3;background:#0c1117;overflow:hidden}
+  .pcard.has-img .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
+  .pcard.has-img:hover .thumb img{transform:scale(1.05)}
+  .pcard.has-img .pc{padding:14px 16px}
+  /* store buttons */
+  .store-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:32px}
+  .store-btn{display:inline-flex;align-items:center;gap:9px;font-weight:700;font-family:'Bricolage Grotesque';font-size:.95rem;text-decoration:none;color:#0f141b;background:var(--lego-yellow);padding:13px 22px;border-radius:99px;transition:transform .18s,filter .18s}
+  .store-btn:hover{transform:translateY(-2px);filter:brightness(1.06)}
+  .store-btn.ghost{background:transparent;color:var(--lego-yellow);border:1px solid var(--line)}
+  .store-btn.ghost:hover{border-color:var(--lego-yellow);background:rgba(255,207,0,.06)}
+  /* brand store tiles */
+  .store-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:34px}
+  @media(max-width:680px){.store-grid{grid-template-columns:1fr}}
+  .store-tile{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:18px;overflow:hidden;text-decoration:none;transition:transform .22s,border-color .22s,box-shadow .22s}
+  .store-tile:hover{transform:translateY(-5px);border-color:var(--lego-yellow);box-shadow:0 18px 44px rgba(0,0,0,.42)}
+  .store-tile .logo{height:240px;display:flex;align-items:center;justify-content:center;background:#0e141b;padding:20px}
+  .store-tile .plate{width:100%;height:100%;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+  .store-tile .plate.mv{background:#fff}
+  .store-tile .plate.oi{background:#2d7e90}
+  .store-tile .plate img{width:100%;height:100%;object-fit:contain;transition:transform .35s}
+  .store-tile .plate.mv img{transform:scale(1.6)}
+  .store-tile .plate.oi img{object-fit:cover;transform:scale(1.08)}
+  .store-tile .cta{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;background:var(--surface);color:#fff;font-family:'Bricolage Grotesque';font-weight:700;font-size:1.02rem;border-top:1px solid var(--line)}
+  .store-tile .cta .go{color:var(--lego-yellow);font-size:.92rem}
+  /* "now" video + no-code robot */
+  .nowgrid{display:grid;grid-template-columns:1.25fr .75fr;gap:24px;margin-top:32px;align-items:start}
+  @media(max-width:860px){.nowgrid{grid-template-columns:1fr}}
+  .videofig{background:#0c1117;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .videofig video{width:100%;display:block;aspect-ratio:16/10;object-fit:cover;background:#000}
+  .videofig figcaption{padding:13px 18px;font-size:.86rem;color:var(--muted);border-top:1px solid var(--line)}
+  .loop-note{margin-top:18px;color:var(--lego-yellow);font-size:.92rem;font-weight:600}
+  /* why me */
+  .why{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:34px}
+  @media(max-width:720px){.why{grid-template-columns:1fr}}
+  .why .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;transition:transform .25s,border-color .25s,box-shadow .25s}
+  .why .card:hover{transform:translateY(-4px);border-color:#3a4654;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+  .why .card h4{font-family:'Bricolage Grotesque';font-weight:800;font-size:1.15rem;margin-bottom:8px;color:#fff}
+  .why .card p{color:var(--muted);font-size:.95rem}
+  .why .card .ic{width:38px;height:38px;border-radius:10px;background:rgba(255,207,0,.12);display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:1.15rem}
+  .honest{margin-top:34px;border-left:3px solid var(--lego-yellow);padding:8px 0 8px 20px;color:var(--muted);font-size:1.04rem;max-width:62ch}
+  .close{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:40px}
+  .close p{font-size:1.1rem;max-width:54ch}
+  .links{display:flex;flex-wrap:wrap;gap:14px;margin-top:24px}
+  .links a{color:var(--lego-yellow);text-decoration:none;font-size:.9rem;border:1px solid var(--line);padding:8px 14px;border-radius:99px;transition:transform .2s,border-color .2s,background .2s}
+  .links a:hover{transform:translateY(-2px);border-color:var(--lego-yellow);background:rgba(255,207,0,.06)}
+
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  /* staggered child reveals */
+  .stagger-item{opacity:0;transform:translateY(20px);transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1)}
+  .stagger-item.in{opacity:1;transform:none}
+
+  /* KIDO speech bubble (rail only) */
+  #kido .say{position:absolute;bottom:114%;left:50%;transform:translateX(-20%) translateY(6px) scale(.9);transform-origin:bottom left;white-space:nowrap;background:#fff;color:#0f141b;font-family:'Bricolage Grotesque';font-weight:700;font-size:.78rem;padding:6px 12px;border-radius:11px;box-shadow:0 8px 20px rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .3s ease,transform .35s cubic-bezier(.34,1.5,.5,1)}
+  #kido .say::after{content:"";position:absolute;left:16px;bottom:-4px;width:10px;height:10px;background:#fff;transform:rotate(45deg)}
+  #kido .say.show{opacity:1;transform:translateX(-20%) translateY(0) scale(1)}
+  .scroll-cue.win-cue{color:var(--lego-yellow);font-weight:600}
+  .scroll-cue.win-cue .arrow{border-color:var(--lego-yellow);color:var(--lego-yellow)}
+
+  @media(max-width:980px){
+    .hero-card{grid-template-columns:1fr;gap:34px;padding:26px}
+    .game-side{flex-direction:column;align-items:center;margin:0 auto;width:100%}
+    .board{width:min(340px,78vw)}
+    .hero-intro{text-align:center;padding-top:0}
+    .hero-intro p{margin-left:auto;margin-right:auto}
+    .hero-intro .scroll-cue{justify-content:center}
+  }
+  @media(max-width:1240px){
+    .rail{display:none}
+    .chipbar{display:flex;position:fixed;top:0;left:0;right:0;z-index:48;gap:8px;padding:10px 16px;overflow-x:auto;background:rgba(14,17,22,.82);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);scrollbar-width:none;opacity:0;pointer-events:none;transition:opacity .35s}
+    .chipbar::-webkit-scrollbar{display:none}
+    .chipbar.show{opacity:1;pointer-events:auto}
+    .chipbar a{flex:0 0 auto;font-size:.74rem;color:var(--muted);text-decoration:none;padding:5px 12px;border:1px solid var(--line);border-radius:99px;white-space:nowrap;transition:.2s}
+    .chipbar a.active{color:var(--bg);background:var(--lego-yellow);border-color:var(--lego-yellow);font-weight:600}
+  }
+  @media(max-width:560px){.stats,.proof{grid-template-columns:1fr}.ba{grid-template-columns:1fr}}
+  /* desktop: clear the station rail by shifting section content right */
+  @media(min-width:1241px){
+    section .wrap{margin-left:300px;margin-right:auto;max-width:820px}
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<!-- KIDO lives here, floats over the grid and travels to the rail -->
+<div id="kido">
+  <div class="say" id="kidoSay"></div>
+  <div class="carry" id="carry">
+    <svg viewBox="0 0 40 44" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M20 14 C14 6 4 8 4 20 C4 32 14 42 20 42 C26 42 36 32 36 20 C36 8 26 6 20 14 Z" fill="#e3000b"/>
+      <path d="M20 14 C20 8 24 4 30 5 C29 11 25 14 20 14 Z" fill="#00852b"/>
+    </svg>
+  </div>
+  <svg class="kbody" viewBox="0 0 100 116" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="KIDO">
+    <defs>
+      <linearGradient id="gb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fdfefe"/><stop offset="1" stop-color="#c7d2dd"/></linearGradient>
+      <radialGradient id="ge" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#bff4ff"/><stop offset="1" stop-color="#46cdf0"/></radialGradient>
+    </defs>
+    <rect x="46" y="6" width="8" height="16" rx="3" fill="#9fb0c0"/>
+    <ellipse cx="50" cy="6" rx="9" ry="4.5" fill="#ffe46b"/><rect x="41" y="2" width="18" height="6" rx="3" fill="#ffcf00"/>
+    <circle cx="12" cy="62" r="8" fill="#b9c4cf"/><circle cx="88" cy="62" r="8" fill="#b9c4cf"/>
+    <rect x="16" y="24" width="68" height="78" rx="30" fill="url(#gb)" stroke="#eef3f7"/>
+    <ellipse cx="38" cy="44" rx="16" ry="9" fill="#fff" opacity=".5"/>
+    <rect x="28" y="44" width="44" height="42" rx="18" fill="#121821"/>
+    <rect class="eye" x="40" y="56" width="8" height="18" rx="4" fill="url(#ge)"/>
+    <rect class="eye" x="54" y="56" width="8" height="18" rx="4" fill="url(#ge)"/>
+    <path d="M42 80 q8 6 16 0" stroke="#46cdf0" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".7"/>
+  </svg>
+</div>
+
+<!-- STATION RAIL -->
+<aside class="rail" id="rail" aria-label="Sections">
+  <ul class="stations" id="stations">
+    <span class="rail-line"></span>
+    <span class="rail-fill" id="railFill"></span>
+    <li data-target="top" class="active"><span class="nm">00</span><span class="lbl">Start</span><span class="dot"></span></li>
+    <li data-target="build"><span class="nm">01</span><span class="lbl">What to build</span><span class="dot"></span></li>
+    <li data-target="kids"><span class="nm">02</span><span class="lbl">Test with kids</span><span class="dot"></span></li>
+    <li data-target="makeable"><span class="nm">03</span><span class="lbl">Makeable</span><span class="dot"></span></li>
+    <li data-target="numbers"><span class="nm">04</span><span class="lbl">The numbers</span><span class="dot"></span></li>
+    <li data-target="platform"><span class="nm">05</span><span class="lbl">The platform</span><span class="dot"></span></li>
+    <li data-target="proof"><span class="nm">06</span><span class="lbl">Proof</span><span class="dot"></span></li>
+    <li data-target="nocode"><span class="nm">07</span><span class="lbl">Working on now</span><span class="dot"></span></li>
+    <li data-target="whyme"><span class="nm">08</span><span class="lbl">Why me</span><span class="dot"></span></li>
+    <li data-target="contact"><span class="nm">09</span><span class="lbl">Contact</span><span class="dot"></span></li>
+  </ul>
+</aside>
+
+<!-- MOBILE CHIPS -->
+<nav class="chipbar" id="chipbar" aria-label="Sections">
+  <a href="#build">What to build</a>
+  <a href="#kids">Test with kids</a>
+  <a href="#makeable">Makeable</a>
+  <a href="#numbers">The numbers</a>
+  <a href="#platform">The platform</a>
+  <a href="#proof">Proof</a>
+  <a href="#nocode">Working on now</a>
+  <a href="#whyme">Why me</a>
+  <a href="#contact">Contact</a>
+</nav>
+
+<!-- 1. HERO -->
+<header class="hero" id="top">
+  <div class="hero-card">
+    <!-- LEFT: game -->
+    <div class="game-side">
+      <div class="board" id="board">
+        <svg class="grid-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <line x1="0" y1="20" x2="100" y2="20"/>
+          <line x1="0" y1="40" x2="100" y2="40"/>
+          <line x1="0" y1="60" x2="100" y2="60"/>
+          <line x1="0" y1="80" x2="100" y2="80"/>
+          <line x1="20" y1="0" x2="20" y2="100"/>
+          <line x1="40" y1="0" x2="40" y2="100"/>
+          <line x1="60" y1="0" x2="60" y2="100"/>
+          <line x1="80" y1="0" x2="80" y2="100"/>
+        </svg>
+        <div class="pad home" id="homePad" style="left:80%;top:0%">
+          <div class="home-glow"></div>
+          <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" aria-label="home">
+            <polygon points="30,6 55,28 5,28" fill="#e3000b"/>
+            <rect x="6" y="22" width="48" height="6" rx="2" fill="#b8000a"/>
+            <rect x="12" y="28" width="36" height="26" rx="3" fill="#0057a8"/>
+            <rect x="25" y="38" width="11" height="16" rx="2" fill="#ffcf00"/>
+            <rect x="16" y="33" width="9" height="9" rx="1.5" fill="#bfe0ff"/>
+            <rect x="37" y="33" width="9" height="9" rx="1.5" fill="#bfe0ff"/>
+            <circle cx="30" cy="14" r="3" fill="#ffcf00"/>
+          </svg>
+        </div>
+        <div class="pad apple" id="apple" style="left:40%;top:40%">
+          <svg viewBox="0 0 40 44" xmlns="http://www.w3.org/2000/svg" aria-label="apple">
+            <path d="M20 14 C14 6 4 8 4 20 C4 32 14 42 20 42 C26 42 36 32 36 20 C36 8 26 6 20 14 Z" fill="#e3000b"/>
+            <path d="M20 14 C20 8 24 4 30 5 C29 11 25 14 20 14 Z" fill="#00852b"/>
+            <ellipse cx="13" cy="22" rx="4" ry="6" fill="#fff" opacity=".25"/>
+          </svg>
+        </div>
+      </div>
+      <div class="control-col">
+        <div class="dirpad">
+          <button class="dbtn dup" data-d="U" aria-label="up"><svg viewBox="0 0 100 100"><polygon points="50,14 86,82 14,82"/></svg></button>
+          <button class="dbtn dleft" data-d="L" aria-label="left"><svg viewBox="0 0 100 100" style="transform:rotate(-90deg)"><polygon points="50,14 86,82 14,82"/></svg></button>
+          <button class="dreset" id="resetBtn" title="Reset" aria-label="reset">&#8634;</button>
+          <button class="dbtn dright" data-d="R" aria-label="right"><svg viewBox="0 0 100 100" style="transform:rotate(90deg)"><polygon points="50,14 86,82 14,82"/></svg></button>
+          <button class="dbtn ddown" data-d="D" aria-label="down"><svg viewBox="0 0 100 100" style="transform:rotate(180deg)"><polygon points="50,14 86,82 14,82"/></svg></button>
+        </div>
+        <div class="ginfo" id="ginfo">Walk KIDO to the apple, then carry it home.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Hej there -->
+    <div class="hero-intro">
+      <p class="wave">Hej there</p>
+      <h1>I'm Kshiteesh.<br>Fancy a quick <span class="hl">game</span> first?</h1>
+      <p>This is my application for the Product Owner role on the SMART Play team. You have probably been through a stack of these today, so before the rest: walk KIDO over to the apple and bring it home.</p>
+      <div class="scroll-cue">
+        <span class="arrow">&#8595;</span>
+        <span>When you are ready, scroll on. KIDO comes with you.</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- 2. ROADMAP -->
+<section class="reveal" id="build">
+  <div class="wrap">
+    <h2 class="sec-h" style="--ac:var(--lego-blue)"><span class="num">01 · What to build</span>I let demand and feasibility pick the bet.</h2>
+    <p class="lead">Amazon is our main channel, so the roadmap starts there. Best-sellers set the price band. Then keyword search data month on month: search-volume growth, units sold, average price, return rate. The last filter is our own capability, where design, manufacturing or sourcing has to improve to deliver it. The data picks the product, the capability check makes it real.</p>
+    <div class="stats">
+      <div class="stat"><div class="big">"Robotics kit"</div><div class="lbl">the winning keyword the data kept pointing at</div></div>
+      <div class="stat"><div class="big" data-count="3">0</div><div class="lbl">best-sellers from this method: Emotibot, Gobble Bot, Dust Ninja</div></div>
+      <div class="stat"><div class="big">4–5 / day</div><div class="lbl">Dust Ninja orders, around 2 months after launch</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. USER BEHAVIOUR -->
+<section class="reveal" id="kids">
+  <div class="wrap">
+    <h2 class="sec-h" style="--ac:var(--lego-red)"><span class="num">02 · Test with kids</span>I change the product when kids tell me to.</h2>
+    <p class="lead">Two products, two times the kids forced a change. Different problems, the same instinct: watch them play, then act on what you see.</p>
+
+    <div class="case">
+      <div class="case-head"><span class="case-tag">Case A</span><span class="case-name">Bluetooth speaker · Makerverse</span></div>
+      <h3>Five kids broke it three days before launch, so I rebuilt it overnight.</h3>
+      <p class="lead">Three days before a 15-kid summer workshop, I ran a pilot with 5 kids. The MDF living hinges all broke, because kids handle things hard. I redesigned it overnight, prototyped at the vendor the next morning, tested on the spot, then produced it for the workshop.</p>
+    <div class="gallery g3">
+      <figure>
+        <div class="imgwrap"><img src="Bluetooth%20speaker/Version%20with%20living%20hinge%201.jpg" alt="MDF living-hinge speaker"></div>
+        <figcaption><span class="step">01</span>The MDF living-hinge build. Those bent panels are what snapped in 5 of 5 kids' hands.</figcaption>
+      </figure>
+      <figure>
+        <div class="imgwrap"><img src="Bluetooth%20speaker/immediately%20after%20we%20changed%20hinges.jpg" alt="Overnight strap fix"></div>
+        <figcaption><span class="step">02</span>Redesigned overnight, prototyped at the vendor next morning: a fabric strap instead of the rigid hinge.</figcaption>
+      </figure>
+      <figure>
+        <div class="imgwrap"><img src="Bluetooth%20speaker/Current%20version.jpg" alt="Shipped speaker"></div>
+        <figcaption><span class="step">03</span>The version that went to the workshop, and the one we ship now.</figcaption>
+      </figure>
+      </div>
+      <a class="proj-link" href="https://www.amazon.in/MakerVerse-Wireless-Bluetooth-Electronic-Robotics/dp/B0DJR6XCQM/ref=ast_sto_dp_puis?th=1" target="_blank" rel="noopener">See the speaker on Amazon &#8599;</a>
+    </div>
+
+    <div class="case">
+      <div class="case-head"><span class="case-tag">Case B</span><span class="case-name">MEEBO &amp; PYBO · Next Education</span></div>
+      <h3>The modular build was too hard for younger kids, so I split the robot in two by age.</h3>
+      <p class="lead">We planned one Mindstorms-style kit on Raspberry Pi. The younger kids found the modular construction too hard to put together, so we split it by age: MEEBO (ages 7 to 10, a fixed shape with no modular building) and PYBO (ages 11 and up, modular). Both moved to micro:bit, cheaper than Pi and cheaper still at the combined volume, which let us map the CS curriculum to each age. Published at IIT Bombay, 2021.</p>
+      <figure class="figfull">
+        <div class="imgwrap"><img src="Next%20education/Journey_next%20education-03.jpg" alt="Journey of the product"></div>
+        <figcaption>The journey: from the early Raspberry Pi prototype, to micro:bit, to two age-tuned robots.</figcaption>
+      </figure>
+      <figure class="figfull">
+        <div class="imgwrap"><img src="Next%20education/PYBO%20on%20left%20MEEBO%20on%20right.png" alt="PYBO and MEEBO"></div>
+        <figcaption>PYBO (left): ages 11 and up, modular. MEEBO (right): ages 7 to 10, fixed shape.</figcaption>
+      </figure>
+      <a class="proj-link" href="https://iamadesigneer.framer.website" target="_blank" rel="noopener">For the full design case study, visit my portfolio &#8599;</a>
+    </div>
+  </div>
+</section>
+
+<!-- 4. MAKEABLE -->
+<section class="reveal" id="makeable">
+  <div class="wrap">
+    <h2 class="sec-h" style="--ac:var(--lego-green)"><span class="num">03 · Makeable</span>I build the products I need.</h2>
+    <p class="lead">My junior designers kept getting manufacturing wrong, so I built the tool that fixes it. Makeable analyses a part for moldability, undercuts, wall thickness and India tooling cost. I built it solo with AI. It started on 4 March 2026 and I have made it better almost every day since: undercut detection alone took 25-plus revisions to get right, and the other features each took many more. It is backed by a database that logs every session, so the product tells me how it is actually used. It is live, free for now, and on its way to becoming a business of its own.</p>
+    <figure class="figfull">
+      <div class="imgwrap"><img src="assets/makeable-dfm/1.png" alt="Makeable DFM analysis tool"></div>
+      <figcaption>Makeable reading a part: undercuts and draft flagged, a per-unit cost and India tooling estimate, and a material call (here, ABS).</figcaption>
+    </figure>
+    <div class="stats">
+      <div class="stat"><div class="big">Solo</div><div class="lbl">built end to end with AI, no team</div></div>
+      <div class="stat"><div class="big" data-count="25" data-suffix="+">0</div><div class="lbl">revisions just to perfect undercut detection</div></div>
+      <div class="stat"><div class="big">Live</div><div class="lbl">every session logged, so it tells me how it is used</div></div>
+    </div>
+    <p class="lead" style="margin-top:28px">This is product ownership in miniature: I saw the unmet need, shipped the thing, and now I run it on the data it gives back. Early and small, but real:</p>
+    <div class="stats">
+      <div class="stat"><div class="big" data-count="73" data-suffix="%">0%</div><div class="lbl">ran the analysis all the way to a result</div></div>
+      <div class="stat"><div class="big" data-count="30" data-suffix="%">0%</div><div class="lbl">of analysed parts had undercuts the tool flagged</div></div>
+      <div class="stat"><div class="big" data-count="38" data-suffix="%">0%</div><div class="lbl">spec a 1,000-unit run, the rest larger: real production intent</div></div>
+    </div>
+    <p class="cap">The parts people bring are telling too: enclosures lead, and most skip the industry field. So I shipped a quick path: pick your own material and skip the industry questions entirely. A small product decision the data made for me, the same way I would prioritise a roadmap.</p>
+    <a class="proj-link" href="https://makeable-dfm.in" target="_blank" rel="noopener">Try Makeable live &#8599;</a>
+  </div>
+</section>
+
+<!-- 5. NUMBERS -->
+<section class="reveal" id="numbers">
+  <div class="wrap">
+    <h2 class="sec-h" style="--ac:var(--lego-yellow)"><span class="num">04 · The numbers</span>I own the numbers, and I measure.</h2>
+    <p class="lead">On Gobble Bot the biggest cost lever was the body material. Moving from all-MDF to a mix of EVA foam and MDF, MDF kept for the rigid core and EVA for the rest, cut the material cost, cut the laser-cutting time, and cut the weight, so both the unit cost and the per-box shipping came down. None of it took the play out.</p>
+    <div class="gallery g2">
+      <figure>
+        <div class="imgwrap"><img src="GobbleBot/Version%201.jpg" alt="Gobble Bot version 1"></div>
+        <figcaption><span class="step">V1</span>All MDF. The starting point.</figcaption>
+      </figure>
+      <figure>
+        <div class="imgwrap"><img src="GobbleBot/Version%202.jpg" alt="Gobble Bot version 2"></div>
+        <figcaption><span class="step">V2</span>EVA foam added over an MDF core, MDF kept for the rigid structure: cheaper, less laser-cutting, lighter to ship.</figcaption>
+      </figure>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="big" data-count="100" data-prefix="₹">₹0</div><div class="lbl">COGS reduction per unit</div></div>
+      <div class="stat"><div class="big" data-count="350" data-suffix=" g">0 g</div><div class="lbl">weight removed, lowering per-box shipping</div></div>
+      <div class="stat"><div class="big" data-count="40" data-prefix="₹">₹0</div><div class="lbl">saved by a colour to B&amp;W manual that still reads</div></div>
+    </div>
+    <div class="gallery g2">
+      <figure><div class="imgwrap"><img src="GobbleBot/Color%20manual.jpg" alt="Colour manual"></div><figcaption><span class="step">Before</span>The colour manual we printed first.</figcaption></figure>
+      <figure><div class="imgwrap"><img src="GobbleBot/Black%20and%20white%20manual.jpeg" alt="Black and white manual"></div><figcaption><span class="step">After</span>The same steps in black and white. The renders were drawn to read either way, so ₹40 came out per kit with nothing lost.</figcaption></figure>
+    </div>
+    <figure class="figfull">
+      <div class="imgwrap"><img src="GobbleBot/Whats%20inside%20the%20box.jpg" alt="Gobble Bot kit contents"></div>
+      <figcaption>Lighter parts and tighter packing dropped 350 g, which dropped the per-box shipping cost.</figcaption>
+    </figure>
+
+    <p class="lead" style="margin-top:48px">Then the data caught something the cost sheet could not: colour. V2 had launched in sporty yellow and red, and sales dropped. Gobble Bot is a rugged, blocky robot, so the data sent us to black. Sales recovered.</p>
+    <figure class="figfull">
+      <div class="imgwrap"><img src="GobbleBot/Version%203.jpg" alt="Gobble Bot version 3, black"></div>
+      <figcaption><span class="step">V3</span>Version 3, in black: the colour the data chose, and the one that brought sales back.</figcaption>
+    </figure>
+    <a class="proj-link" href="https://www.amazon.in/MakerVerse-GobbleBot-Electronic-Control-Science/dp/B0DWFLMVHK/ref=ast_sto_dp_puis?th=1" target="_blank" rel="noopener">See Gobble Bot on Amazon &#8599;</a>
+  </div>
+</section>
+
+<!-- 6. PLATFORM -->
+<section class="reveal" id="platform">
+  <div class="wrap">
+    <h2 class="sec-h" style="--ac:var(--lego-blue)"><span class="num">05 · The platform</span>I build the platform, not just the product.</h2>
+    <p class="lead">To ship a range cheaply and reliably, I set one standard everyone designs to: 2mm MDF throughout, a fixed four-colour foam palette, a single M4 screw, and a reusable stack of common PCBs instead of a new board per product. The boards connect by wire, which standardises components and lets kids see the circuit they are building. Every sheet is engraved with a lot and revision number, so a complaint traces to the exact batch.</p>
+    <div class="proof">
+      <div class="pcard"><h4>Components</h4><p>One screw, one board stack, one foam palette. Bulk-buyable, interchangeable.</p></div>
+      <div class="pcard"><h4>Quality</h4><p>Lot and revision engraved on every sheet. Complaints trace to the batch.</p></div>
+      <div class="pcard"><h4>People</h4><p>My team is early-career. I lead the standard by teaching it. Mentoring is the constant in my work.</p></div>
+    </div>
+    <figure class="figfull">
+      <div class="imgwrap"><img src="Modular%20PCB%20stack.jpg" alt="Modular PCB stack"></div>
+      <figcaption>One form factor, many functions: LED, power LED, potentiometer, motor, LDR, buzzer, switch and power. Wire them together and the same boards build any kit, while kids see the circuit they are making.</figcaption>
+    </figure>
+    <figure class="figfull">
+      <div class="imgwrap"><img src="MDF%20engraving.jpg" alt="MDF sheet with engraved batch code"></div>
+      <figcaption>Every sheet is engraved with a batch code. B150JU26 reads as batch 1, batch size 50, June 2026, next to the brand mark, so any complaint traces to the exact batch.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 7. PROOF -->
+<section class="reveal" id="proof">
+  <div class="wrap">
+    <h2 class="sec-h" style="--ac:var(--lego-green)"><span class="num">06 · Proof of work</span>Shipped, interactive, for kids.</h2>
+    <p class="lead">Rather than cherry-pick a few, here are both full storefronts. Dozens of interactive STEM kits I have shipped or directed at Makerverse and OIMake, on Amazon shelves now.</p>
+    <div class="store-grid">
+      <a class="store-tile" href="https://www.amazon.in/stores/MakerVerse/page/C1692C0E-D949-4E64-8690-4699B7EC8856?lp_asin=B0DWFLMVHK&ref_=ast_bln&store_ref=bl_ast_dp_brandlogo_sto" target="_blank" rel="noopener">
+        <div class="logo"><div class="plate mv"><img src="Logo_makerverse_big.jpg" alt="MakerVerse"></div></div>
+        <div class="cta"><span>MakerVerse store</span><span class="go">Shop on Amazon &#8599;</span></div>
+      </a>
+      <a class="store-tile" href="https://www.amazon.in/stores/OIMake/page/2EE8CB37-D49C-4DB2-94F2-27D52865EDDF?lp_asin=B0H1M6R91D&ref_=ast_bln&store_ref=bl_ast_dp_brandlogo_sto" target="_blank" rel="noopener">
+        <div class="logo"><div class="plate oi"><img src="Oimake%20Final%20Logo.jpg" alt="OIMake"></div></div>
+        <div class="cta"><span>OIMake store</span><span class="go">Shop on Amazon &#8599;</span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- 7b. WORKING ON NOW -->
+<section class="reveal" id="nocode">
+  <div class="wrap">
+    <h2 class="sec-h" style="--ac:var(--lego-red)"><span class="num">07 · Working on now</span>The game up top is real. I am building it.</h2>
+    <p class="lead">The No-code Robot is a pre-primary coding toy. Kids sequence directional steps and watch the robot route itself across a printed map, building computational thinking before they can type. It runs on an ESP32 and the characters are swappable skins. Right now it is a working prototype in testing: we are running it with nursery kids to evaluate the product. No-code coding robots are not a new category and this one is a team effort; what I own is the design and the play, how it feels in a child's hands and how they learn from it. My electronics R&D owns the board. The little game you played at the top of this page is this product's mechanic.</p>
+    <div class="nowgrid">
+      <figure class="videofig">
+        <video src="assets/no-code-robot/2.mp4" poster="assets/no-code-robot/4.jpg" controls preload="none"></video>
+        <figcaption>The No-code Robot in play: program the moves, then watch it route the map.</figcaption>
+      </figure>
+      <figure class="videofig">
+        <div style="aspect-ratio:1;background:radial-gradient(circle at 50% 38%,#1a232e,#0b1016);display:flex;align-items:center;justify-content:center;padding:16px"><img src="assets/no-code-robot/3.png" alt="Swappable character skins" style="max-width:100%;max-height:100%;object-fit:contain"></div>
+        <figcaption>Swappable character skins: same robot, themed for different play.</figcaption>
+      </figure>
+    </div>
+    <p class="loop-note">And yes, KIDO is the penguin. Now you know what you were really playing.</p>
+  </div>
+</section>
+
+<!-- 7c. WHY ME -->
+<section class="reveal" id="whyme">
+  <div class="wrap">
+    <h2 class="sec-h" style="--ac:var(--lego-yellow)"><span class="num">08 · Why me</span>Why I fit this, and where I am honest.</h2>
+    <p class="lead">SMART Play wants someone who can hold an interactive product vision and unite designers, engineers and business people behind it. That is the job I already do, on physical-digital toys for kids, just under a different title.</p>
+    <div class="why">
+      <div class="card"><div class="ic">&#9632;</div><h4>Designer who speaks tech and business</h4><p>I hold the product vision and make the trade-offs that ship it, across design, engineering, manufacturing and the commercial side. Not handed down a chain; owned.</p></div>
+      <div class="card"><div class="ic">&#9633;</div><h4>I have shipped, end to end</h4><p>Interactive children's products from watching kids play to product on Amazon shelves, owning the roadmap, the cost and the quality.</p></div>
+      <div class="card"><div class="ic">&#9650;</div><h4>I decide with data</h4><p>Amazon keyword demand, kindergarten testing, Makeable session logs, sales signals. I change direction, and kill my own ideas, when the data says so.</p></div>
+      <div class="card"><div class="ic">&#9679;</div><h4>I lead and grow people</h4><p>Small, early-career teams. I set one standard and teach it. Mentoring inexperienced designers has been the constant across my career.</p></div>
+    </div>
+    <p class="honest">The honest bit: my title is Chief Maker, not Product Owner, and I do not come from a formal scrum background. My engineering and design background have helped me earn the responsibility of running projects end to end, concept to production. What is newer is the last few years: I have become far more aware of the supply chain and the marketing and business side too, closer to the commercial reality than I have ever been. I have the substance of the role and a real appetite to learn the parts I have not yet done by the book, at LEGO's scale.</p>
+  </div>
+</section>
+
+<!-- 8. CLOSE -->
+<section style="border-bottom:none" id="contact">
+  <div class="wrap reveal">
+    <div class="close">
+      <p class="eyebrow"><span class="stud"></span>Let's talk</p>
+      <p style="font-family:'Bricolage Grotesque';font-weight:800;font-size:clamp(1.6rem,3.2vw,2.4rem);color:#fff;line-height:1.1;margin-bottom:14px">I would like to own interactive products at LEGO.</p>
+      <p>CV and cover letter are attached with the application. Everything on this page is real work, and I would happily walk you through any of it.</p>
+      <div class="links">
+        <a href="mailto:kulkarnikshiteesh@gmail.com">kulkarnikshiteesh@gmail.com</a>
+        <a href="https://iamadesigneer.framer.website" target="_blank" rel="noopener">Portfolio</a>
+        <a href="https://makeable-dfm.in" target="_blank" rel="noopener">Makeable</a>
+        <a href="https://linkedin.com/in/kshiteeshkulkarni" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // scroll reveals
+  const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.15});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // before/after compare sliders
+  document.querySelectorAll('.compare').forEach(el=>{
+    let drag=false;
+    const setPos=(cx)=>{const r=el.getBoundingClientRect();let p=(cx-r.left)/r.width*100;p=Math.max(2,Math.min(98,p));el.style.setProperty('--pos',p+'%');el.classList.add('touched');};
+    el.addEventListener('pointerdown',e=>{drag=true;el.setPointerCapture(e.pointerId);setPos(e.clientX);});
+    el.addEventListener('pointermove',e=>{if(drag)setPos(e.clientX);});
+    el.addEventListener('pointerup',()=>drag=false);
+    el.addEventListener('pointercancel',()=>drag=false);
+  });
+
+  // count-up stats
+  const countIO=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){const el=e.target,t=+el.dataset.count,pre=el.dataset.prefix||'',suf=el.dataset.suffix||'';let st=null;const dur=950;(function step(ts){if(!st)st=ts;const p=Math.min((ts-st)/dur,1);el.textContent=pre+Math.round(p*t)+suf;if(p<1)requestAnimationFrame(step);})(performance.now());countIO.unobserve(el);}})},{threshold:.6});
+  document.querySelectorAll('[data-count]').forEach(el=>countIO.observe(el));
+
+  // staggered child reveals for grouped content
+  document.querySelectorAll('.stats,.gallery,.why,.proof,.figrow,.store-grid').forEach(g=>{
+    [...g.children].forEach(c=>c.classList.add('stagger-item'));
+  });
+  const stIO=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){
+    [...e.target.children].forEach((c,i)=>setTimeout(()=>c.classList.add('in'),i*90));
+    stIO.unobserve(e.target);
+  }})},{threshold:.2});
+  document.querySelectorAll('.stats,.gallery,.why,.proof,.figrow,.store-grid').forEach(g=>stIO.observe(g));
+
+  // hero card: cursor-follow glow (no layout shift, KIDO geometry untouched)
+  const hcard=document.querySelector('.hero-card');
+  if(hcard){
+    hcard.addEventListener('pointermove',e=>{
+      const r=hcard.getBoundingClientRect();
+      hcard.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');
+      hcard.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');
+    });
+  }
+
+  const progress=document.getElementById('progress');
+  const rail=document.getElementById('rail'), railFill=document.getElementById('railFill');
+  const chipbar=document.getElementById('chipbar');
+  const lis=[...document.querySelectorAll('#stations li')];
+  const chips=[...document.querySelectorAll('#chipbar a')];
+  const sections=[...document.querySelectorAll('header[id],section[id]')];
+  const hero=document.getElementById('top');
+  const board=document.getElementById('board'), apple=document.getElementById('apple'),
+        carry=document.getElementById('carry'), kido=document.getElementById('kido'),
+        info=document.getElementById('ginfo'), resetBtn=document.getElementById('resetBtn');
+
+  // ---- game state ----
+  const START={r:4,c:0}, HOME={r:0,c:4}, APPLE={r:2,c:2};
+  const DRC={U:[-1,0],D:[1,0],L:[0,-1],R:[0,1]};
+  let s={...START}, hasApple=false, won=false;
+  let mode='grid', activeId='top';
+
+  // KIDO's one-liners per section (dry, short)
+  const say=document.getElementById('kidoSay');
+  const SAY={top:'Hej.',build:'Data picks the bet.',kids:'Then the kids decide.',makeable:'I built this one.',numbers:'Watch the money.',platform:'Same system, every kit.',proof:'On the shelf.',nocode:'That penguin is me.',whyme:'Still reading? Good.',contact:'Let us talk.'};
+  let sayTimer=null;
+  function showSay(id){
+    if(mode!=='rail'){ say.classList.remove('show'); return; }
+    const t=SAY[id]; if(!t) return;
+    say.textContent=t; say.classList.add('show');
+    clearTimeout(sayTimer); sayTimer=setTimeout(()=>say.classList.remove('show'),2800);
+  }
+
+  // ---- KIDO positioning across grid + rail ----
+  function gridTarget(){
+    const br=board.getBoundingClientRect();
+    const cw=br.width/5, size=cw*0.86;
+    return {x:br.left+s.c*cw+(cw-size)/2, y:br.top+s.r*cw+(cw-size)/2, size};
+  }
+  function railTarget(){
+    const li=lis.find(l=>l.dataset.target===activeId)||lis[0];
+    const r=li.getBoundingClientRect(), size=42;
+    const railRect=rail.getBoundingClientRect();
+    return {x:railRect.left-size-8, y:r.top+r.height/2-size/2, size};
+  }
+  let walking=false, walkTimer=null;
+  const WALK_T='left .6s cubic-bezier(.45,1.3,.45,1),top .55s cubic-bezier(.45,1.3,.45,1),width .5s ease,height .5s ease';
+  const STEP_T='left .28s cubic-bezier(.5,1.3,.5,1),top .28s cubic-bezier(.5,1.3,.5,1)';
+  function setKido(t,trans){
+    kido.style.transition=trans;
+    kido.style.left=t.x+'px'; kido.style.top=t.y+'px';
+    kido.style.width=t.size+'px'; kido.style.height=t.size+'px';
+  }
+  // steady update: animated on the rail or mid-walk, glued (instant) while tracking the grid on scroll
+  function updateKido(){
+    const t=(mode==='grid')?gridTarget():railTarget();
+    setKido(t,(mode==='rail'||walking)?WALK_T:'none');
+  }
+  // a single cell hop from a button press (animated even while glued)
+  function stepKido(){ setKido(gridTarget(),STEP_T); }
+  function startWalk(){
+    walking=true; kido.classList.add('walking');
+    clearTimeout(walkTimer); updateKido();
+    walkTimer=setTimeout(()=>{ walking=false; kido.classList.remove('walking'); updateKido(); },660);
+  }
+
+  // ---- rail / progress / active section ----
+  function setActive(id){
+    if(id!==activeId){
+      activeId=id;
+      lis.forEach(l=>l.classList.toggle('active',l.dataset.target===id));
+      chips.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+id));
+      const li=lis.find(l=>l.dataset.target===id);
+      if(li) railFill.style.height=Math.max(0,li.offsetTop+li.offsetHeight/2-8)+'px';
+      if(mode==='rail'){ updateKido(); showSay(id); }
+    }
+  }
+  function onScroll(){
+    const st=window.scrollY, h=document.documentElement.scrollHeight-window.innerHeight;
+    progress.style.width=(h>0?st/h*100:0)+'%';
+    // active section
+    const center=st+window.innerHeight/2;
+    let cur=sections[0].id;
+    for(const sec of sections){ if(sec.offsetTop<=center) cur=sec.id; }
+    setActive(cur);
+    // mode: grid only while the board is genuinely on screen, rail otherwise (desktop only)
+    const wide=window.innerWidth>1240;
+    const br=board.getBoundingClientRect();
+    const gridVisible = br.top > -br.height*0.15 && br.top < window.innerHeight*0.6;
+    const newMode=(wide && !gridVisible)?'rail':'grid';
+    rail.classList.toggle('show',newMode==='rail');
+    chipbar.classList.toggle('show', !gridVisible);
+    if(newMode!==mode){ mode=newMode; startWalk(); if(mode==='rail'){ setTimeout(()=>showSay(activeId),500); } else { say.classList.remove('show'); } }
+    else { updateKido(); } // grid: glued/animated tracking · rail: stable
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  window.addEventListener('resize',()=>updateKido(false));
+  lis.forEach(li=>li.addEventListener('click',()=>{const t=document.getElementById(li.dataset.target);if(t)t.scrollIntoView({behavior:'smooth'})}));
+
+  // ---- game ----
+  function reset(){ s={...START}; hasApple=false; won=false;
+    apple.classList.remove('gone'); carry.classList.remove('on'); kido.classList.remove('happy');
+    info.textContent='Walk KIDO to the apple, then carry it home.'; info.classList.remove('win');
+    if(mode==='grid') stepKido();
+  }
+  function bump(){ kido.classList.add('bump'); setTimeout(()=>kido.classList.remove('bump'),300); }
+  function move(dir){
+    if(won||mode!=='grid')return;
+    const [dr,dc]=DRC[dir], nr=s.r+dr, nc=s.c+dc;
+    if(nr<0||nr>4||nc<0||nc>4){ bump(); return; }
+    s.r=nr; s.c=nc; stepKido();
+    if(!hasApple && s.r===APPLE.r && s.c===APPLE.c){
+      hasApple=true; apple.classList.add('gone'); carry.classList.add('on');
+      info.textContent='Got it. Now take the apple home.';
+    }
+    if(s.r===HOME.r && s.c===HOME.c){
+      if(hasApple){ won=true; kido.classList.add('happy'); info.textContent='KIDO is home. Thanks for playing. Now scroll on.'; info.classList.add('win'); burst();
+        const cue=document.querySelector('.scroll-cue'); if(cue){ cue.classList.add('win-cue'); cue.lastElementChild.textContent='KIDO is home. Scroll on, he follows you.'; } }
+      else { info.textContent='That is home, but grab the apple first.'; }
+    }
+  }
+  function burst(){
+    const colors=['#ffcf00','#e3000b','#0057a8','#00852b','#ffffff'];
+    const br=board.getBoundingClientRect();
+    for(let i=0;i<30;i++){
+      const d=document.createElement('div'); d.className='confetti';
+      d.style.position='fixed'; d.style.background=colors[i%5];
+      d.style.left=(br.left+br.width*0.82)+'px'; d.style.top=(br.top+br.height*0.1)+'px';
+      document.body.appendChild(d);
+      const ang=Math.random()*Math.PI*2, dist=40+Math.random()*150;
+      requestAnimationFrame(()=>{ d.style.transition='transform 1.1s ease-out,opacity 1.1s';
+        d.style.transform=`translate(${Math.cos(ang)*dist}px,${Math.sin(ang)*dist+70}px) rotate(${Math.random()*540}deg)`; d.style.opacity='0'; });
+      setTimeout(()=>d.remove(),1200);
+    }
+  }
+  document.querySelectorAll('.dbtn').forEach(b=>b.addEventListener('click',()=>move(b.dataset.d)));
+  resetBtn.addEventListener('click',reset);
+  window.addEventListener('keydown',e=>{
+    const k={ArrowUp:'U',ArrowDown:'D',ArrowLeft:'L',ArrowRight:'R'}[e.key];
+    if(k && mode==='grid'){ e.preventDefault(); move(k); }
+  });
+
+  // init
+  setKido(gridTarget(),'none');
+  onScroll();
+  window.addEventListener('load',()=>setKido(mode==='grid'?gridTarget():railTarget(),'none'));
+</script>
+</body>
+</html>

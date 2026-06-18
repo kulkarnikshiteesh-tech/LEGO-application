@@ -1,0 +1,4 @@
+# Keep other job applications OUT of the Creative Play (root) deploy.
+# Each application has its own separate Vercel project; never serve them here.
+product-owner
+design-manager
