@@ -1,12 +1,11 @@
-MEEBO PYBO
-Tooliqa
-.claude
-_gifbuild
-_docbuild
+/MEEBO PYBO
+/Tooliqa
+/.claude
+/_gifbuild
+/_docbuild
 node_modules
 *.psd
 mine_*.png
-assets/no-code-robot/cover.jpg
 assets/dust-ninja/2.mp4
 assets/projecto/2.mp4
 assets/lumobug-mini/2.mp4
