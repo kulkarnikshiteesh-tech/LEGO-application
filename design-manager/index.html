@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kshiteesh Kulkarni · Design Manager, Interaction Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,1,0&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#0E1217;
+    --paper-2:#171D26;
+    --ink:#ECEFF3;
+    --ink-soft:#98A2AE;
+    --line:#283039;
+    --card:#161C24;
+    --blue:#2E7AC9;
+    --orange:#4596E6;
+    --sage:#5FA05A;
+    --plum:#9C6B8E;
+    --r:18px;
+    --maxw:1180px;
+    --shadow:0 1px 0 rgba(255,255,255,.03), 0 22px 48px -24px rgba(0,0,0,.65);
+    --shadow-sm:0 1px 0 rgba(255,255,255,.02), 0 10px 24px -16px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+  /* vibrant dot-grid + saturated corner radials + grain */
+  body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:
+     radial-gradient(rgba(255,255,255,.028) 1.1px, transparent 1.3px) 0 0/24px 24px,
+     radial-gradient(60% 50% at 50% -10%, rgba(69,150,230,.12), transparent 62%),
+     radial-gradient(50% 46% at 100% 100%, rgba(46,122,201,.08), transparent 60%),
+     linear-gradient(180deg,#0F141A,#0B0E13)}
+  body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E")}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+  h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:-.02em}
+  .material-symbols-rounded{font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24;line-height:1}
+  a{color:inherit}
+
+  /* reveal on scroll */
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  .reveal[data-d="1"]{transition-delay:.08s}.reveal[data-d="2"]{transition-delay:.16s}.reveal[data-d="3"]{transition-delay:.24s}.reveal[data-d="4"]{transition-delay:.32s}
+
+  /* ---------- NAV ---------- */
+  header.nav{position:sticky;top:0;z-index:60;background:rgba(14,18,23,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:66px}
+  .brand{display:flex;align-items:center;gap:11px;font-family:'Bricolage Grotesque';font-weight:800;font-size:17px;text-decoration:none;color:var(--ink)}
+  .logo{width:24px;height:24px;border-radius:7px;background:var(--orange);position:relative;flex:none;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+  .logo::after{content:"";position:absolute;inset:6px 6px auto 6px;height:5px;border-radius:3px;background:rgba(255,255,255,.6)}
+  .brand:hover .logo{transform:rotate(-8deg) scale(1.08)}
+  .nav-links{display:flex;gap:26px;font-size:14.5px;font-weight:500;color:var(--ink-soft)}
+  .nav-links a{text-decoration:none;position:relative}
+  .nav-links a::after{content:"";position:absolute;left:0;right:100%;bottom:-4px;height:2px;background:var(--orange);transition:right .25s ease}
+  .nav-links a:hover{color:var(--ink)}
+  .nav-links a:hover::after{right:0}
+  @media(max-width:840px){.nav-links{display:none}}
+
+  /* ============ HERO CARD ============ */
+  .hero-section{padding:30px 0 56px}
+
+  .hero-card{
+    background:
+      radial-gradient(130% 100% at 50% -12%, rgba(255,255,255,.05), transparent 55%),
+      linear-gradient(162deg,#181C23 0%,#0E1116 55%,#090B0E 100%);
+    border-radius:28px;
+    border:1.5px solid rgba(255,255,255,.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.06),
+      0 48px 120px -30px rgba(0,0,0,.85),
+      0 0 0 1px rgba(0,0,0,.28);
+    padding:38px 44px;
+    display:grid;
+    grid-template-columns:auto 1fr;
+    gap:50px;
+    align-items:center;
+    max-width:1120px;
+    margin:0 auto;
+    position:relative;
+    overflow:hidden;
+  }
+  /* top-edge shimmer */
+  .hero-card::before{content:"";position:absolute;top:0;left:0;right:60%;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),rgba(255,255,255,.14),transparent)}
+
+  /* WHITE CARD EXPERIMENT (remove .light from .hero-card to revert) */
+  .hero-card.light{
+    background:radial-gradient(130% 100% at 50% -12%, rgba(0,0,0,.025), transparent 55%),linear-gradient(162deg,#FFFFFF 0%,#F3F5F8 100%);
+    border-color:rgba(0,0,0,.1);
+    box-shadow:0 34px 90px -36px rgba(20,30,55,.4),0 0 0 1px rgba(0,0,0,.06);
+  }
+  .hero-card.light .hej{color:#141921}
+  .hero-card.light .invite-line{color:rgba(20,25,32,.72)}
+  .hero-card.light .iv-btn.no{color:rgba(20,25,32,.62);border-color:rgba(20,25,32,.22)}
+  .hero-card.light .iv-btn.no:hover{color:#141921;border-color:rgba(20,25,32,.45)}
+  .hero-card.light .qempty{color:rgba(20,25,32,.4)}
+  .hero-card.light .qchip{background:rgba(20,25,32,.06);border-color:rgba(20,25,32,.16);color:rgba(20,25,32,.82)}
+  .hero-card.light .qchip.run{background:var(--orange);border-color:var(--orange);color:#fff}
+  .hero-card.light .hud-steps{color:rgba(20,25,32,.66)}
+  .hero-card.light .hud-steps b{color:#141921}
+  .hero-card.light .hud-hint{color:rgba(20,25,32,.5)}
+  .hero-card.light .dpad-label{color:rgba(20,25,32,.42)}
+  .hero-card.light .dpad-panel{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.08)}
+  .hero-card.light .unlock-hint{color:#9a6b00;background:rgba(255,196,40,.16);border-color:rgba(200,150,0,.35)}
+  .hero-card.light .dp-nub{background:rgba(20,25,32,.10);box-shadow:inset 0 2px 4px rgba(0,0,0,.18)}
+  .hero-card.light .dp-nub::after{background:rgba(20,25,32,.32)}
+  .hero-card.light .dp-reset{background:rgba(20,25,32,.07);color:rgba(20,25,32,.55)}
+  .hero-card.light .dp-reset:hover{background:rgba(20,25,32,.13)}
+  .hero-card.light .hud-apples .s-off path{fill:rgba(20,25,32,.10);stroke:rgba(20,25,32,.2)}
+
+  /* --- LEFT: title + board + dpad + status --- */
+  .game-side{display:flex;flex-direction:column;gap:15px;position:relative;z-index:2}
+  .game-title{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px;color:rgba(255,255,255,.92);display:flex;align-items:center;gap:8px}
+  .game-title .material-symbols-rounded{font-size:19px;color:#F5A030}
+  .game-cluster{display:flex;align-items:flex-start;gap:14px}
+  .board-col{display:flex;flex-direction:column;gap:10px;width:300px;flex:none}
+  .game-status{display:flex;flex-direction:column;gap:10px}
+  .game-meters{display:flex;align-items:center;gap:20px}
+
+  /* THE BOARD */
+  .board{position:relative;border-radius:18px;overflow:hidden;
+    box-shadow:inset 0 4px 26px rgba(30,110,40,.3),inset 0 0 0 2px rgba(30,110,40,.22),0 16px 34px -16px rgba(40,140,60,.7);
+    background:
+      radial-gradient(120% 66% at 50% -18%,rgba(70,200,255,.85),transparent 52%),
+      radial-gradient(95% 52% at 50% 122%,rgba(255,206,70,.75),transparent 56%),
+      repeating-linear-gradient(0deg,transparent 0 59px,rgba(22,110,40,.22) 59px 60px),
+      repeating-linear-gradient(90deg,transparent 0 59px,rgba(22,110,40,.22) 59px 60px),
+      linear-gradient(180deg,#4FCB52 0%,#66D44E 52%,#ABE84A 100%)}
+  .board .deco{position:absolute;pointer-events:none;opacity:.7;z-index:1}
+  .tileobj{position:absolute;z-index:2;pointer-events:none;display:flex;align-items:center;justify-content:center}
+  .tileobj svg{filter:drop-shadow(0 3px 3px rgba(80,60,20,.18))}
+  .star.collected{opacity:.32;transition:opacity .3s}
+
+
+  /* bot - .bot=position, .botinner=bounce, .botbody=rotates (shell+face turn with Kido) */
+  .bot{position:absolute;width:46px;height:46px;z-index:4;transition:transform .42s cubic-bezier(.5,.05,.2,1)}
+  .botinner{position:absolute;inset:0}
+  .botbody{position:absolute;inset:0;transition:transform .42s cubic-bezier(.5,.05,.2,1)}
+  .botshell{position:absolute;inset:0;width:46px;height:46px;filter:drop-shadow(0 5px 8px rgba(44,111,176,.45))}
+  .botface{position:absolute;inset:0;width:46px;height:46px;z-index:2}
+  .bot .heading{position:absolute;inset:0;z-index:1}
+  .bot .heading::before{content:"";position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:10px solid var(--orange);filter:drop-shadow(0 1px 1px rgba(0,0,0,.2));opacity:1;transition:opacity .2s}
+  .bot.idle .heading::before{opacity:0}
+  /* eyes glow + states (emote with eyes; smile only on finish) */
+  .botface .eyes-neutral{animation:eyePulse 2.6s ease-in-out infinite}
+  @keyframes eyePulse{0%,100%{opacity:.82}50%{opacity:1}}
+  .botface .eyes-happy,.botface .mouth-smile{display:none}
+  .bot.nom .eyes-neutral{display:none}
+  .bot.nom .eyes-happy{display:block}
+  .bot.happy .mouth-smile{display:block}
+  .botface .eyes-sad,.botface .mouth-frown{display:none}
+  .bot.sad .eyes-neutral{display:none}
+  .bot.sad .eyes-sad,.bot.sad .mouth-frown{display:block}
+  .bot.bump .botshell{animation:bump .3s}
+  @keyframes bump{30%{transform:scale(.9)}60%{transform:scale(1.05)}}
+  .bot.nom .botinner{animation:nomPop .5s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes nomPop{30%{transform:scale(1.2)}60%{transform:scale(.95)}100%{transform:scale(1)}}
+  .bot.cheer .botinner{animation:cheer .6s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes cheer{30%{transform:translateY(-8px) scale(1.06)}60%{transform:translateY(0) scale(1)}}
+  .confetti{position:absolute;width:9px;height:9px;border-radius:2px;pointer-events:none;z-index:6}
+  .fxring{position:absolute;width:46px;height:46px;border-radius:50%;border:2.5px solid #8BF6FF;box-shadow:0 0 12px #8BF6FF;pointer-events:none;z-index:5}
+
+  /* move queue - below board */
+  .queue{display:flex;gap:5px;align-items:center;min-height:30px;flex-wrap:wrap}
+  .qchip{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.75);animation:pop .22s;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+  .qchip .material-symbols-rounded{font-size:16px}
+  .qchip.run{background:var(--orange);border-color:var(--orange);color:#fff;transform:translateY(-2px)}
+  @keyframes pop{from{transform:scale(.4);opacity:0}}
+  .qempty{font-size:11.5px;color:rgba(255,255,255,.26);font-style:italic}
+
+  /* ---- D-PAD PANEL ---- */
+  .dpad-panel{
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:20px;
+    padding:16px 13px 14px;
+    min-width:136px;height:300px;justify-content:center;
+  }
+  .dpad-label{font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.28)}
+
+  /* 3-col × 3-row cross grid */
+  .dpad-cross{display:grid;grid-template-columns:44px 44px 44px;grid-template-rows:44px 44px 44px;gap:5px}
+
+  .dp{
+    display:flex;align-items:center;justify-content:center;
+    border:none;border-radius:12px;cursor:pointer;
+    background:linear-gradient(180deg,#EEE0B2 0%,#D9CC98 100%);
+    color:#4A3400;
+    box-shadow:0 5px 0 #9A7E24,inset 0 1px 0 rgba(255,255,255,.55);
+    transition:transform .08s,box-shadow .08s,filter .08s;
+    -webkit-user-select:none;user-select:none;
+  }
+  .dp .material-symbols-rounded{font-size:22px}
+  .dp:active{transform:translateY(5px);box-shadow:0 0 0 #9A7E24}
+  .dp:hover{filter:brightness(1.07)}
+  .dp.fwd{grid-column:2;grid-row:1}
+  .dp.lft{grid-column:1;grid-row:2}
+  .dp.rgt{grid-column:3;grid-row:2}
+  .dp.bck{grid-column:2;grid-row:3}
+  /* center hub - non-interactive */
+  .dp-nub{
+    grid-column:2;grid-row:2;
+    background:rgba(255,255,255,.06);
+    border-radius:50%;
+    box-shadow:inset 0 2px 4px rgba(0,0,0,.35);
+    display:flex;align-items:center;justify-content:center;
+    pointer-events:none;
+  }
+  .dp-nub::after{content:"";width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.18)}
+
+  .dpad-actions{display:flex;gap:6px;width:100%;margin-top:4px}
+  .dp-play{
+    flex:1;padding:9px 6px;border:none;border-radius:12px;
+    background:linear-gradient(180deg,#3FD466,#23A348);
+    color:#fff;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:13px;
+    cursor:pointer;
+    box-shadow:0 4px 0 #1A6B30;
+    display:flex;align-items:center;justify-content:center;gap:4px;
+    transition:transform .08s,box-shadow .08s;
+    -webkit-user-select:none;user-select:none;
+  }
+  .dp-play .material-symbols-rounded{font-size:17px}
+  .dp-play:active{transform:translateY(4px);box-shadow:0 0 0 #1A6B30}
+  .dp-play:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  .dp-reset{
+    padding:9px 11px;border:none;border-radius:12px;
+    background:rgba(255,255,255,.07);
+    color:rgba(255,255,255,.5);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:background .15s;
+  }
+  .dp-reset .material-symbols-rounded{font-size:20px}
+  .dp-reset:hover{background:rgba(255,255,255,.13)}
+
+  /* ---- HERO TEXT (right side) ---- */
+  .hero-text{color:rgba(255,255,255,.9);display:flex;flex-direction:column;gap:0;position:relative;z-index:2}
+  .hero-text .eyebrow{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.38);margin-bottom:12px}
+  .hero-text h1{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;font-size:clamp(24px,3vw,42px);font-weight:900;line-height:1.06;max-width:17ch;color:#fff;margin-bottom:13px}
+  .hero-text h1 .hl{color:#F5A030}
+  .hero-text .lead{font-size:clamp(13.5px,1.45vw,16px);color:rgba(255,255,255,.58);max-width:52ch;line-height:1.68;margin-bottom:18px}
+
+  /* apple HUD + step counter (below grid) */
+  .hud-apples{display:flex;gap:5px}
+  .hud-apples svg{width:21px;height:21px}
+  .hud-apples .s-off path{fill:rgba(255,255,255,.1);stroke:rgba(255,255,255,.16)}
+  .hud-steps{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.38)}
+  .hud-steps b{color:#fff;font-family:'Bricolage Grotesque';font-size:17px;font-weight:900;margin-left:3px}
+  .hud-steps b.best{color:#5FD88C}
+  .hud-hint{font-size:12.5px;color:rgba(255,255,255,.4);font-style:italic;min-height:16px}
+
+  /* unlock message - the attention grabber */
+  .unlock-hint{
+    display:flex;align-items:flex-start;gap:9px;
+    font-size:14px;font-weight:600;line-height:1.42;
+    color:rgba(255,196,40,.9);
+    background:rgba(255,196,40,.08);
+    border:1px solid rgba(255,196,40,.2);
+    border-radius:13px;padding:11px 15px;
+    transition:color .5s,background .5s,border-color .5s;
+  }
+  .unlock-hint .material-symbols-rounded{font-size:18px;flex:none;margin-top:1px}
+  .unlock-hint.done,.unlock-hint.nudge{font-size:15.5px;font-weight:800;animation:popUnlock .55s cubic-bezier(.34,1.56,.64,1)}
+  .unlock-hint.done{color:#7BE89E;background:rgba(90,218,130,.12);border-color:rgba(90,218,130,.34)}
+  .unlock-hint.nudge{color:rgba(255,196,40,.95);background:rgba(255,196,40,.12);border-color:rgba(255,196,40,.32)}
+  @keyframes popUnlock{0%{transform:scale(.94)}60%{transform:scale(1.04)}100%{transform:scale(1)}}
+  .hero-invite{display:flex;flex-direction:column;gap:18px;position:relative;z-index:2}
+  .hero-invite .hej{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(2.6rem,4.4vw,4rem);line-height:.98;letter-spacing:-.025em;color:#fff;display:flex;align-items:center;gap:.28em}
+  .hej-kido{width:.95em;height:1.05em;display:inline-flex;flex:none}
+  .hej-kido svg{width:100%;height:100%;overflow:visible}
+  .hej-kido .e-happy,.hej-kido .e-sad,.hej-kido .m-frown{display:none}
+  .hej-kido.happy .e-neutral{display:none}.hej-kido.happy .e-happy{display:block}
+  .hej-kido.sad .e-neutral,.hej-kido.sad .m-smile{display:none}
+  .hej-kido.sad .e-sad,.hej-kido.sad .m-frown{display:block}
+  .hej-kido.happy{animation:hkHop .5s ease}
+  @keyframes hkHop{30%{transform:translateY(-16%)}60%{transform:translateY(0)}}
+  .hero-invite .invite-line{font-size:16.5px;color:rgba(255,255,255,.72);max-width:42ch;line-height:1.6}
+  .invite-done{font-size:15px;font-weight:600;color:#3a4250;max-width:36ch}
+  .invite-done[hidden]{display:none}
+  .invite-cta{display:flex;gap:10px;margin-top:5px}
+  .invite-cta[hidden]{display:none}
+  .iv-btn{display:inline-flex;align-items:center;gap:5px;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px;padding:10px 18px;border-radius:11px;cursor:pointer;border:1px solid transparent;transition:transform .15s ease,filter .2s ease,background .2s ease,color .2s ease,border-color .2s ease}
+  .iv-btn .material-symbols-rounded{font-size:17px}
+  .iv-btn.yes{background:var(--orange);color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.28)}
+  .iv-btn.yes:hover{transform:translateY(-2px);filter:brightness(1.06)}
+  .iv-btn.no{background:transparent;color:rgba(255,255,255,.62);border-color:rgba(255,255,255,.22)}
+  .iv-btn.no:hover{transform:translateY(-2px);color:#fff;border-color:rgba(255,255,255,.46)}
+  .dpad-cross.invite{animation:dpadInvite 2.2s ease-in-out 3}
+  @keyframes dpadInvite{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 4px rgba(255,196,40,.22)}}
+
+  .hero-text .pills{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:13px}
+  .hero-text .pill{font-size:12.5px;font-weight:600;padding:6px 13px;border-radius:100px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:rgba(255,255,255,.72);transition:background .18s}
+  .hero-text .pill:hover{background:rgba(255,255,255,.13)}
+  .hero-text .reapply{font-size:13px;color:rgba(255,255,255,.4);border-left:3px solid rgba(240,138,36,.5);padding-left:12px;margin-bottom:13px}
+  .hero-text .hero-meta{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:rgba(255,255,255,.35)}
+  .hero-text .hero-meta b{color:rgba(255,255,255,.72);font-weight:700}
+
+  /* ============ SCROLL LOCK ============ */
+  #lockVeil{transition:filter .95s ease,opacity .95s ease}
+  #lockVeil.locked{filter:blur(7px);opacity:.28;pointer-events:none;user-select:none}
+  #lockVeil.unlocked{filter:none;opacity:1;pointer-events:auto;user-select:auto}
+
+  /* responsive: stack on narrow */
+  @media(max-width:900px){
+    .hero-card{grid-template-columns:1fr;gap:24px;padding:20px}
+    .game-cluster{justify-content:center}
+  }
+
+  /* ---------- SECTION SHELL ---------- */
+  section{padding:62px 0;border-top:1px solid var(--line)}
+  .kicker{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:14px}
+  .kicker .dot{width:10px;height:10px;border-radius:4px}
+  .sec-title{font-size:clamp(26px,3.3vw,38px);font-weight:800;line-height:1.1;max-width:20ch}
+  .sec-intro{margin-top:13px;max-width:64ch;color:var(--ink-soft);font-size:17.5px}
+  .intro-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+  .intro-meta{display:flex;gap:24px;flex-wrap:wrap;margin-top:18px;font-size:13px;color:var(--ink-soft)}
+  .intro-meta b{color:var(--ink);font-weight:800}
+  /* INTRO — centered, big, statement */
+  #intro{padding:128px 0 116px}
+  #intro .wrap{text-align:center;max-width:980px}
+  #intro .kicker{justify-content:center}
+  #intro .sec-title{font-size:clamp(44px,7vw,86px);line-height:1.0;max-width:16ch;margin:0 auto;letter-spacing:-.025em;font-weight:800}
+  #intro .sec-intro{max-width:60ch;margin:26px auto 0;font-size:clamp(16px,1.55vw,20px);color:var(--ink-soft)}
+  #intro .intro-tags{justify-content:center;margin-top:30px}
+  #intro .intro-meta{justify-content:center;gap:28px;margin-top:22px}
+  @media(max-width:700px){#intro{padding:84px 0 72px}}
+
+  /* ---------- HOW I LEAD ---------- */
+  .grid2{display:grid;grid-template-columns:1.05fr .95fr;gap:42px;align-items:center;margin-top:36px}
+  @media(max-width:900px){.grid2{grid-template-columns:1fr;gap:30px}}
+  .leadlist{display:flex;flex-direction:column;gap:6px}
+  .leadlist .item{display:flex;gap:14px;padding:14px;border-radius:12px;transition:background .2s}
+  .leadlist .item:hover{background:var(--card)}
+  .leadlist .n{font-family:'Bricolage Grotesque';font-weight:900;color:var(--orange);font-size:15px;flex:none;width:28px}
+  .leadlist h4{font-size:17px;font-weight:800;margin-bottom:2px}
+  .leadlist p{font-size:15px;color:var(--ink-soft)}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:26px}
+  .panel .ptitle{font-size:12.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
+  .org{display:flex;flex-direction:column;align-items:center}
+  .node{border-radius:11px;padding:11px 16px;text-align:center;font-weight:700;font-size:14.5px;line-height:1.25;transition:transform .2s}
+  .node small{display:block;font-weight:500;font-size:12.5px;opacity:.8}
+  .node.me{background:var(--orange);color:#fff}
+  .org .branchline{width:2px;height:22px;background:var(--line)}
+  .org-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;width:100%}
+  .node.team{background:var(--paper-2);border:1px solid var(--line);flex:1;min-width:120px;cursor:default}
+  .node.team:hover{transform:translateY(-3px)}
+  .node.team b{display:block;font-family:'Bricolage Grotesque';font-size:22px;color:var(--blue)}
+  .org-sub{margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .chip{font-size:12.5px;font-weight:600;background:var(--paper-2);border:1px solid var(--line);border-radius:100px;padding:6px 12px;color:var(--ink-soft)}
+  .note{font-size:11px;color:#9A7B12;background:rgba(224,137,44,.13);border:1px dashed var(--orange);border-radius:7px;padding:3px 8px;display:inline-block;font-weight:600}
+
+  /* ---------- HOW I WORK ---------- */
+  .alloc{display:flex;flex-direction:column;gap:14px;margin-top:8px}
+  .alloc .row{display:flex;align-items:center;gap:14px}
+  .alloc .lab{width:178px;flex:none;font-size:14.5px;font-weight:600}
+  .alloc .lab span{display:block;font-weight:500;font-size:12.5px;color:var(--ink-soft)}
+  .bar{flex:1;height:30px;background:var(--paper-2);border-radius:9px;overflow:hidden;border:1px solid var(--line)}
+  .bar i{display:block;height:100%;width:0;border-radius:9px;transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+  .alloc .pct{width:46px;text-align:right;font-family:'Bricolage Grotesque';font-weight:800;font-size:16px}
+
+  /* ---------- STATS ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:34px}
+  @media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px;box-shadow:var(--shadow-sm);transition:transform .2s,box-shadow .2s}
+  .stat:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+  .stat .big{font-family:'Bricolage Grotesque';font-weight:900;font-size:40px;line-height:1}
+  .stat .big.o{color:var(--orange)}.stat .big.b{color:var(--blue)}.stat .big.g{color:var(--sage)}
+  .stat .lab{margin-top:8px;font-size:14px;color:var(--ink-soft);font-weight:500}
+
+  /* ---------- LIFECYCLE ---------- */
+  .pipe{display:flex;gap:10px;margin-top:30px;overflow-x:auto;padding-bottom:6px}
+  .pstep{flex:1;min-width:140px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:16px;position:relative;transition:transform .2s,box-shadow .2s}
+  .pstep:hover{transform:translateY(-4px);box-shadow:var(--shadow-sm)}
+  .pstep .ph{font-family:'Bricolage Grotesque';font-weight:800;font-size:14.5px;margin-bottom:6px}
+  .pstep .pr{font-size:13px;color:var(--ink-soft)}
+  .pstep .tag{position:absolute;top:14px;right:14px;width:9px;height:9px;border-radius:3px;background:var(--sage)}
+
+  /* ---------- FEATURED ---------- */
+  .feat{display:flex;flex-direction:column;gap:30px;margin-top:36px}
+  .fcard{display:grid;grid-template-columns:.95fr 1.05fr;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);transition:transform .25s,box-shadow .25s}
+  .fcard:hover{transform:translateY(-4px);box-shadow:0 1px 0 rgba(0,0,0,.04),0 30px 56px -28px rgba(34,37,42,.4)}
+  .fcard:nth-child(even){grid-template-columns:1.05fr .95fr}
+  .fcard:nth-child(even) .fmedia{order:2}
+  @media(max-width:840px){.fcard,.fcard:nth-child(even){grid-template-columns:1fr}.fcard:nth-child(even) .fmedia{order:0}}
+  .fmedia{background:var(--paper-2);min-height:300px;position:relative;overflow:hidden}
+  .fmedia img,.fmedia video{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s}
+  .fcard:hover .fmedia img{transform:scale(1.04)}
+  .fmedia .placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:13px;font-weight:600;text-align:center;padding:20px}
+  .fbody{padding:32px}
+  .fbody .role{font-size:12.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--orange)}
+  .fbody h3{font-size:25px;font-weight:800;margin:8px 0 6px}
+  .fbody .sub{font-size:14px;color:var(--ink-soft);margin-bottom:14px}
+  .fbody p{font-size:15.5px;margin-bottom:14px}
+  .ftags{display:flex;flex-wrap:wrap;gap:8px}
+  .ftag{font-size:12px;font-weight:600;background:var(--paper-2);border:1px solid var(--line);border-radius:100px;padding:5px 11px;color:var(--ink-soft)}
+  .led{display:inline-block;font-size:12px;font-weight:700;color:var(--sage);background:rgba(122,160,111,.12);border:1px solid rgba(122,160,111,.4);padding:3px 9px;border-radius:6px;margin-bottom:12px}
+
+  /* ---------- PROOF GRID ---------- */
+  .gridhead{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin:40px 0 16px}
+  .gridhead h3{font-size:18px;font-weight:800}
+  .gridhead span{font-size:13.5px;color:var(--ink-soft)}
+  .pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  @media(max-width:900px){.pgrid{grid-template-columns:repeat(2,1fr)}}
+  .pcard{background:var(--card);border:1px solid var(--line);border-radius:13px;overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .22s,box-shadow .22s}
+  .pcard:hover{transform:translateY(-5px);box-shadow:var(--shadow)}
+  .pcard .thumb{aspect-ratio:4/3;background:var(--paper-2);overflow:hidden}
+  .pcard .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
+  .pcard:hover .thumb img{transform:scale(1.05)}
+  .pcard .pc{padding:13px 15px}
+  .pcard h4{font-size:15px;font-weight:800}
+  .pcard p{font-size:12.5px;color:var(--ink-soft);margin-top:3px}
+
+  /* ---------- CONTINUITY ---------- */
+  .quiet{background:#10151C;border:1px solid var(--line);color:#EDEBE5;border-radius:var(--r);overflow:hidden;position:relative}
+  .quiet .wrap2{padding:50px 42px;position:relative;z-index:2}
+  .quiet h2{font-size:clamp(24px,3vw,33px);font-weight:800;max-width:24ch;color:#fff}
+  .quiet p{margin-top:16px;max-width:60ch;color:#C7C9C5;font-size:17px}
+
+  /* ---------- CONTACT ---------- */
+  .contact{text-align:center}
+  .contact h2{font-size:clamp(26px,3.4vw,38px);font-weight:900}
+  .links{margin-top:24px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:9px;font-weight:800;font-family:'Bricolage Grotesque';font-size:15px;text-decoration:none;padding:14px 24px;border-radius:100px;border:1px solid var(--ink);transition:transform .15s,box-shadow .15s}
+  .btn.primary{background:var(--orange);border-color:var(--orange);color:#fff;box-shadow:0 4px 0 #1f5fa3}
+  .btn.primary:active{transform:translateY(4px);box-shadow:0 0 0 #1f5fa3}
+  .btn.ghost{background:transparent}
+  .btn.ghost:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+  footer.foot{padding:34px 0;border-top:1px solid var(--line);color:var(--ink-soft);font-size:13.5px}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+
+  /* clickable project cards + popup gallery */
+  .fcard{cursor:pointer}
+  .fcard .viewp{margin-top:16px;font-size:13px;font-weight:800;letter-spacing:.02em;color:var(--orange);display:inline-flex;align-items:center;gap:6px;transition:gap .18s}
+  .fcard:hover .viewp{gap:11px}
+  #projModal{position:fixed;inset:0;z-index:200;display:none;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;background:rgba(6,9,13,.8);backdrop-filter:blur(7px)}
+  #projModal.open{display:flex}
+  .pm-panel{background:var(--card);border:1px solid var(--line);border-radius:20px;max-width:900px;width:100%;padding:32px 32px 38px;position:relative;box-shadow:0 40px 120px -30px rgba(0,0,0,.8)}
+  .pm-close{position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink-soft);font-size:22px;line-height:1;cursor:pointer}
+  .pm-close:hover{color:var(--ink);border-color:var(--orange)}
+  .pm-role{font-size:12.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--orange)}
+  .pm-title{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px,3vw,30px);margin:6px 0 8px;color:var(--ink)}
+  .pm-sum{color:var(--ink-soft);font-size:15px;max-width:66ch;line-height:1.6}
+  .pm-link{display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-weight:800;font-family:'Bricolage Grotesque',sans-serif;font-size:14px;text-decoration:none;padding:11px 22px;border-radius:100px;background:var(--orange);color:#fff;box-shadow:0 4px 0 #1f5fa3}
+  .pm-link:hover{filter:brightness(1.07)}
+  .pm-gallery{margin-top:28px;display:flex;flex-direction:column;gap:32px}
+  .pm-item img,.pm-item video{width:100%;border-radius:12px;display:block;background:#0c0f14;border:1px solid var(--line)}
+  .pm-cap{margin-top:11px;color:var(--ink-soft);font-size:14px;line-height:1.55}
+  body.modal-open{overflow:hidden}
+  @media(max-width:700px){.pm-panel{padding:24px 16px 28px}}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="#"><span class="logo"></span> Kshiteesh Kulkarni</a>
+    <nav class="nav-links">
+      <a href="#lead">How I lead</a>
+      <a href="#work">How I work</a>
+      <a href="#strategy">Systems</a>
+      <a href="#featured">Work</a>
+      <a href="#all">All projects</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO - single landscape device card -->
+<div class="wrap hero-section">
+  <div class="hero-card light">
+
+    <!-- LEFT: title + game board + D-pad + status -->
+    <div class="game-side">
+      <div class="game-cluster">
+        <div class="board-col">
+          <div class="board" id="board"></div>
+          <div class="queue" id="queue"><span class="qempty">queue moves, then Play</span></div>
+        </div>
+
+        <!-- D-pad - physical button layout, side of the grid -->
+        <div class="dpad-panel">
+          <div class="dpad-label">Controls</div>
+          <div class="dpad-cross">
+            <button class="dp fwd" data-move="F" title="Forward"><span class="material-symbols-rounded">arrow_upward</span></button>
+            <button class="dp lft" data-move="L" title="Turn left"><span class="material-symbols-rounded">turn_left</span></button>
+            <div class="dp-nub"></div>
+            <button class="dp rgt" data-move="R" title="Turn right"><span class="material-symbols-rounded">turn_right</span></button>
+            <button class="dp bck" data-move="B" title="Back"><span class="material-symbols-rounded">arrow_downward</span></button>
+          </div>
+          <div class="dpad-actions">
+            <button class="dp-play" id="playBtn"><span class="material-symbols-rounded">play_arrow</span>Go!</button>
+            <button class="dp-reset" id="clearBtn" title="Reset"><span class="material-symbols-rounded">restart_alt</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATUS - below the grid -->
+      <div class="game-status">
+        <div class="unlock-hint" id="unlockHint">
+          <span class="material-symbols-rounded">lock</span>
+          <span id="unlockText">Steer Kido onto an apple to unlock the page below</span>
+        </div>
+        <div class="game-meters">
+          <div class="hud-apples" id="hudStars"></div>
+          <div class="hud-steps">steps<b id="stepCount">0</b></div>
+          <div class="hud-steps">best<b class="best" id="bestEl">0</b></div>
+        </div>
+        <div class="hud-hint" id="toyHint"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: invitation -->
+    <div class="hero-invite">
+      <p class="hej"><span class="hej-kido" id="heroKido" aria-hidden="true"><svg viewBox="0 0 46 50">
+        <rect x="21" y="1" width="4" height="8" rx="2" fill="#9fb0c0"/><circle cx="23" cy="2.5" r="2.8" fill="var(--orange)"/>
+        <rect x="6" y="8" width="34" height="34" rx="13" fill="#1b222c" stroke="rgba(255,255,255,.14)"/>
+        <rect x="11" y="16" width="24" height="18" rx="9" fill="#0c1117"/>
+        <g class="e-neutral" fill="#8BF6FF"><circle cx="19" cy="24" r="2.6"/><circle cx="27" cy="24" r="2.6"/></g>
+        <g class="e-happy" fill="none" stroke="#8BF6FF" stroke-width="2.2" stroke-linecap="round"><path d="M16.4 25.5q2.6-3.2 5.2 0"/><path d="M24.4 25.5q2.6-3.2 5.2 0"/></g>
+        <g class="e-sad" fill="none" stroke="#8BF6FF" stroke-width="2.2" stroke-linecap="round"><path d="M16.4 23.5q2.6 2.8 5.2 0"/><path d="M24.4 23.5q2.6 2.8 5.2 0"/></g>
+        <path class="m-smile" d="M19 30q4 3 8 0" fill="none" stroke="#8BF6FF" stroke-width="1.8" stroke-linecap="round"/>
+        <path class="m-frown" d="M19 31q4 -3 8 0" fill="none" stroke="#8BF6FF" stroke-width="1.8" stroke-linecap="round"/>
+      </svg></span>Hej there!</p>
+      <p class="invite-line">You have probably been through a pile of these today. Before the CV, fancy a quick game? Help Kido bring the apples home.</p>
+      <div class="invite-cta" id="inviteCta">
+        <button class="iv-btn yes" id="invYes" type="button"><span class="material-symbols-rounded">play_arrow</span> Let's play</button>
+        <button class="iv-btn no" id="invNo" type="button">Not today</button>
+      </div>
+      <p class="invite-done" id="inviteDone" hidden>No problem. Maybe next time, the page is open below.</p>
+    </div>
+
+  </div>
+</div><!-- /wrap hero-section -->
+
+<!-- SCROLL LOCK: everything below blurred until game won -->
+<div id="lockVeil" class="locked">
+
+<!-- INTRO: who I am + what I'm applying for -->
+<section id="intro">
+  <div class="wrap">
+    <div class="kicker reveal"><span class="dot" style="background:var(--orange)"></span> Application · Design Manager, Interaction Design · LEGO Design, Billund</div>
+    <h2 class="sec-title reveal" data-d="1">I make toys that react, and I lead the people who <span style="color:var(--orange)">build them.</span></h2>
+    <p class="sec-intro reveal" data-d="1">I am an industrial designer with a mechanical-engineering foundation, now leading product, design and R&amp;D at a tech-toys company. We make interactive toys, both electronic and mechanical, that children build and play with. I take them from idea to shelf and grow the team behind them.</p>
+    <p class="reveal" data-d="1" style="margin:16px auto 0;max-width:58ch;font-size:14.5px;color:var(--ink-soft)">I was selected for this role last year. Unfortunately, it didn't work out.</p>
+    <div class="intro-tags reveal" data-d="2">
+      <span class="chip">Open to relocation · Billund</span>
+      <span class="chip">Electronics + mechanical</span>
+      <span class="chip">Concept to production</span>
+    </div>
+    <div class="intro-meta reveal" data-d="2">
+      <div><b>Chief Maker</b> · Makerverse</div>
+      <div><b>10+ yrs</b> designing for children</div>
+      <div><b>MA Product Design</b> · IED Milan</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW I LEAD -->
+<section id="lead">
+  <div class="wrap">
+    <div class="kicker reveal"><span class="dot" style="background:var(--orange)"></span> How I lead</div>
+    <h2 class="sec-title reveal" data-d="1">A small team, a complete product, end to end.</h2>
+    <p class="sec-intro reveal" data-d="1">I run design and R&amp;D as one loop. Concept, interaction, engineering and manufacturing sit close together so decisions stay coherent from the first sketch to the production line.</p>
+    <div class="grid2">
+      <div class="leadlist">
+        <div class="item reveal"><div class="n">01</div><div><h4>Set the design vision, then protect it</h4><p>I translate strategy into clear briefs the team can act on, and keep the interaction intent intact as engineering and cost pressures arrive.</p></div></div>
+        <div class="item reveal" data-d="1"><div class="n">02</div><div><h4>Own the whole lifecycle</h4><p>Research, concept, interaction, prototyping, R&amp;D hand-off, manufacturing and launch. I sit across all of it rather than handing it down a chain.</p></div></div>
+        <div class="item reveal" data-d="2"><div class="n">03</div><div><h4>Grow designers and engineers</h4><p>I brief and prioritise R&amp;D, mentor designers and interns, and build the team's understanding of interactive play, not just the next deliverable.</p></div></div>
+        <div class="item reveal" data-d="3"><div class="n">04</div><div><h4>Bring engineering, business and partners along</h4><p>I build the partnerships that get an interactive product made, aligning design, R&amp;D, manufacturing and the commercial side around one direction.</p></div></div>
+      </div>
+      <div class="panel reveal" data-d="2">
+        <div class="ptitle">Who I lead, and who I work with</div>
+        <div class="org">
+          <div class="node me">Me · Chief Maker<small>Product · Design · Strategy</small></div>
+          <div class="branchline"></div>
+          <div class="org-row">
+            <div class="node team"><b>5</b>Design interns</div>
+            <div class="node team"><b>2</b>R&amp;D engineers</div>
+          </div>
+          <div class="org-sub">
+            <span class="chip">Manufacturing unit · I mentor on process &amp; tech</span>
+            <span class="chip">2-3 freelancers · graphic + ID</span>
+            <span class="chip">SMEs · activity design</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW I WORK -->
+<section id="work">
+  <div class="wrap">
+    <div class="kicker reveal"><span class="dot" style="background:var(--blue)"></span> How I work</div>
+    <h2 class="sec-title reveal" data-d="1">Where a design manager's week actually goes.</h2>
+    <p class="sec-intro reveal" data-d="1">I stay close to the craft, but most of the job is direction, prioritisation and unblocking. Rough split of my time across a product cycle.</p>
+    <div class="panel reveal" data-d="1" style="margin-top:30px">
+      <div class="alloc" id="alloc">
+        <div class="row"><div class="lab">Design direction<span>briefs, reviews, vision</span></div><div class="bar"><i data-w="30" style="background:var(--orange)"></i></div><div class="pct">30%</div></div>
+        <div class="row"><div class="lab">R&amp;D &amp; prioritisation<span>briefing, sequencing work</span></div><div class="bar"><i data-w="22" style="background:var(--blue)"></i></div><div class="pct">22%</div></div>
+        <div class="row"><div class="lab">Cost &amp; feasibility<span>making it viable to ship</span></div><div class="bar"><i data-w="20" style="background:var(--sage)"></i></div><div class="pct">20%</div></div>
+        <div class="row"><div class="lab">People &amp; mentoring<span>1:1s, growing the team</span></div><div class="bar"><i data-w="16" style="background:var(--plum)"></i></div><div class="pct">16%</div></div>
+        <div class="row"><div class="lab">Hands-on making<span>prototyping, CAD</span></div><div class="bar"><i data-w="12" style="background:var(--ink-soft)"></i></div><div class="pct">12%</div></div>
+      </div>
+      <p style="margin-top:14px;font-size:12.5px"><span class="note">placeholder split, you'll set the real numbers</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- STRATEGY -->
+<section id="strategy">
+  <div class="wrap">
+    <div class="kicker reveal"><span class="dot" style="background:var(--sage)"></span> Systems thinking</div>
+    <h2 class="sec-title reveal" data-d="1">One system across the whole range.</h2>
+    <p class="sec-intro reveal" data-d="1">At Makerverse I set the platform standards the whole team designs within, so every product is cheaper to make, faster to ship and consistent in a child's hands.</p>
+    <div class="stats">
+      <div class="stat reveal"><div class="big g">2&thinsp;mm MDF</div><div class="lab">One sheet material across every product. Less laser-cutting, bought in bulk.</div></div>
+      <div class="stat reveal" data-d="1"><div class="big b">4 colours</div><div class="lab">A fixed EVA-foam palette, so foam is bought by the block and nothing is bespoke.</div></div>
+      <div class="stat reveal" data-d="2"><div class="big o">One screw</div><div class="lab">A single M4 fastener everywhere, simpler to source and to assemble.</div></div>
+      <div class="stat reveal" data-d="3"><div class="big g">Shared PCB</div><div class="lab">A reusable board stack across products. The boards wire together, which also teaches kids circuits.</div></div>
+    </div>
+    <h3 style="margin-top:46px;font-size:18px;font-weight:800" class="reveal">How a product moves through me</h3>
+    <div class="pipe">
+      <div class="pstep reveal"><span class="tag"></span><div class="ph">Research</div><div class="pr">Market, cost ceiling, the child and the classroom.</div></div>
+      <div class="pstep reveal" data-d="1"><span class="tag"></span><div class="ph">Concept</div><div class="pr">Play idea and interaction model. I lead this.</div></div>
+      <div class="pstep reveal" data-d="2"><span class="tag"></span><div class="ph">Design</div><div class="pr">Industrial design, HMI, prototyping with the team.</div></div>
+      <div class="pstep reveal" data-d="3"><span class="tag"></span><div class="ph">R&amp;D</div><div class="pr">I brief electronics R&amp;D; they own the board.</div></div>
+      <div class="pstep reveal" data-d="3"><span class="tag"></span><div class="ph">Manufacturing</div><div class="pr">DFM, tooling, process optimisation with partners.</div></div>
+      <div class="pstep reveal" data-d="4"><span class="tag"></span><div class="ph">Market</div><div class="pr">Pricing, launch, what we learn for the next one.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED -->
+<section id="featured">
+  <div class="wrap">
+    <div class="kicker reveal"><span class="dot" style="background:var(--orange)"></span> Selected work · in depth</div>
+    <h2 class="sec-title reveal" data-d="1">Four products, and the decisions behind them.</h2>
+    <p class="sec-intro reveal" data-d="1">Interactive play across physical and digital, shown through what I led rather than only what shipped.</p>
+    <div class="feat">
+      <article class="fcard reveal" data-proj="nocode">
+        <div class="fmedia"><video src="assets/no-code-robot/1.mp4" autoplay muted loop playsinline preload="metadata"></video></div>
+        <div class="fbody">
+          <div class="led">In development</div>
+          <div class="role">Concept &amp; design lead · my R&amp;D owns the board</div>
+          <h3>No-code Robot</h3>
+          <div class="sub">Pre-primary · computational thinking through play</div>
+          <p>A robot that builds computational thinking in 4–6 year olds. Children sequence directional steps with buttons and watch it route across a printed map. The game in the hero above is this mechanic. I own the concept, the interaction model and the physical design; electronics R&amp;D, who report to me, own the board.</p>
+          <p>The hard design problem is orientation: keeping the cognitive load right for a child still learning to track a turn. We tested the first prototype in multiple kindergartens.</p>
+          <div class="ftags"><span class="ftag">Interaction design</span><span class="ftag">Embedded (ESP32)</span><span class="ftag">Early childhood</span><span class="ftag">Tested in kindergartens</span></div>
+        </div>
+      </article>
+      <article class="fcard reveal" data-proj="makeable">
+        <div class="fmedia"><img src="assets/makeable-dfm/1.png" alt="Makeable-DFM" /></div>
+        <div class="fbody">
+          <div class="led">Live · built solo with AI</div>
+          <div class="role">Designed, built and shipped alone</div>
+          <h3>Makeable-DFM</h3>
+          <div class="sub">A manufacturing-analysis web tool</div>
+          <p>I kept seeing the same gap in young designers: they could not read a part for manufacturability. So I built a tool that does it. Makeable analyses injection-moulded parts for moldability, undercuts and wall thickness, suggests materials, and estimates Indian tooling cost. 25+ revisions, built solo alongside AI.</p>
+          <p>The clearest proof of the technical depth this kind of role used to ask for: real application architecture, 3D computation and manufacturing logic, shipped as working software.</p>
+          <div class="ftags"><span class="ftag">Systems thinking</span><span class="ftag">Built software</span><span class="ftag">DFM &amp; tooling</span><span class="ftag">3D computation</span></div>
+        </div>
+      </article>
+      <article class="fcard reveal" data-proj="tooliqa">
+        <div class="fmedia"><img src="assets/tooliqa/device-hero.jpg" alt="Tooliqa Twinn device" /></div>
+        <div class="fbody">
+          <div class="role">Head of Product Design · owned ID + HMI across the system</div>
+          <h3>Tooliqa interior-capture system</h3>
+          <div class="sub">A five-part connected product</div>
+          <p>One product made of five connected parts: a handheld scanning device, a computer-vision pipeline, a 3D editor, a project-management CRM and a client interface. I owned the device's industrial design and its single-hand interaction, and held the design coherent across all five so it read as one system.</p>
+          <p>Took the device from a 2&nbsp;kg proof-of-principle to a 900&nbsp;g working prototype while keeping the interaction model intact.</p>
+          <div class="ftags"><span class="ftag">Systems design</span><span class="ftag">Hardware + software</span><span class="ftag">One-hand HMI</span><span class="ftag">Team leadership</span></div>
+        </div>
+      </article>
+      <article class="fcard reveal" data-proj="meebo">
+        <div class="fmedia"><img src="assets/meebo-pybo/thumb.jpg" alt="MEEBO and PYBO" /></div>
+        <div class="fbody">
+          <div class="role">Senior Product Designer · Next Education</div>
+          <h3>MEEBO &amp; PYBO</h3>
+          <div class="sub">Programmable robots, tuned by age</div>
+          <p>A family of programmable robots, each tuned to a child's age, built to teach computer-science concepts through robotics. Children programmed them in a visual programming language on a desktop application. The work fed a research paper on computational thinking through programmable toys, published at IIT Bombay.</p>
+          <div class="ftags"><span class="ftag">Programmable play</span><span class="ftag">Visual programming</span><span class="ftag">Age-tuned design</span><span class="ftag">Published research</span></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ALL PROJECTS -->
+<section id="all">
+  <div class="wrap">
+    <div class="kicker reveal"><span class="dot" style="background:var(--ink)"></span> Proof of work</div>
+    <h2 class="sec-title reveal" data-d="1">What's shipped since I last applied.</h2>
+    <p class="sec-intro reveal" data-d="1">Interactive STEM toys my team and I have taken to market at Makerverse / OIMake, most on shelves now.</p>
+    <div class="gridhead reveal"><h3>Led by me</h3><span>concept &amp; design ownership</span></div>
+    <div class="pgrid">
+      <div class="pcard reveal"><div class="thumb"><img src="assets/no-code-robot/cover.jpg" alt=""></div><div class="pc"><h4>No-code Robot</h4><p>Computational thinking · in development</p></div></div>
+      <div class="pcard reveal" data-d="1"><div class="thumb"><img src="assets/makeable-dfm/1.png" alt=""></div><div class="pc"><h4>Makeable-DFM</h4><p>Manufacturing analysis tool · live</p></div></div>
+      <div class="pcard reveal" data-d="2"><div class="thumb"><img src="assets/dust-ninja/1.jpg" alt=""></div><div class="pc"><h4>Dust Ninja</h4><p>Robotic sweeping kit</p></div></div>
+      <div class="pcard reveal" data-d="3"><div class="thumb"><img src="assets/projecto/1.jpg" alt=""></div><div class="pc"><h4>Projecto</h4><p>Build-a-projector science kit</p></div></div>
+    </div>
+    <div class="gridhead reveal"><h3>Led by my team</h3><span>briefed &amp; directed by me</span></div>
+    <div class="pgrid">
+      <div class="pcard reveal"><div class="thumb"><img src="assets/lumobug-mini/1.jpg" alt=""></div><div class="pc"><h4>LumoBug Mini</h4><p>Light-sensing robot · 4 modes</p></div></div>
+      <div class="pcard reveal" data-d="1"><div class="thumb"><img src="assets/autorickshaw/1.png" alt=""></div><div class="pc"><h4>Autorickshaw</h4><p>Motors &amp; parallel circuits</p></div></div>
+      <div class="pcard reveal" data-d="2"><div class="thumb"><img src="assets/task-champ/1.jpg" alt=""></div><div class="pc"><h4>Task Champ</h4><p>Sensor task board kids wire</p></div></div>
+      <div class="pcard reveal" data-d="3"><div class="thumb"><img src="assets/cherry-blossom-lamp/1.png" alt=""></div><div class="pc"><h4>Cherry Blossom Lamp</h4><p>STEAM · art meets circuits</p></div></div>
+      <div class="pcard reveal"><div class="thumb"><img src="assets/led-light-bag/1.png" alt=""></div><div class="pc"><h4>LED Light Bag</h4><p>Wearable · LEDs &amp; parallel wiring</p></div></div>
+      <div class="pcard reveal" data-d="1"><div class="thumb"><img src="assets/lightup-fridge-magnet/1.jpg" alt=""></div><div class="pc"><h4>Light-up Fridge Magnet</h4><p>Engraved · paint &amp; wire</p></div></div>
+      <a class="pcard reveal" data-d="2" href="https://www.amazon.in/stores/MakerVerse/page/C1692C0E-D949-4E64-8690-4699B7EC8856?lp_asin=B0DWFLMVHK&ref_=ast_bln&store_ref=bl_ast_dp_brandlogo_sto" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div class="thumb"><img src="assets/logos/makerverse.jpg" alt="Makerverse" style="object-fit:contain;padding:18px;background:#fff"></div><div class="pc"><h4>Makerverse</h4><p>Shop the store on Amazon →</p></div></a>
+      <a class="pcard reveal" data-d="3" href="https://www.amazon.in/stores/OIMake/page/2EE8CB37-D49C-4DB2-94F2-27D52865EDDF?lp_asin=B0H1M6R91D&ref_=ast_bln&store_ref=bl_ast_dp_brandlogo_sto" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div class="thumb"><img src="assets/logos/oimake.jpg" alt="OIMake" style="object-fit:contain;padding:18px;background:#fff"></div><div class="pc"><h4>OIMake</h4><p>Shop the store on Amazon →</p></div></a>
+    </div>
+  </div>
+</section>
+
+<!-- CONTINUITY -->
+<section style="border-top:none">
+  <div class="wrap">
+    <div class="quiet reveal">
+      <div class="wrap2">
+        <h2>You shortlisted me at this level last year. I'm a stronger candidate now.</h2>
+        <p>Last time, I was selected for both the Design Manager and Senior Designer roles. Since then I have built and shipped real software, taken a robotics product into kindergartens, and expanded my remit to own product, R&amp;D and the business end to end. Same fit, more behind it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="contact">
+  <div class="wrap">
+    <div class="kicker reveal" style="justify-content:center"><span class="dot" style="background:var(--orange)"></span> Let's talk</div>
+    <h2 class="reveal" data-d="1">I'd like to lead interaction design at LEGO.</h2>
+    <p class="sec-intro reveal" data-d="1" style="margin-left:auto;margin-right:auto">CV, motivational letter and portfolio attached with the application. The full design process for each project lives on my portfolio.</p>
+    <div class="links reveal" data-d="2">
+      <a class="btn primary" href="https://iamadesigneer.framer.website" target="_blank">View full portfolio →</a>
+      <a class="btn ghost" href="mailto:kulkarnikshiteesh@gmail.com">kulkarnikshiteesh@gmail.com</a>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>Kshiteesh Kulkarni · Industrial &amp; interaction designer · Hyderabad, India</span>
+    <span>Application for Design Manager, Interaction Design · LEGO Design, Billund</span>
+  </div>
+</footer>
+
+</div><!-- /lockVeil -->
+
+<!-- PROJECT GALLERY MODAL -->
+<div id="projModal" aria-hidden="true">
+  <div class="pm-panel">
+    <button class="pm-close" id="pmClose" aria-label="Close">&times;</button>
+    <div class="pm-role" id="pmRole"></div>
+    <h3 class="pm-title" id="pmTitle"></h3>
+    <p class="pm-sum" id="pmSum"></p>
+    <a class="pm-link" id="pmLink" target="_blank" rel="noopener"></a>
+    <div class="pm-gallery" id="pmGallery"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const PORT = "https://iamadesigneer.framer.website";
+  const PROJECTS = {
+    nocode: {
+      role:"Concept & design lead · R&D owns the board",
+      title:"No-code Robot",
+      sum:"A robot for pre-primary children that builds computational thinking. Kids feed it a sequence of arrow presses to navigate a printed map. I own the concept and design; my electronics R&D owns the board (ESP32, BO motors, buzzer).",
+      link:null,
+      items:[
+        {src:"assets/no-code-robot/1.mp4", type:"video", cap:"Kids navigate a printed map by feeding the robot a sequence of arrow presses. The first-stage prototype was tested in multiple kindergartens."},
+        {src:"assets/no-code-robot/2.mp4", type:"video", cap:"The current second-stage prototype, running on ESP32, BO motors and a buzzer."},
+        {src:"assets/no-code-robot/3.png", cap:"Concept and interaction studies."},
+        {src:"assets/no-code-robot/4.jpg", cap:"A concept: swappable character skins that can change to match a theme."}
+      ]
+    },
+    makeable: {
+      role:"Designed, built & shipped solo with AI",
+      title:"Makeable-DFM",
+      sum:"A manufacturing-analysis web tool I designed, built and shipped alone alongside AI. Moldability, undercuts, wall thickness, material suggestions and India tooling cost.",
+      link:{label:"Open the live tool · makeable-dfm.in", href:"https://makeable-dfm.in"},
+      items:[
+        {src:"assets/makeable-dfm/1.png", cap:"The live tool reading a part for moldability, undercuts and wall thickness."},
+        {src:"assets/makeable-dfm/2.mp4", type:"video", cap:"A walkthrough of the analysis flow."}
+      ]
+    },
+    tooliqa: {
+      role:"Head of Product Design · Tooliqa (2021-22) · only industrial designer",
+      title:"Interior-design ecosystem & digital twin",
+      sum:"An ecosystem of five connected parts for the interior-design industry: a handheld capture device, a computer-vision pipeline, a 3D editor, a project-management tool and a client app. As Head of Product Design and the only industrial designer, I held the design coherent across all five. It cut a full project cycle to about 60% of its original time.",
+      link:{label:"See the full project on my portfolio →", href:PORT},
+      items:[
+        {src:"assets/tooliqa/device-hero.jpg", cap:"Twinn, the handheld capture device and the front end of the five-part ecosystem."},
+        {src:"assets/tooliqa/product-wheel.jpg", cap:"The whole idea: one ecosystem in five parts, capture, process, develop, organise and interact, that the industry can work within end to end."},
+        {src:"assets/tooliqa/device.jpg", cap:"As the only industrial designer I balanced a 7-inch validation screen, long- and short-range cameras and ToF with the grip and cooling for 45 minutes of continuous capture."},
+        {src:"assets/tooliqa/journey.jpg", cap:"The device's journey, from a 2 kg proof-of-principle to a 900 g working prototype."},
+        {src:"assets/tooliqa/device-interface.jpg", cap:"The on-device interface, designed for single-hand use, with a mirror feature to move the menu to whichever hand is free."},
+        {src:"assets/tooliqa/software.jpg", cap:"The 3D editor, built on Unity for interior designers and light enough for low-config machines. In testing, users finished tasks 40% faster than with common tools."},
+        {src:"assets/tooliqa/crm.jpg", cap:"A project-management tool linked to the device and editor, so managers track projects without constant designer involvement."},
+        {src:"assets/tooliqa/customer.jpg", cap:"A browser app where clients explore and adjust their space in real time, cutting the back-and-forth with designers."}
+      ]
+    },
+    meebo: {
+      role:"Senior Product Designer · Next Education (2016-2020)",
+      title:"MEEBO & PYBO",
+      sum:"A pair of programmable robots tuned by age, MEEBO for under-10s and PYBO for 10+, built to teach computer-science concepts through robotics. I split a team of two designers and two engineers into pods on a six-month timeline, we standardised on BBC Micro:bit across both for cost, and the work was published as a case study at IIT Bombay.",
+      link:{label:"See the full project on my portfolio →", href:PORT},
+      items:[
+        {src:"assets/meebo-pybo/research.jpg", cap:"The starting point: visiting partner schools, mapping where kids lose interest in robotics, and the early calls, age-split kits and one Micro:bit board across both."},
+        {src:"assets/meebo-pybo/direction.gif", cap:"How I directed it: a team of two designers and two engineers split into pods, one on MEEBO and one on PYBO, converging at every shared milestone from kickoff to a school pilot."},
+        {src:"assets/meebo-pybo/meebo.mp4", type:"video", cap:"MEEBO, for under-10s, built to spark curiosity about computer science. Three IR sensors up front, two underneath for line-following, a sound sensor and a pencil hole to draw shapes."},
+        {src:"assets/meebo-pybo/pybo.mp4", type:"video", cap:"PYBO, for 10+, built for tinkering: five exposed GPIO pins, IR, sound, humidity and ultrasound sensors, and modular building components."},
+        {src:"assets/meebo-pybo/meebo-ui.jpg", cap:"MEEBO's block programming, a visual language built on Microsoft MakeCode."},
+        {src:"assets/meebo-pybo/pybo-ui.jpg", cap:"PYBO is programmed in Python, with a compiler and a Micro:bit simulation interface."}
+      ]
+    }
+  };
+  const modal=document.getElementById('projModal'), gal=document.getElementById('pmGallery');
+  function openProj(id){
+    const p=PROJECTS[id]; if(!p)return;
+    document.getElementById('pmRole').textContent=p.role||'';
+    document.getElementById('pmTitle').textContent=p.title;
+    document.getElementById('pmSum').textContent=p.sum||'';
+    const lk=document.getElementById('pmLink');
+    if(p.link){ lk.style.display='inline-flex'; lk.href=p.link.href; lk.textContent=p.link.label; } else { lk.style.display='none'; }
+    gal.innerHTML=p.items.map(it=>{
+      const media = it.type==='video'
+        ? '<video controls preload="metadata" playsinline src="'+it.src+'"></video>'
+        : '<img loading="lazy" src="'+it.src+'" alt="">';
+      return '<div class="pm-item">'+media+'<div class="pm-cap">'+it.cap+'</div></div>';
+    }).join('');
+    modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
+    document.body.classList.add('modal-open'); modal.scrollTop=0;
+  }
+  function closeProj(){
+    modal.classList.remove('open'); modal.setAttribute('aria-hidden','true');
+    document.body.classList.remove('modal-open'); gal.innerHTML='';
+  }
+  document.getElementById('pmClose').addEventListener('click',closeProj);
+  modal.addEventListener('click',e=>{ if(e.target===modal) closeProj(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape' && modal.classList.contains('open')) closeProj(); });
+  document.querySelectorAll('.fcard[data-proj]').forEach(c=>{
+    const hint=document.createElement('div'); hint.className='viewp'; hint.textContent='View project ↗';
+    const body=c.querySelector('.fbody'); if(body) body.appendChild(hint);
+    c.addEventListener('click',()=>openProj(c.dataset.proj));
+  });
+})();
+</script>
+
+<script>
+/* ---------- reveal on scroll ---------- */
+const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.14});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* ---------- allocation bars ---------- */
+const allocIO=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('i[data-w]').forEach(b=>b.style.width=b.dataset.w+'%');allocIO.unobserve(e.target);}})},{threshold:.3});
+const allocEl=document.getElementById('alloc');if(allocEl)allocIO.observe(allocEl);
+
+/* ---------- count-up ---------- */
+const countIO=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){const el=e.target,t=+el.dataset.count,suf=el.dataset.suffix||'';let s=null;const dur=900;function step(ts){if(!s)s=ts;const p=Math.min((ts-s)/dur,1);el.textContent=Math.round(p*t)+suf;if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);countIO.unobserve(el);}})},{threshold:.6});
+document.querySelectorAll('[data-count]').forEach(el=>countIO.observe(el));
+
+/* ============ THE GAME ============ */
+(function(){
+  const N=5, CELL=60, BOT=46;
+  const board=document.getElementById('board');
+  const queueEl=document.getElementById('queue');
+  const hint=document.getElementById('toyHint');
+  const stepCountEl=document.getElementById('stepCount');
+  const hudStars=document.getElementById('hudStars');
+  const bestEl=document.getElementById('bestEl');
+  const unlockHint=document.getElementById('unlockHint');
+  const unlockText=document.getElementById('unlockText');
+  board.style.width=board.style.height=(N*CELL)+'px';
+
+  // grid: rows a(top)–e(bottom), cols 1–5 → x=col-1, y=row(a=0)
+  // dir: 0=up 1=right 2=down 3=left
+  const start={x:4,y:2,dir:0};        // c5, facing up - open on 3 sides
+  const goal={x:4,y:0};               // a5 = home (top-right)
+  const apples=[{x:2,y:4},{x:4,y:4},{x:3,y:2}]; // e3, e5, c4
+  const rocks=[{x:2,y:1}];            // one boulder at b3
+
+  /* ----- SVG art ----- */
+  const appleSVG='<svg viewBox="0 0 24 24"><path d="M12 8.4c-1.5-2.3-5.5-2.3-6.6.5-1.3 3.3 1 8.8 3.3 9.9.95.42 1.35.42 3.3.42s2.35 0 3.3-.42c2.3-1.1 4.6-6.6 3.3-9.9-1.1-2.8-5.1-2.8-6.6-.5z" fill="#F0392B" stroke="#b71f14" stroke-width="1"/><path d="M12 8.4c0-2.3 1.1-3.5 3.2-4.1" fill="none" stroke="#2E8B3A" stroke-width="1.6" stroke-linecap="round"/><path d="M14.8 4.9c1.9-.7 3.1 0 3.4 1.3-1.5.85-2.9.3-3.4-1.3z" fill="#37B24D"/><ellipse cx="9" cy="11" rx="1.7" ry="2.7" fill="#fff" opacity=".55"/></svg>';
+  const homeSVG='<svg viewBox="0 0 24 24"><path d="M4 10.5 12 3.5l8 7v.6H4z" fill="#FF8A1E" stroke="#c75f08" stroke-width="1"/><rect x="5.5" y="11" width="13" height="9" rx="1" fill="#FFD27A" stroke="#c79030" stroke-width="1"/><rect x="10.2" y="14" width="3.6" height="6" rx=".6" fill="#2E7AC9"/><circle cx="11.1" cy="17" r=".5" fill="#fff"/><rect x="6.7" y="12.3" width="2.6" height="2.6" rx=".5" fill="#9FE0F5" stroke="#c79030" stroke-width=".7"/><rect x="14.7" y="12.3" width="2.6" height="2.6" rx=".5" fill="#9FE0F5" stroke="#c79030" stroke-width=".7"/></svg>';
+  const flowerSVG='<svg viewBox="0 0 24 24"><g fill="#FFC21E"><circle cx="12" cy="7" r="3"/><circle cx="8" cy="11" r="3"/><circle cx="16" cy="11" r="3"/><circle cx="10" cy="15" r="3"/><circle cx="14" cy="15" r="3"/></g><circle cx="12" cy="11" r="2.6" fill="#F0392B"/></svg>';
+  const grassSVG='<svg viewBox="0 0 24 24" fill="none" stroke="#1E8B33" stroke-width="2.4" stroke-linecap="round"><path d="M6 20c0-5 1-8 2-10M12 20c0-6 1-9 0-13M18 20c0-5-1-8-2-10"/></svg>';
+  const treeSVG='<svg viewBox="0 0 24 24"><rect x="10.8" y="13" width="2.6" height="8" rx="1.2" fill="#8a5a22"/><circle cx="12" cy="9" r="6.2" fill="#2E9E3C"/><circle cx="8.2" cy="11" r="4.2" fill="#46BC4E"/><circle cx="15.8" cy="11" r="4.2" fill="#1E8B33"/><circle cx="11" cy="7" r="2.2" fill="#7BD860" opacity=".8"/></svg>';
+  const rockSVG='<svg viewBox="0 0 24 24"><path d="M4 18c-1.2-4 1.8-8.5 6.2-9.4 5-1 9.4 2 10.2 6.2.5 2.6-1.4 4.2-3.6 4.2H6.4C5.2 19 4.4 18.7 4 18z" fill="#AEB4BA" stroke="#6f757b" stroke-width="1.2"/><ellipse cx="9" cy="12" rx="2" ry="1.3" fill="#fff" opacity=".4"/></svg>';
+  // shell rotates to show facing; face stays upright (eyes glow, smile only on win)
+  function shellSVG(){return `<svg class="botshell" viewBox="0 0 46 46">
+    <rect x="9" y="40" width="9" height="5" rx="2" fill="#1d5a99"/><rect x="28" y="40" width="9" height="5" rx="2" fill="#1d5a99"/>
+    <rect x="6" y="9" width="34" height="32" rx="12" fill="#2E7AC9"/>
+    <rect x="6" y="9" width="34" height="13" rx="12" fill="#3f8ad8" opacity=".6"/>
+    <rect x="10" y="13" width="26" height="20" rx="9" fill="#15314A"/>
+  </svg>`;}
+  function faceSVG(){return `<svg class="botface" viewBox="0 0 46 46">
+    <defs><filter id="eyeGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter></defs>
+    <g class="eyes-neutral" filter="url(#eyeGlow)" fill="#8BF6FF">
+      <circle cx="18.5" cy="23" r="3"/><circle cx="27.5" cy="23" r="3"/>
+    </g>
+    <g class="eyes-happy" filter="url(#eyeGlow)" fill="none" stroke="#8BF6FF" stroke-width="2.5" stroke-linecap="round">
+      <path d="M15.7 24.3q2.8-3.6 5.6 0"/><path d="M24.7 24.3q2.8-3.6 5.6 0"/>
+    </g>
+    <path class="mouth-smile" d="M18 29.5q5 4 10 0" fill="none" stroke="#8BF6FF" stroke-width="2" stroke-linecap="round" filter="url(#eyeGlow)"/>
+    <g class="eyes-sad" filter="url(#eyeGlow)" fill="none" stroke="#8BF6FF" stroke-width="2.5" stroke-linecap="round">
+      <path d="M15.7 22.5q2.8 3 5.6 0"/><path d="M24.7 22.5q2.8 3 5.6 0"/>
+    </g>
+    <path class="mouth-frown" d="M18 31q5 -4 10 0" fill="none" stroke="#8BF6FF" stroke-width="2" stroke-linecap="round" filter="url(#eyeGlow)"/>
+  </svg>`;}
+
+  /* ----- build the scene ----- */
+  function obj(cls,x,y,html,size){
+    const e=document.createElement('div');
+    e.className=cls;
+    e.style.left=(x*CELL+(CELL-size)/2)+'px';
+    e.style.top=(y*CELL+(CELL-size)/2)+'px';
+    e.style.width=e.style.height=size+'px';
+    e.innerHTML=html;
+    board.appendChild(e);
+    return e;
+  }
+  obj('tileobj deco',0,4,treeSVG,44);
+  obj('tileobj deco',1,1,flowerSVG,22);
+  obj('tileobj deco',0,2,flowerSVG,22);
+  obj('tileobj deco',1,3,grassSVG,22);
+  obj('tileobj deco',3,3,grassSVG,22);
+  obj('tileobj deco',0,0,grassSVG,20);
+  rocks.forEach(r=>obj('tileobj',r.x,r.y,rockSVG,44));
+  obj('tileobj',goal.x,goal.y,homeSVG,42);
+  const appleEls=apples.map(s=>obj('tileobj star',s.x,s.y,appleSVG,32));
+  const botEl=document.createElement('div');
+  botEl.className='bot idle';
+  botEl.innerHTML='<div class="botinner"><div class="botbody"><div class="heading"></div>'+shellSVG()+faceSVG()+'</div></div>';
+  board.appendChild(botEl);
+  const bodyEl=botEl.querySelector('.botbody');
+
+  const isRock=(x,y)=>rocks.some(r=>r.x===x&&r.y===y);
+  const appleAt=(x,y)=>apples.findIndex(s=>s.x===x&&s.y===y);
+
+  function renderHud(coll){
+    hudStars.innerHTML=apples.map((_,i)=>`<span class="${coll&&coll[i]?'':'s-off'}">${appleSVG}</span>`).join('');
+  }
+
+  /* ----- BFS: true shortest path ----- */
+  function solve(){
+    const k=(x,y,d,m)=>x+','+y+','+d+','+m;
+    const q=[{x:start.x,y:start.y,d:start.dir,m:0,path:[]}];
+    const seen=new Set([k(start.x,start.y,start.dir,0)]);
+    while(q.length){
+      const s=q.shift();
+      if(s.x===goal.x&&s.y===goal.y&&s.m===7)return s.path;
+      for(const mv of ['L','R','F']){
+        let nx=s.x,ny=s.y,nd=s.d,nm=s.m;
+        if(mv==='L')nd=(s.d+3)%4;
+        else if(mv==='R')nd=(s.d+1)%4;
+        else{
+          const dl=[[0,-1],[1,0],[0,1],[-1,0]][s.d];
+          const tx=s.x+dl[0],ty=s.y+dl[1];
+          if(tx<0||tx>=N||ty<0||ty>=N||isRock(tx,ty))continue;
+          nx=tx;ny=ty;
+          const ai=appleAt(nx,ny);
+          if(ai>=0)nm=s.m|(1<<ai);
+        }
+        const key=k(nx,ny,nd,nm);
+        if(seen.has(key))continue;
+        seen.add(key);
+        q.push({x:nx,y:ny,d:nd,m:nm,path:s.path.concat(mv)});
+      }
+    }
+    return null;
+  }
+  const solution=solve()||[];
+  const BEST=solution.length;
+  if(bestEl)bestEl.textContent=BEST;
+
+  let bot={...start},botRot=0,totalSteps=0,queue=[],playing=false,collected=[false,false,false];
+  const pad=(CELL-BOT)/2;
+
+  function place(){botEl.style.transform=`translate(${bot.x*CELL+pad}px,${bot.y*CELL+pad}px)`;bodyEl.style.transform=`rotate(${botRot}deg)`;}
+  function face(c){botEl.className='bot '+c;}
+
+  const ICON={F:'arrow_upward',B:'arrow_downward',L:'turn_left',R:'turn_right'};
+
+  function renderQueue(){
+    if(!queue.length){queueEl.innerHTML='<span class="qempty">queue moves, then Play</span>';return;}
+    queueEl.innerHTML=queue.map((m,i)=>`<span class="qchip" data-i="${i}"><span class="material-symbols-rounded">${ICON[m]}</span></span>`).join('');
+  }
+
+  function add(m){
+    if(playing)return;
+    if(queue.length>=24)return;
+    queue.push(m);
+    renderQueue();
+    stepCountEl.textContent=totalSteps+queue.length;
+    hint.textContent='';
+  }
+
+  function softReset(){
+    bot={...start};botRot=Math.round(botRot/360)*360;totalSteps=0;collected=[false,false,false];
+    place();face('idle');
+    appleEls.forEach(e=>e.classList.remove('collected'));
+    renderHud(collected);
+  }
+
+  function clearAll(){
+    if(playing)return;
+    queue=[];
+    softReset();
+    renderQueue();
+    stepCountEl.textContent=0;
+    hint.textContent='';
+  }
+
+  const wait=ms=>new Promise(r=>setTimeout(r,ms));
+
+  /* ----- unlock page: any apple opens it ----- */
+  let unlocked=false;
+  function unlockPage(mode){
+    document.getElementById('lockVeil').classList.replace('locked','unlocked');
+    unlocked=true;
+    const iconEl=unlockHint.querySelector('.material-symbols-rounded');
+    unlockHint.classList.remove('nudge');unlockHint.classList.add('done');
+    if(mode==='perfect'){
+      unlockText.textContent='Perfect. Every apple home on the shortest path. Page unlocked.';
+      if(iconEl)iconEl.textContent='celebration';
+    } else if(mode==='all'){
+      unlockText.textContent=`All three apples, in ${queue.length} steps. Shortest is ${BEST}, but you're in. Page unlocked.`;
+      if(iconEl)iconEl.textContent='celebration';
+    } else if(mode==='declined'){
+      unlockText.textContent='Page unlocked.';
+      if(iconEl)iconEl.textContent='lock_open';
+    } else {
+      const count=collected.filter(Boolean).length;
+      unlockText.textContent=`Nice. ${count} apple${count>1?'s':''} collected. Page unlocked. Scroll on.`;
+      if(iconEl)iconEl.textContent='lock_open';
+    }
+  }
+
+  async function play(){
+    if(playing||!queue.length)return;
+    playing=true;
+    const playBtn=document.getElementById('playBtn');
+    if(playBtn)playBtn.disabled=true;
+    face('go');
+    hint.textContent='running…';
+    await wait(200);
+    // run the queued moves FROM KIDO'S CURRENT POSITION (no teleport back to start)
+    const chips=queueEl.querySelectorAll('.qchip');
+    const moves=queue.slice();
+    for(let i=0;i<moves.length;i++){
+      chips.forEach(c=>c.classList.remove('run'));
+      if(chips[i])chips[i].classList.add('run');
+      const m=moves[i];
+      const step=(sgn)=>{
+        const d=[[0,-1],[1,0],[0,1],[-1,0]][bot.dir];
+        const nx=bot.x+d[0]*sgn,ny=bot.y+d[1]*sgn;
+        if(nx>=0&&nx<N&&ny>=0&&ny<N&&!isRock(nx,ny)){bot.x=nx;bot.y=ny;}
+        else{botEl.classList.add('bump');setTimeout(()=>botEl.classList.remove('bump'),300);}
+      };
+      if(m==='L'){bot.dir=(bot.dir+3)%4;botRot-=90;}       // turn left (relative, 90 the short way)
+      else if(m==='R'){bot.dir=(bot.dir+1)%4;botRot+=90;}  // turn right
+      else if(m==='B')step(-1);               // move backward (no turn)
+      else step(1);                           // move forward
+      totalSteps++;
+      place();
+      await wait(430);
+      apples.forEach((s,si)=>{
+        if(!collected[si]&&bot.x===s.x&&bot.y===s.y){
+          collected[si]=true;
+          appleEls[si].classList.add('collected');
+          renderHud(collected);
+          collectFx(s.x,s.y);
+          botEl.classList.add('nom'); setHeroFace('happy');
+          setTimeout(()=>botEl.classList.remove('nom'),520);
+        }
+      });
+    }
+    // batch finished: clear the queue, leave Kido where it ended
+    queue=[]; renderQueue(); stepCountEl.textContent=totalSteps;
+
+    const all=collected.every(Boolean);
+    const anyApple=collected.some(Boolean);
+    const home=(bot.x===goal.x&&bot.y===goal.y);
+    const count=collected.filter(Boolean).length;
+
+    if(all&&home){
+      face('happy');setHeroFace('happy');botEl.classList.add('cheer');burst();
+      if(totalSteps<=BEST){ hint.textContent='Perfect, shortest path!'; unlockPage('perfect'); }
+      else{ hint.textContent=`All 3 apples home in ${totalSteps} steps. Best is ${BEST}.`; unlockPage('all'); }
+      setTimeout(()=>botEl.classList.remove('cheer'),650);
+    } else if(anyApple){
+      face('idle');setHeroFace('happy');
+      hint.textContent=`${count}/3 apple${count>1?'s':''} collected. Keep going, or scroll on.`;
+      unlockPage('some');
+    } else {
+      face('sad');setHeroFace('sad');
+      hint.textContent='No apples yet. Queue moves and press Play again.';
+    }
+    playing=false;
+    if(playBtn)playBtn.disabled=false;
+  }
+
+  function collectFx(x,y){
+    const cx=x*CELL+CELL/2, cy=y*CELL+CELL/2;
+    // expanding glow ring
+    const ring=document.createElement('span');
+    ring.className='fxring';
+    ring.style.left=(cx-23)+'px';ring.style.top=(cy-23)+'px';
+    board.appendChild(ring);
+    ring.animate([
+      {transform:'scale(.35)',opacity:.95},
+      {transform:'scale(1.7)',opacity:0}
+    ],{duration:560,easing:'ease-out'}).onfinish=()=>ring.remove();
+    // radial sparkles
+    const cols=['#8BF6FF','#4596E6','#BFE0FF','#FFFFFF'];
+    for(let i=0;i<9;i++){
+      const s=document.createElement('span');
+      s.className='confetti';s.style.background=cols[i%cols.length];
+      s.style.left=cx+'px';s.style.top=cy+'px';
+      board.appendChild(s);
+      const ang=(Math.PI*2*i)/9, dist=20+Math.random()*16;
+      s.animate([
+        {transform:'translate(-4px,-4px) scale(1)',opacity:1},
+        {transform:`translate(${Math.cos(ang)*dist-4}px,${Math.sin(ang)*dist-4}px) scale(0)`,opacity:0}
+      ],{duration:540,easing:'cubic-bezier(.2,.7,.2,1)'}).onfinish=()=>s.remove();
+    }
+  }
+
+  function burst(){
+    const cols=['#2E7AC9','#EE7A2A','#5FA05A','#F2B632'];
+    for(let i=0;i<28;i++){
+      const c=document.createElement('span');
+      c.className='confetti';
+      c.style.background=cols[i%cols.length];
+      c.style.left=(goal.x*CELL+CELL/2)+'px';
+      c.style.top=(goal.y*CELL+CELL/2)+'px';
+      board.appendChild(c);
+      const ang=Math.random()*Math.PI*2,dist=40+Math.random()*85;
+      c.animate([
+        {transform:'translate(0,0) scale(1)',opacity:1},
+        {transform:`translate(${Math.cos(ang)*dist}px,${Math.sin(ang)*dist}px) scale(0)`,opacity:0}
+      ],{duration:700+Math.random()*380,easing:'cubic-bezier(.2,.7,.2,1)'}).onfinish=()=>c.remove();
+    }
+  }
+
+  document.querySelectorAll('[data-move]').forEach(b=>b.addEventListener('click',()=>{ const dc=document.querySelector('.dpad-cross'); if(dc)dc.classList.remove('invite'); add(b.dataset.move); }));
+  document.getElementById('playBtn').addEventListener('click',play);
+  document.getElementById('clearBtn').addEventListener('click',clearAll);
+
+  // hero invitation buttons
+  const invCta=document.getElementById('inviteCta');
+  const invYes=document.getElementById('invYes'), invNo=document.getElementById('invNo');
+  // "Let's play": pulse the controls, then step aside
+  if(invYes)invYes.addEventListener('click',()=>{ setHeroFace('happy'); const dc=document.querySelector('.dpad-cross'); if(dc){dc.classList.remove('invite');void dc.offsetWidth;dc.classList.add('invite');} if(invCta)invCta.hidden=true; });
+  // "Not today": Kido turns sad, but the page still unlocks (never trap the visitor)
+  if(invNo)invNo.addEventListener('click',()=>{ if(unlocked)return; face('sad'); setHeroFace('sad'); unlockPage('declined'); if(invCta)invCta.hidden=true; const done=document.getElementById('inviteDone'); if(done)done.hidden=false; const dc=document.querySelector('.dpad-cross'); if(dc)dc.classList.remove('invite'); });
+  // one-time controls nudge: invites the first move, then gets out of the way
+  const dcross=document.querySelector('.dpad-cross');
+  if(dcross)dcross.classList.add('invite');
+
+  // the little KIDO beside "Hej there!" emotes with the game
+  function setHeroFace(s){ const k=document.getElementById('heroKido'); if(!k)return; k.classList.remove('happy','sad'); if(s)k.classList.add(s); }
+
+  renderHud(collected);
+  place();
+})();
+</script>
+</body>
+</html>
