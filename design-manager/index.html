@@ -410,6 +410,9 @@
   .pcard .thumb{aspect-ratio:4/3;background:var(--paper-2);overflow:hidden}
   .pcard .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
   .pcard:hover .thumb img{transform:scale(1.05)}
+  .pcard .thumb.logo-thumb{display:flex;align-items:center;justify-content:center;background:#fff}
+  .pcard .thumb.logo-thumb img{width:auto;height:auto;max-width:72%;max-height:56%;object-fit:contain}
+  .pcard:hover .thumb.logo-thumb img{transform:none}
   .pcard .pc{padding:13px 15px}
   .pcard h4{font-size:15px;font-weight:800}
   .pcard p{font-size:12.5px;color:var(--ink-soft);margin-top:3px}
@@ -712,8 +715,8 @@
       <div class="pcard reveal" data-d="3"><div class="thumb"><img src="assets/cherry-blossom-lamp/1.png" alt=""></div><div class="pc"><h4>Cherry Blossom Lamp</h4><p>STEAM · art meets circuits</p></div></div>
       <div class="pcard reveal"><div class="thumb"><img src="assets/led-light-bag/1.png" alt=""></div><div class="pc"><h4>LED Light Bag</h4><p>Wearable · LEDs &amp; parallel wiring</p></div></div>
       <div class="pcard reveal" data-d="1"><div class="thumb"><img src="assets/lightup-fridge-magnet/1.jpg" alt=""></div><div class="pc"><h4>Light-up Fridge Magnet</h4><p>Engraved · paint &amp; wire</p></div></div>
-      <a class="pcard reveal" data-d="2" href="https://www.amazon.in/stores/MakerVerse/page/C1692C0E-D949-4E64-8690-4699B7EC8856?lp_asin=B0DWFLMVHK&ref_=ast_bln&store_ref=bl_ast_dp_brandlogo_sto" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div class="thumb"><img src="assets/logos/makerverse.jpg" alt="Makerverse" style="object-fit:contain;padding:18px;background:#fff"></div><div class="pc"><h4>Makerverse</h4><p>Shop the store on Amazon →</p></div></a>
-      <a class="pcard reveal" data-d="3" href="https://www.amazon.in/stores/OIMake/page/2EE8CB37-D49C-4DB2-94F2-27D52865EDDF?lp_asin=B0H1M6R91D&ref_=ast_bln&store_ref=bl_ast_dp_brandlogo_sto" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div class="thumb"><img src="assets/logos/oimake.png" alt="OIMake" style="object-fit:contain;padding:14px;background:#fff"></div><div class="pc"><h4>OIMake</h4><p>Shop the store on Amazon →</p></div></a>
+      <a class="pcard reveal" data-d="2" href="https://www.amazon.in/stores/MakerVerse/page/C1692C0E-D949-4E64-8690-4699B7EC8856?lp_asin=B0DWFLMVHK&ref_=ast_bln&store_ref=bl_ast_dp_brandlogo_sto" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div class="thumb logo-thumb"><img src="assets/logos/makerverse.jpg" alt="Makerverse"></div><div class="pc"><h4>Makerverse</h4><p>Shop the store on Amazon →</p></div></a>
+      <a class="pcard reveal" data-d="3" href="https://www.amazon.in/stores/OIMake/page/2EE8CB37-D49C-4DB2-94F2-27D52865EDDF?lp_asin=B0H1M6R91D&ref_=ast_bln&store_ref=bl_ast_dp_brandlogo_sto" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div class="thumb logo-thumb"><img src="assets/logos/oimake.png" alt="OIMake"></div><div class="pc"><h4>OIMake</h4><p>Shop the store on Amazon →</p></div></a>
     </div>
   </div>
 </section>
@@ -817,7 +820,8 @@
         {src:"assets/meebo-pybo/meebo.mp4", type:"video", cap:"MEEBO, for under-10s, built to spark curiosity about computer science. Three IR sensors up front, two underneath for line-following, a sound sensor and a pencil hole to draw shapes."},
         {src:"assets/meebo-pybo/pybo.mp4", type:"video", cap:"PYBO, for 10+, built for tinkering: five exposed GPIO pins, IR, sound, humidity and ultrasound sensors, and modular building components."},
         {src:"assets/meebo-pybo/meebo-ui.jpg", cap:"MEEBO's block programming, a visual language built on Microsoft MakeCode."},
-        {src:"assets/meebo-pybo/pybo-ui.jpg", cap:"PYBO is programmed in Python, with a compiler and a Micro:bit simulation interface."}
+        {src:"assets/meebo-pybo/pybo-ui.jpg", cap:"PYBO is programmed in Python, with a compiler and a Micro:bit simulation interface."},
+        {src:"assets/meebo-pybo/journey.jpg", cap:"The project journey at a glance."}
       ]
     }
   };
