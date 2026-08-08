@@ -190,60 +190,64 @@
     renderer.render(scene, camera);
   }
 
-  // ---- pinch detection + pop-out + drop animation ----
+  // ---- pinch detection + follow + drop ----
+  // Three phases: 'idle' (hidden) -> 'growing' (quick pop-in right where
+  // you pinch) -> 'following' (tracks your fingers every frame while
+  // still pinched) -> 'dropped' (settles with a small bounce on release).
   const PINCH_ON_DIST = 0.045;
   const PINCH_OFF_DIST = 0.09;
+  const TARGET_SCALE = 1.4;
   let pinching = false;
-  let poppedOut = false;
-  let animT = 0, animating = false;
-  let settleT = 0, settling = false;
+  let phase = 'idle';
+  let t = 0;
 
-  function applyScale() {
+  function applyScale(mult = 1) {
     const factor = model.userData.baseScale || 1;
-    model.scale.setScalar(currentScale * factor);
+    model.scale.setScalar(currentScale * factor * mult);
   }
 
   function onPinchStart(fx, fy) {
-    if (poppedOut) return;
+    if (phase === 'dropped') return; // one drop per take, use Reset for another
     const p = screenToScene(fx, fy);
     model.position.x = p.x;
     model.position.y = p.y;
+    if (phase === 'idle') {
+      phase = 'growing';
+      t = 0;
+    }
   }
 
   function onPinchRelease() {
-    if (poppedOut) return;
-    poppedOut = true;
-    animating = true;
-    animT = 0;
+    if (phase === 'growing' || phase === 'following') {
+      phase = 'dropped';
+      t = 0;
+    }
   }
 
   function tickPopAnim() {
-    if (animating) {
-      animT += 0.035;
-      const t = Math.min(1, animT);
-      currentScale = THREE.MathUtils.lerp(0.0001, 1.4, t);
+    if (phase === 'growing') {
+      t += 0.09; // quick pop-in, ~150ms
+      const p = Math.min(1, t);
+      currentScale = THREE.MathUtils.lerp(0.0001, TARGET_SCALE, p);
       applyScale();
-      model.rotation.y += 0.02;
-      if (animT >= 1) {
-        animating = false;
-        settling = true;
-        settleT = 0;
-      }
-    } else if (settling) {
-      // small drop + bounce so the model reads as "landing", the
-      // visual cue that the joystick interface has now opened
-      settleT += 0.05;
-      const bounce = Math.sin(settleT * Math.PI) * Math.exp(-settleT * 2.2) * -18;
-      model.position.y += bounce * 0.0; // no-op hook kept for future tuning
-      model.rotation.y += 0.006;
-      if (settleT >= 1.6) settling = false;
+      model.rotation.y += 0.05;
+      if (p >= 1) { currentScale = TARGET_SCALE; phase = 'following'; }
+    } else if (phase === 'following') {
+      currentScale = TARGET_SCALE;
+      applyScale();
+      model.rotation.y += 0.01; // gentle idle spin while it's being carried
+    } else if (phase === 'dropped') {
+      t += 0.06;
+      const squash = Math.sin(Math.min(t, 1) * Math.PI) * Math.exp(-t * 2.5);
+      currentScale = TARGET_SCALE;
+      applyScale(1 + squash * 0.15); // small landing bounce, then settles flat
+      model.rotation.y += 0.006 * Math.max(0, 1 - t);
     }
   }
 
   function resetAll() {
-    poppedOut = false;
-    animating = false;
-    settling = false;
+    phase = 'idle';
+    t = 0;
     currentScale = 0.0001;
     applyScale();
   }
