@@ -129,29 +129,34 @@
   // ---- PLACEHOLDER joystick model (procedural), shown instantly while
   // the real GLB loads in the background, then swapped out.
   function buildPlaceholder() {
+    // Local origin is the TOP of the knob (not the model's center) --
+    // that's the point that gets pinned to your pinch.
     const group = new THREE.Group();
     const base = new THREE.Mesh(
       new THREE.CylinderGeometry(45, 55, 22, 24),
       new THREE.MeshStandardMaterial({ color: 0x2c2f36 })
     );
-    base.position.y = -40;
+    base.position.y = -98;
     const stick = new THREE.Mesh(
       new THREE.CylinderGeometry(7, 7, 70, 16),
       new THREE.MeshStandardMaterial({ color: 0x16181c })
     );
-    stick.position.y = 5;
+    stick.position.y = -53;
     const knob = new THREE.Mesh(
       new THREE.SphereGeometry(16, 20, 20),
       new THREE.MeshStandardMaterial({ color: 0xe85d14 })
     );
-    knob.position.y = 42;
+    knob.position.y = -16;
     group.add(base, stick, knob);
     return group;
   }
 
   let model = buildPlaceholder();
-  let currentScale = 0.0001;
+  let currentScale = 0;
   model.scale.setScalar(currentScale);
+  model.visible = false; // hidden until a pinch actually starts -- scale alone
+                          // isn't reliable once the real GLB's normalization
+                          // factor gets multiplied in (see loader below)
   scene.add(model);
 
   const TARGET_HEIGHT = 130; // world units, matches placeholder's rough size
@@ -163,7 +168,10 @@
     box.getSize(size);
     const center = new THREE.Vector3();
     box.getCenter(center);
-    real.position.sub(center);
+    // Anchor at the TOP center, not the geometric center, so the top of
+    // the model is what gets pinned to your pinch point as you drag.
+    const topAnchor = new THREE.Vector3(center.x, box.max.y, center.z);
+    real.position.sub(topAnchor);
 
     const wrapper = new THREE.Group();
     wrapper.add(real);
@@ -172,6 +180,9 @@
 
     wrapper.position.copy(model.position);
     wrapper.rotation.copy(model.rotation);
+    wrapper.visible = model.visible; // carry over hidden/shown state, don't
+                                      // let a fresh default-visible Group
+                                      // reveal it mid-idle
     wrapper.scale.setScalar(currentScale * scaleFactor);
 
     scene.remove(model);
@@ -216,6 +227,7 @@
     if (phase === 'idle') {
       phase = 'growing';
       t = 0;
+      model.visible = true;
     }
   }
 
@@ -231,28 +243,26 @@
     if (phase === 'growing') {
       t += 0.09; // quick pop-in, ~150ms
       const p = Math.min(1, t);
-      currentScale = THREE.MathUtils.lerp(0.0001, TARGET_SCALE, p);
+      currentScale = THREE.MathUtils.lerp(0, TARGET_SCALE, p);
       applyScale();
-      model.rotation.y += 0.05;
       if (p >= 1) { currentScale = TARGET_SCALE; phase = 'following'; }
     } else if (phase === 'following') {
       currentScale = TARGET_SCALE;
       applyScale();
-      model.rotation.y += 0.01; // gentle idle spin while it's being carried
     } else if (phase === 'dropped') {
       t += 0.06;
       const squash = Math.sin(Math.min(t, 1) * Math.PI) * Math.exp(-t * 2.5);
       currentScale = TARGET_SCALE;
       applyScale(1 + squash * 0.15); // small landing bounce, then settles flat
-      model.rotation.y += 0.006 * Math.max(0, 1 - t);
     }
   }
 
   function resetAll() {
     phase = 'idle';
     t = 0;
-    currentScale = 0.0001;
+    currentScale = 0;
     applyScale();
+    model.visible = false;
   }
   resetBtn.addEventListener('click', resetAll);
 
