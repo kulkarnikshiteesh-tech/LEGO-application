@@ -240,7 +240,12 @@
   const TARGET_SCALE = 1.4;
   const TRACKING_GRACE_MS = 500; // tolerate a brief AF/AE hunting blip
                                   // without treating it as hand-lost
-  let pinching = false; // true while fist is closed (name kept for minimal diff)
+  const GRAB_CONFIRM_MS = 120; // gesture must hold steady this long before
+                                // it counts as a real grab/release, filters
+                                // single-frame classifier flicker
+  let pinching = false; // true while gripping (name kept for minimal diff)
+  let candidateGrab = null; // pending state we're confirming, or null
+  let candidateSince = 0;
   let phase = 'idle';
   let t = 0;
   let lastSeenAt = 0;
@@ -250,19 +255,26 @@
     model.scale.setScalar(currentScale * factor * mult);
   }
 
-  function onPinchStart(fx, fy) {
-    if (phase === 'dropped') return; // one drop per take, use Reset for another
+  function updateGrabPosition(fx, fy) {
     const p = screenToScene(fx, fy);
     model.position.x = p.x;
     model.position.y = p.y;
+  }
+
+  function startGrab(fx, fy) {
+    updateGrabPosition(fx, fy);
     if (phase === 'idle') {
       phase = 'growing';
       t = 0;
       model.visible = true;
+    } else if (phase === 'dropped') {
+      // re-grabbing after a drop -- already visible/full-size, just
+      // resume tracking instead of re-running the pop-in animation
+      phase = 'following';
     }
   }
 
-  function onPinchRelease() {
+  function releaseGrab() {
     if (phase === 'growing' || phase === 'following') {
       phase = 'dropped';
       t = 0;
@@ -294,6 +306,8 @@
     currentScale = 0;
     applyScale();
     model.visible = false;
+    pinching = false;
+    candidateGrab = null;
   }
   resetBtn.addEventListener('click', resetAll);
 
@@ -398,15 +412,24 @@
       debugCtx.arc(fx, fy, 9, 0, Math.PI * 2);
       debugCtx.fill();
 
-      if (!pinching && isFist) {
-        pinching = true;
-        onPinchStart(fx, fy);
-      } else if (pinching && !isFist) {
-        pinching = false;
-        onPinchRelease();
-      } else if (pinching) {
-        onPinchStart(fx, fy);
+      // Debounce: a raw reading that disagrees with the current confirmed
+      // state has to hold for GRAB_CONFIRM_MS straight before it commits.
+      // A single flickered frame (classifier noise, motion blur) no
+      // longer flips state on its own.
+      if (isFist !== pinching) {
+        if (candidateGrab !== isFist) {
+          candidateGrab = isFist;
+          candidateSince = now;
+        } else if (now - candidateSince >= GRAB_CONFIRM_MS) {
+          pinching = isFist;
+          candidateGrab = null;
+          if (pinching) startGrab(fx, fy); else releaseGrab();
+        }
+      } else {
+        candidateGrab = null;
       }
+
+      if (pinching) updateGrabPosition(fx, fy); // track every frame while gripping
 
       const label = top ? `${top.categoryName} ${top.score.toFixed(2)}` : 'no gesture';
       status.textContent = `${label} ${pinching ? 'GRIPPING' : ''}`;
@@ -417,8 +440,9 @@
     } else {
       if (pinching) {
         pinching = false;
-        onPinchRelease();
+        releaseGrab();
       }
+      candidateGrab = null;
       status.textContent = 'no hand';
     }
 
