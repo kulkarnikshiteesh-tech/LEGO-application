@@ -312,13 +312,12 @@
       const squash = Math.sin(Math.min(t, 1) * Math.PI) * Math.exp(-t * 2.5);
       currentScale = TARGET_SCALE;
       applyScale(1 + squash * 0.15); // small landing bounce, then settles flat
-      if (t >= 1.5) { phase = 'fading'; t = 0; } // bounce settled, start the fade-out
+      if (t >= 0.7) { phase = 'fading'; t = 0; } // bounce read, cut to the fade almost immediately
     } else if (phase === 'fading') {
-      t += 0.025;
+      t += 0.22; // fast: fully gone in ~5 frames, not a lingering fade
       const p = Math.min(1, t);
       currentScale = TARGET_SCALE * (1 - p); // shrink away rather than relying on material opacity
       applyScale();
-      model.position.y += 0.6; // drift gently upward as it disappears
       if (p >= 1) {
         model.visible = false;
         phase = 'idle';

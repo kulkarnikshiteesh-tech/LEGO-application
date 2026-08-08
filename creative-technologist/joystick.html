@@ -15,6 +15,10 @@
     --accent: #E85D14;
     --ink: #16181C;
     --paper: #F5F1E8;
+    --panel: #131519;
+    --panel-2: #191C21;
+    --hair: rgba(255,255,255,0.08);
+    --text-dim: #7C808A;
   }
   html, body {
     height:100%;
@@ -56,14 +60,18 @@
   .bracket.bl { bottom:26px; left:26px; border-right:none; border-top:none; }
   .bracket.br { bottom:26px; right:26px; border-left:none; border-top:none; }
 
-  /* ---- bounded app card ---- */
+  /* ---- bounded app card: dark, part of the same technical surface as
+     the canvas behind it, not a light card floating on a dark page ---- */
   #app {
     position:relative;
     width:min(980px, 92vw);
     height:min(680px, 88vh);
-    background:var(--paper);
+    background:
+      radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px) 0 0/24px 24px,
+      radial-gradient(ellipse 700px 460px at 50% 46%, rgba(232,93,20,0.07), transparent 70%),
+      var(--panel);
     border-radius:20px;
-    box-shadow: 0 30px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(232,93,20,0.12);
+    box-shadow: 0 30px 90px rgba(0,0,0,0.6), inset 0 0 0 1px var(--hair), inset 0 0 60px rgba(232,93,20,0.05);
     overflow:hidden;
   }
   #app.flash::before {
@@ -86,7 +94,7 @@
     display:flex; justify-content:space-between; align-items:center;
     padding:16px 20px;
     z-index:10;
-    border-bottom:1px solid rgba(22,24,28,0.08);
+    border-bottom:1px solid var(--hair);
   }
   .link-group { display:flex; align-items:center; gap:10px; }
   #status-dot {
@@ -104,28 +112,36 @@
   @keyframes pulse-green { 0%,100% { box-shadow:0 0 0 0 rgba(46,125,50,0.45); } 50% { box-shadow:0 0 0 6px rgba(46,125,50,0); } }
 
   button { font-family:var(--mono); }
+  /* Ghost by default -- this only needs one click before you start
+     recording, so it stays out of the way rather than reading as a
+     big black button sitting on top of the HUD. Collapses further
+     once connected: just a quiet dot + short label. */
   #connect {
     font-size:11px; font-weight:500; letter-spacing:.06em; text-transform:uppercase;
-    background:var(--ink); color:var(--paper); border:none;
-    padding:9px 14px; border-radius:6px; cursor:pointer;
-    transition: transform .12s ease, background .2s ease;
+    background:transparent; color:var(--text-dim); border:1px solid var(--hair);
+    padding:8px 13px; border-radius:6px; cursor:pointer;
+    transition: all .25s cubic-bezier(.2,.8,.2,1);
   }
-  #connect:hover { transform:translateY(-1px); }
-  #connect.connected { background:#2E7D32; }
+  #connect:hover { border-color:var(--accent); color:var(--paper); }
+  #connect.connected {
+    border-color:rgba(46,125,50,0.35); color:#8FBF93;
+    padding:6px 10px; font-size:10px;
+  }
   #test-signal {
     font-size:11px; font-weight:500; letter-spacing:.06em; text-transform:uppercase;
-    background:transparent; color:#8A8D94; border:1px solid rgba(22,24,28,0.15);
+    background:transparent; color:var(--text-dim); border:1px solid var(--hair);
     padding:8px 13px; border-radius:6px; cursor:pointer;
     margin-left:8px;
     transition: border-color .15s ease, color .15s ease;
   }
-  #test-signal:hover { border-color:var(--accent); color:var(--ink); }
+  #test-signal:hover { border-color:var(--accent); color:var(--paper); }
   #refresh {
     width:34px; height:34px; border-radius:8px;
-    background:var(--ink); border:none; cursor:pointer;
+    background:transparent; border:1px solid var(--hair); cursor:pointer;
     display:flex; align-items:center; justify-content:center;
-    transition: transform .3s cubic-bezier(.2,.8,.2,1);
+    transition: transform .3s cubic-bezier(.2,.8,.2,1), border-color .2s ease;
   }
+  #refresh:hover { border-color:var(--accent); }
   #refresh:hover svg { transform:rotate(180deg); }
   #refresh svg { width:16px; height:16px; stroke:var(--paper); transition: transform .3s cubic-bezier(.2,.8,.2,1); }
 
@@ -145,7 +161,7 @@
   #scan-ring {
     position:absolute; top:50%; left:50%; width:160px; height:160px;
     transform:translate(-50%,-50%);
-    border:1.5px dashed rgba(22,24,28,0.18);
+    border:1.5px dashed rgba(232,93,20,0.25);
     border-radius:50%;
     animation: spin 12s linear infinite;
     z-index:1;
@@ -203,8 +219,11 @@
   #caption {
     position:absolute; left:50%; bottom:24px; transform:translateX(-50%) translateY(10px) scale(0.96);
     max-width:88%; width:auto;
-    background:var(--ink); color:var(--paper);
+    background:rgba(255,255,255,0.05);
+    backdrop-filter: blur(8px);
+    color:var(--paper);
     padding:16px 22px 14px; border-radius:10px;
+    border:1px solid var(--hair);
     border-left:3px solid var(--accent);
     text-align:left;
     opacity:0; pointer-events:none;
@@ -434,7 +453,7 @@
 
   window.addEventListener('serial-status', (e) => {
     if (e.detail === 'connected') {
-      connectBtn.textContent = 'Connected';
+      connectBtn.textContent = 'Linked';
       connectBtn.classList.add('connected');
       statusDot.classList.add('connected');
     } else if (e.detail === 'disconnected' || e.detail === 'error') {
