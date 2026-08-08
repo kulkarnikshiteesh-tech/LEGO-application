@@ -294,8 +294,8 @@
 
       running = true;
       gate.classList.add('hidden');
-      // give it a beat, then fade the debug chrome so the recording is clean
-      setTimeout(() => chromeEl.classList.add('recording-clean'), 1500);
+      // debug readout auto-hide disabled while we calibrate pinch detection
+      // -- re-enable with: setTimeout(() => chromeEl.classList.add('recording-clean'), 1500);
       loop();
     } catch (err) {
       gate.classList.remove('loading');
