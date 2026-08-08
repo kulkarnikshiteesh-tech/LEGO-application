@@ -166,10 +166,13 @@
   let profile = new Array(BIN_COUNT).fill(null);
   let centerX = null;
   let baseY, topY;
+  let smoothTipX = null, smoothTipY = null;
 
   function resetVase() {
     profile = new Array(BIN_COUNT).fill(null);
     centerX = null;
+    smoothTipX = null;
+    smoothTipY = null;
     baseY = window.innerHeight * 0.92;
     topY = window.innerHeight * 0.12;
     if (vaseMesh) {
@@ -319,7 +322,15 @@
       lastSeenAt = now;
       const lm = result.landmarks[0];
       const tip = lm[8]; // index fingertip
-      const sp = videoPointToScreen(tip.x, tip.y);
+      const rawSp = videoPointToScreen(tip.x, tip.y);
+
+      // Smooth the fingertip position itself, not just the resulting
+      // profile -- cuts jitter at the source instead of only after
+      // it's already been baked into the vase shape.
+      if (smoothTipX === null) { smoothTipX = rawSp.x; smoothTipY = rawSp.y; }
+      smoothTipX += (rawSp.x - smoothTipX) * 0.4;
+      smoothTipY += (rawSp.y - smoothTipY) * 0.4;
+      const sp = { x: smoothTipX, y: smoothTipY };
 
       debugCtx.fillStyle = 'rgba(46, 125, 50, 0.85)';
       for (const p of lm) {
