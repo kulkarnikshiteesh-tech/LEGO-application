@@ -167,17 +167,24 @@
                                           // starting point you can build,
                                           // as a fraction of screen height
   let profile = new Array(BIN_COUNT).fill(null);
-  let centerX = null;
-  let baseY = null, topY = null; // null until your first tracked touch --
-                                  // anchored to where YOU actually start,
-                                  // not a guessed fixed screen position
+  // Stored as FRACTIONS of window width/height, not raw pixels -- entering
+  // fullscreen (triggered on the same tap that starts tracking) can change
+  // window.innerWidth/innerHeight shortly after your first touch is
+  // captured, and raw pixel anchors would then be silently wrong for
+  // every frame after that resize. Fractions stay valid regardless.
+  let centerXFrac = null;
+  let baseYFrac = null, topYFrac = null;
   let smoothTipX = null, smoothTipY = null;
+
+  function getCenterX() { return centerXFrac * window.innerWidth; }
+  function getBaseY() { return baseYFrac * window.innerHeight; }
+  function getTopY() { return topYFrac * window.innerHeight; }
 
   function resetVase() {
     profile = new Array(BIN_COUNT).fill(null);
-    centerX = null;
-    baseY = null;
-    topY = null;
+    centerXFrac = null;
+    baseYFrac = null;
+    topYFrac = null;
     smoothTipX = null;
     smoothTipY = null;
     if (vaseMesh) {
@@ -208,9 +215,10 @@
 
   function rebuildVase() {
     const known = profile.map((r, i) => ({ r, i })).filter(p => p.r !== null);
-    if (known.length < 2 || centerX === null) return;
+    if (known.length < 2 || centerXFrac === null) return;
 
     const smoothed = smoothRadii(known);
+    const centerX = getCenterX(), baseY = getBaseY(), topY = getTopY();
 
     // LatheGeometry points: local (radius, height), bottom to top.
     // Radius floor keeps the base from pinching to a zero-width point.
@@ -243,14 +251,15 @@
   }
 
   function updateProfile(fx, fy) {
-    if (centerX === null) {
+    if (centerXFrac === null) {
       // First tracked touch, wherever it actually is -- this becomes
       // the base of the vase. No assumption about where the disc "should"
       // be on screen.
-      centerX = fx;
-      baseY = fy;
-      topY = fy - window.innerHeight * BUILD_HEIGHT_PX_FRACTION;
+      centerXFrac = fx / window.innerWidth;
+      baseYFrac = fy / window.innerHeight;
+      topYFrac = (fy - window.innerHeight * BUILD_HEIGHT_PX_FRACTION) / window.innerHeight;
     }
+    const centerX = getCenterX(), baseY = getBaseY(), topY = getTopY();
     const radius = Math.abs(fx - centerX);
     const t = (baseY - fy) / (baseY - topY); // 0 at base, 1 at top
     const bin = Math.round(Math.max(0, Math.min(1, t)) * (BIN_COUNT - 1));
