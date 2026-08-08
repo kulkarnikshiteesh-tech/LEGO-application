@@ -163,18 +163,23 @@
   // bottom-up as the fingertip rises. Revolved into a real 3D lathe
   // mesh each frame, not a flat 2D fill.
   const BIN_COUNT = 140;
+  const BUILD_HEIGHT_PX_FRACTION = 0.7; // how far up from your actual
+                                          // starting point you can build,
+                                          // as a fraction of screen height
   let profile = new Array(BIN_COUNT).fill(null);
   let centerX = null;
-  let baseY, topY;
+  let baseY = null, topY = null; // null until your first tracked touch --
+                                  // anchored to where YOU actually start,
+                                  // not a guessed fixed screen position
   let smoothTipX = null, smoothTipY = null;
 
   function resetVase() {
     profile = new Array(BIN_COUNT).fill(null);
     centerX = null;
+    baseY = null;
+    topY = null;
     smoothTipX = null;
     smoothTipY = null;
-    baseY = window.innerHeight * 0.92;
-    topY = window.innerHeight * 0.12;
     if (vaseMesh) {
       vaseGroup.remove(vaseMesh);
       vaseMesh.geometry.dispose();
@@ -238,7 +243,14 @@
   }
 
   function updateProfile(fx, fy) {
-    if (centerX === null) centerX = fx; // lock the axis to where tracking starts
+    if (centerX === null) {
+      // First tracked touch, wherever it actually is -- this becomes
+      // the base of the vase. No assumption about where the disc "should"
+      // be on screen.
+      centerX = fx;
+      baseY = fy;
+      topY = fy - window.innerHeight * BUILD_HEIGHT_PX_FRACTION;
+    }
     const radius = Math.abs(fx - centerX);
     const t = (baseY - fy) / (baseY - topY); // 0 at base, 1 at top
     const bin = Math.round(Math.max(0, Math.min(1, t)) * (BIN_COUNT - 1));
