@@ -328,7 +328,15 @@
     requestAnimationFrame(loop);
   }
 
-  gateBtn.addEventListener('click', () => { if (!running) start(); });
+  gateBtn.addEventListener('click', () => {
+    if (running) return;
+    // must be requested synchronously inside the click handler, before
+    // any await, or the browser won't treat it as a real user gesture
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+    start();
+  });
 </script>
 </body>
 </html>
