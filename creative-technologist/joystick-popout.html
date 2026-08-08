@@ -84,7 +84,7 @@
     <button id="gate-btn">
       <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
     </button>
-    <p>Rear camera + hand tracking. Tap once, then it's hands-free, pinch the joystick to pull the model out.</p>
+    <p>Rear camera + hand tracking. Tap once, then it's hands-free: close your hand into a fist around the joystick to grab, open it to drop.</p>
   </div>
 
 <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
@@ -94,7 +94,7 @@
 </script>
 <script type="module">
   import * as THREE from "three";
-  import { HandLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs";
+  import { GestureRecognizer, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs";
   import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/loaders/GLTFLoader.js";
 
   const camEl = document.getElementById('cam');
@@ -232,16 +232,15 @@
     renderer.render(scene, camera);
   }
 
-  // ---- pinch detection + follow + drop ----
+  // ---- grab detection (Closed_Fist gesture) + follow + drop ----
   // Three phases: 'idle' (hidden) -> 'growing' (quick pop-in right where
-  // you pinch) -> 'following' (tracks your fingers every frame while
-  // still pinched) -> 'dropped' (settles with a small bounce on release).
-  const PINCH_ON_DIST = 0.045;
-  const PINCH_OFF_DIST = 0.09;
+  // you grab) -> 'following' (tracks your hand every frame while still
+  // gripped) -> 'dropped' (settles with a small bounce on release).
+  const GESTURE_MIN_SCORE = 0.5;
   const TARGET_SCALE = 1.4;
   const TRACKING_GRACE_MS = 500; // tolerate a brief AF/AE hunting blip
                                   // without treating it as hand-lost
-  let pinching = false;
+  let pinching = false; // true while fist is closed (name kept for minimal diff)
   let phase = 'idle';
   let t = 0;
   let lastSeenAt = 0;
@@ -299,7 +298,7 @@
   resetBtn.addEventListener('click', resetAll);
 
   // ---- MediaPipe hand tracking ----
-  let handLandmarker, running = false;
+  let gestureRecognizer, running = false;
 
   async function start() {
     gate.classList.add('loading');
@@ -315,16 +314,16 @@
       const delegate = delegateParam === 'gpu' ? 'GPU' : 'CPU';
       status.textContent = `delegate: ${delegate}`;
 
-      handLandmarker = await HandLandmarker.createFromOptions(vision, {
+      // Pretrained gesture classifier instead of a hand-rolled distance
+      // threshold -- Closed_Fist is one of its built-in, trained gesture
+      // classes, far more robust than measuring two fingertip landmarks.
+      gestureRecognizer = await GestureRecognizer.createFromOptions(vision, {
         baseOptions: {
-          modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+          modelAssetPath: "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task",
           delegate
         },
         runningMode: "VIDEO",
         numHands: 1,
-        // lowered from the 0.5 defaults -- a hand gripping a physical
-        // object (fingertips partly hidden) is a harder case than the
-        // open, unobstructed hands these defaults assume
         minHandDetectionConfidence: 0.3,
         minHandPresenceConfidence: 0.3,
         minTrackingConfidence: 0.3
@@ -351,16 +350,12 @@
     }
   }
 
-  function dist(a, b) {
-    return Math.hypot(a.x - b.x, a.y - b.y);
-  }
-
   function loop() {
     if (!running) return;
     const now = performance.now();
     let result;
     try {
-      result = handLandmarker.detectForVideo(camEl, now);
+      result = gestureRecognizer.recognizeForVideo(camEl, now);
     } catch (err) {
       status.textContent = 'detect error: ' + err.message;
       requestAnimationFrame(loop); // keep the loop alive, don't die on one bad frame
@@ -372,15 +367,18 @@
     if (result.landmarks && result.landmarks.length > 0) {
       lastSeenAt = now;
       const lm = result.landmarks[0];
-      const thumb = lm[4], index = lm[8];
-      const d = dist(thumb, index);
+      const gestureList = (result.gestures && result.gestures[0]) || [];
+      const top = gestureList[0];
+      const isFist = top && top.categoryName === 'Closed_Fist' && top.score >= GESTURE_MIN_SCORE;
 
-      // rear camera is NOT mirrored, and this accounts for the
-      // object-fit:cover crop between raw video and display
-      const thumbPt = videoPointToScreen(thumb.x, thumb.y);
-      const indexPt = videoPointToScreen(index.x, index.y);
-      const fx = (thumbPt.x + indexPt.x) / 2;
-      const fy = (thumbPt.y + indexPt.y) / 2;
+      // palm center (wrist + middle-knuckle midpoint) -- stable even
+      // when fingers are curled into a fist, unlike a fingertip pair
+      const wrist = lm[0], midKnuckle = lm[9];
+      const palmPt = videoPointToScreen(
+        (wrist.x + midKnuckle.x) / 2,
+        (wrist.y + midKnuckle.y) / 2
+      );
+      const fx = palmPt.x, fy = palmPt.y;
 
       // draw every landmark so you can see exactly what the camera
       // sees, and where in frame it starts losing the hand
@@ -391,22 +389,23 @@
         debugCtx.arc(sp.x, sp.y, 5, 0, Math.PI * 2);
         debugCtx.fill();
       }
-      debugCtx.fillStyle = pinching ? 'rgba(232, 93, 20, 0.95)' : 'rgba(245, 241, 232, 0.95)';
+      debugCtx.fillStyle = isFist ? 'rgba(232, 93, 20, 0.95)' : 'rgba(245, 241, 232, 0.95)';
       debugCtx.beginPath();
       debugCtx.arc(fx, fy, 9, 0, Math.PI * 2);
       debugCtx.fill();
 
-      if (!pinching && d < PINCH_ON_DIST) {
+      if (!pinching && isFist) {
         pinching = true;
         onPinchStart(fx, fy);
-      } else if (pinching && d > PINCH_OFF_DIST) {
+      } else if (pinching && !isFist) {
         pinching = false;
         onPinchRelease();
       } else if (pinching) {
         onPinchStart(fx, fy);
       }
 
-      status.textContent = `pinch ${d.toFixed(3)} ${pinching ? 'PINCHING' : ''}`;
+      const label = top ? `${top.categoryName} ${top.score.toFixed(2)}` : 'no gesture';
+      status.textContent = `${label} ${pinching ? 'GRIPPING' : ''}`;
     } else if (now - lastSeenAt < TRACKING_GRACE_MS) {
       // brief dropout (likely AF/AE hunting on a background change) --
       // hold position and pinch state instead of dropping the model
