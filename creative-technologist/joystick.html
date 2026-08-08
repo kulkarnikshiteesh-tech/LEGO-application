@@ -249,6 +249,16 @@
   #cross.dismantled #left  { transform: translateY(-50%) translateX(-260px) !important; }
   #cross.dismantled #right { transform: translateY(-50%) translateX(260px) !important; }
 
+  /* ---- dismantle video: real footage instead of a CSS animation ---- */
+  #dismantle-video {
+    position:absolute; inset:0;
+    width:100%; height:100%; object-fit:cover;
+    opacity:0; pointer-events:none;
+    transition: opacity .15s ease;
+    z-index:8;
+  }
+  #dismantle-video.visible { opacity:1; }
+
   /* ---- maker reveal: full photo, text overlaid on it ---- */
   #maker-reveal {
     position:absolute; inset:0;
@@ -321,6 +331,8 @@
 
     <div id="caption"><span class="tag">Direction</span><span class="line" id="caption-line"></span></div>
 
+    <video id="dismantle-video" src="./assets/dismantle.mp4" playsinline></video>
+
     <div id="maker-reveal">
       <img src="./assets/minifig_maker.png" alt="">
       <div class="scrim"></div>
@@ -357,6 +369,7 @@
   const caption = document.getElementById('caption');
   const captionLine = document.getElementById('caption-line');
   const makerReveal = document.getElementById('maker-reveal');
+  const dismantleVideo = document.getElementById('dismantle-video');
   const connectBtn = document.getElementById('connect');
   const statusDot = document.getElementById('status-dot');
   const refreshBtn = document.getElementById('refresh');
@@ -414,20 +427,40 @@
   function dismantle() {
     if (dismantled || !arrived) return;
     dismantled = true;
-    cross.classList.add('dismantled');
     caption.classList.remove('visible');
+    cross.style.opacity = '0'; // cut instantly, the video takes over
     minifigWrap.style.opacity = '0';
+
+    dismantleVideo.currentTime = 0;
+    dismantleVideo.classList.add('visible');
+    dismantleVideo.muted = false;
+    const p = dismantleVideo.play();
+    if (p !== undefined) {
+      p.catch(() => {
+        // autoplay-with-sound blocked -- play muted rather than not at all
+        dismantleVideo.muted = true;
+        dismantleVideo.play();
+      });
+    }
+  }
+
+  dismantleVideo.addEventListener('ended', () => {
+    dismantleVideo.classList.remove('visible');
     makerReveal.classList.add('visible');
     app.classList.add('flash');
     setTimeout(() => app.classList.remove('flash'), 750);
-  }
+  });
 
   function reset() {
     dismantled = false;
     arrived = false;
     app.classList.remove('arrived');
     cross.classList.add('dismantled'); // back to off-screen, waiting for the next drop signal
+    cross.style.opacity = '1';
     minifigWrap.style.opacity = '0';
+    dismantleVideo.pause();
+    dismantleVideo.currentTime = 0;
+    dismantleVideo.classList.remove('visible');
     makerReveal.classList.remove('visible');
     waitingLabel.style.display = 'flex';
     caption.classList.remove('visible');
