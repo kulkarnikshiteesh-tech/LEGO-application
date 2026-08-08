@@ -245,9 +245,10 @@
   // whenever the camera can see it, and settles ("drops") once your
   // hand has been out of frame for longer than the grace window.
   // Phases: 'idle' (hidden) -> 'growing' (pop-in where your hand first
-  // appears) -> 'following' (tracks every frame) -> 'dropped' (settles
-  // once your hand's been gone past TRACKING_GRACE_MS; re-appearing
-  // your hand picks it back up again).
+  // appears) -> 'following' (tracks every frame) -> back to 'idle',
+  // instantly invisible, once your hand's been gone past
+  // TRACKING_GRACE_MS. No bounce/fade -- disappearing and the laptop's
+  // signal firing need to read as the same instant.
   const TARGET_SCALE = 1.4;
   const TRACKING_GRACE_MS = 500; // tolerate a brief AF/AE hunting blip
                                   // without treating it as hand-lost
@@ -271,27 +272,27 @@
   }
 
   function startGrab(fx, fy) {
+    // 'dropped'/'fading' phases no longer exist -- release now goes
+    // straight to idle+invisible+delivered, so this only ever needs to
+    // handle a fresh grab from idle (delivered gates out anything after).
     updateGrabPosition(fx, fy);
     if (phase === 'idle') {
       phase = 'growing';
       t = 0;
       model.visible = true;
-    } else if (phase === 'dropped') {
-      // re-grabbing after a drop -- already visible/full-size, just
-      // resume tracking instead of re-running the pop-in animation
-      phase = 'following';
-    } else if (phase === 'fading') {
-      // caught it mid-fade -- snap back to full size and resume
-      currentScale = TARGET_SCALE;
-      applyScale();
-      phase = 'following';
     }
   }
 
   function releaseGrab() {
     if (phase === 'growing' || phase === 'following') {
-      phase = 'dropped';
+      // Gone in the exact same frame the signal fires -- no bounce, no
+      // fade. Any delay here is a delay between "drop" and "interface
+      // opens" reading as one moment, which was the whole point.
+      phase = 'idle';
       t = 0;
+      currentScale = 0;
+      applyScale();
+      model.visible = false;
       delivered = true; // no more pickups after this -- one drop per take
       RemoteTrigger.fire(); // tells the laptop to build the interface in
     }
@@ -307,22 +308,6 @@
     } else if (phase === 'following') {
       currentScale = TARGET_SCALE;
       applyScale();
-    } else if (phase === 'dropped') {
-      t += 0.06;
-      const squash = Math.sin(Math.min(t, 1) * Math.PI) * Math.exp(-t * 2.5);
-      currentScale = TARGET_SCALE;
-      applyScale(1 + squash * 0.15); // small landing bounce, then settles flat
-      if (t >= 0.7) { phase = 'fading'; t = 0; } // bounce read, cut to the fade almost immediately
-    } else if (phase === 'fading') {
-      t += 0.22; // fast: fully gone in ~5 frames, not a lingering fade
-      const p = Math.min(1, t);
-      currentScale = TARGET_SCALE * (1 - p); // shrink away rather than relying on material opacity
-      applyScale();
-      if (p >= 1) {
-        model.visible = false;
-        phase = 'idle';
-        currentScale = 0;
-      }
     }
   }
 
