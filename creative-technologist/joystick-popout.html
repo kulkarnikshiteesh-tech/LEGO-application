@@ -239,9 +239,12 @@
   const PINCH_ON_DIST = 0.045;
   const PINCH_OFF_DIST = 0.09;
   const TARGET_SCALE = 1.4;
+  const TRACKING_GRACE_MS = 500; // tolerate a brief AF/AE hunting blip
+                                  // without treating it as hand-lost
   let pinching = false;
   let phase = 'idle';
   let t = 0;
+  let lastSeenAt = 0;
 
   function applyScale(mult = 1) {
     const factor = model.userData.baseScale || 1;
@@ -328,7 +331,10 @@
       });
 
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+        // lower resolution than before -- less for continuous AF/AE to
+        // hunt over when the background composition changes, and it's
+        // plenty for hand tracking
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
       });
       camEl.srcObject = stream;
       await new Promise(r => camEl.onloadedmetadata = r);
@@ -364,6 +370,7 @@
     debugCtx.clearRect(0, 0, debugCanvas.width, debugCanvas.height);
 
     if (result.landmarks && result.landmarks.length > 0) {
+      lastSeenAt = now;
       const lm = result.landmarks[0];
       const thumb = lm[4], index = lm[8];
       const d = dist(thumb, index);
@@ -400,7 +407,15 @@
       }
 
       status.textContent = `pinch ${d.toFixed(3)} ${pinching ? 'PINCHING' : ''}`;
+    } else if (now - lastSeenAt < TRACKING_GRACE_MS) {
+      // brief dropout (likely AF/AE hunting on a background change) --
+      // hold position and pinch state instead of dropping the model
+      status.textContent = 'reacquiring...';
     } else {
+      if (pinching) {
+        pinching = false;
+        onPinchRelease();
+      }
       status.textContent = 'no hand';
     }
 
