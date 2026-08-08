@@ -282,7 +282,13 @@
           delegate: "GPU"
         },
         runningMode: "VIDEO",
-        numHands: 1
+        numHands: 1,
+        // lowered from the 0.5 defaults -- a hand gripping a physical
+        // object (fingertips partly hidden) is a harder case than the
+        // open, unobstructed hands these defaults assume
+        minHandDetectionConfidence: 0.3,
+        minHandPresenceConfidence: 0.3,
+        minTrackingConfidence: 0.3
       });
 
       const stream = await navigator.mediaDevices.getUserMedia({
