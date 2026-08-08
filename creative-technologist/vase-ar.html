@@ -78,7 +78,7 @@
     <button id="gate-btn">
       <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
     </button>
-    <p>Rear camera + hand tracking. Tap once, then it's hands-free: keep your whole hand in frame and move it up from the disc to shape the vase.</p>
+    <p>Rear camera + hand tracking. Tap once, then it's hands-free: a dashed box marks the disc position -- bring your hand into it to start, then move it up to shape the vase.</p>
   </div>
 
 <script type="importmap">
@@ -166,6 +166,34 @@
   const TOP_MARGIN_FRAC = 0.05; // ceiling of the build zone, as a fraction
                                  // from the top of the screen -- always
                                  // reachable regardless of where you start
+
+  // Fixed trigger zone: the disc and your hand's starting position are
+  // both physically consistent take to take, so instead of anchoring to
+  // "wherever tracking first happens to succeed" (which drifts, gets hit
+  // by resize timing, and can trigger on a stray detection anywhere in
+  // frame), the vase only starts building once your tracked point is
+  // inside this zone. Estimated from your test footage (disc sits
+  // center-left, lower half of frame) -- ADJUST THESE if the drawn
+  // rectangle doesn't line up with your actual disc position.
+  const DISC_ZONE_FRAC = { x0: 0.28, x1: 0.55, y0: 0.55, y1: 0.85 };
+  function inDiscZone(fx, fy) {
+    const xf = fx / window.innerWidth, yf = fy / window.innerHeight;
+    return xf >= DISC_ZONE_FRAC.x0 && xf <= DISC_ZONE_FRAC.x1
+        && yf >= DISC_ZONE_FRAC.y0 && yf <= DISC_ZONE_FRAC.y1;
+  }
+  function drawDiscZone(ctx2d) {
+    const x0 = DISC_ZONE_FRAC.x0 * window.innerWidth;
+    const x1 = DISC_ZONE_FRAC.x1 * window.innerWidth;
+    const y0 = DISC_ZONE_FRAC.y0 * window.innerHeight;
+    const y1 = DISC_ZONE_FRAC.y1 * window.innerHeight;
+    ctx2d.save();
+    ctx2d.strokeStyle = centerXFrac === null ? 'rgba(245,241,232,0.7)' : 'rgba(46,125,50,0.5)';
+    ctx2d.lineWidth = 2;
+    ctx2d.setLineDash([8, 6]);
+    ctx2d.strokeRect(x0, y0, x1 - x0, y1 - y0);
+    ctx2d.restore();
+  }
+
   let profile = new Array(BIN_COUNT).fill(null);
   // Stored as FRACTIONS of window width/height, not raw pixels -- entering
   // fullscreen (triggered on the same tap that starts tracking) can change
@@ -245,16 +273,27 @@
       vaseMesh = new THREE.Mesh(geometry, material);
       vaseGroup.add(vaseMesh);
     }
+  }
 
-    const worldCenter = screenToWorld(centerX, 0);
+  // Runs every single frame, unconditionally -- NOT just while a hand is
+  // being tracked. The old version only updated position.x inside
+  // rebuildVase(), which only runs while tracking succeeds. If the
+  // viewport resizes (fullscreen finishing its transition) while
+  // tracking has dropped out -- which happens constantly -- the camera's
+  // coordinate system moves on but the mesh position was left stale,
+  // and it visibly drifts away from the anchor. This keeps it locked
+  // to the anchor regardless of tracking state or resize timing.
+  function syncVasePosition() {
+    if (centerXFrac === null) return;
+    const worldCenter = screenToWorld(getCenterX(), 0);
     vaseGroup.position.x = worldCenter.x;
   }
 
   function updateProfile(fx, fy) {
     if (centerXFrac === null) {
-      // First tracked touch, wherever it actually is -- this becomes
-      // the base of the vase. No assumption about where the disc "should"
-      // be on screen.
+      if (!inDiscZone(fx, fy)) return; // not over the disc yet, don't anchor on a stray detection
+      // First touch INSIDE the disc zone -- this becomes the base of
+      // the vase, not just wherever tracking happened to first succeed.
       centerXFrac = fx / window.innerWidth;
       baseYFrac = fy / window.innerHeight;
       // Ceiling is always near the actual top of the screen, NOT a fixed
@@ -344,6 +383,7 @@
     }
 
     debugCtx.clearRect(0, 0, debugCanvas.width, debugCanvas.height);
+    drawDiscZone(debugCtx); // white dashed = waiting for you to enter it, green = anchored
 
     if (result.landmarks && result.landmarks.length > 0) {
       lastSeenAt = now;
@@ -375,16 +415,21 @@
 
       updateProfile(sp.x, sp.y);
       rebuildVase();
-      const dbgCx = centerXFrac !== null ? getCenterX().toFixed(0) : '--';
-      const dbgBy = baseYFrac !== null ? getBaseY().toFixed(0) : '--';
-      const dbgTy = topYFrac !== null ? getTopY().toFixed(0) : '--';
-      status.textContent = `tip x:${sp.x.toFixed(0)} y:${sp.y.toFixed(0)} | anchor cx:${dbgCx} baseY:${dbgBy} topY:${dbgTy} | win:${window.innerWidth}x${window.innerHeight}`;
+      if (centerXFrac === null) {
+        status.textContent = inDiscZone(sp.x, sp.y)
+          ? 'over the disc -- hold to anchor'
+          : `tip x:${sp.x.toFixed(0)} y:${sp.y.toFixed(0)} -- move into the dashed zone`;
+      } else {
+        const dbgCx = getCenterX().toFixed(0), dbgBy = getBaseY().toFixed(0), dbgTy = getTopY().toFixed(0);
+        status.textContent = `tip x:${sp.x.toFixed(0)} y:${sp.y.toFixed(0)} | anchor cx:${dbgCx} baseY:${dbgBy} topY:${dbgTy} | win:${window.innerWidth}x${window.innerHeight}`;
+      }
     } else if (now - lastSeenAt < TRACKING_GRACE_MS) {
       status.textContent = 'reacquiring...';
     } else {
       status.textContent = 'no hand';
     }
 
+    syncVasePosition(); // every frame, unconditionally -- see comment above
     render();
     requestAnimationFrame(loop);
   }
