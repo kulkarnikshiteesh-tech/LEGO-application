@@ -369,7 +369,11 @@
       const lm = result.landmarks[0];
       const gestureList = (result.gestures && result.gestures[0]) || [];
       const top = gestureList[0];
-      const isFist = top && top.categoryName === 'Closed_Fist' && top.score >= GESTURE_MIN_SCORE;
+      // Gripping the actual joystick stick reads as Thumb_Up (thumb rides
+      // up along the stick, not tucked into a bare fist) far more often
+      // than Closed_Fist -- accept either as the grab trigger.
+      const GRAB_GESTURES = ['Closed_Fist', 'Thumb_Up'];
+      const isFist = top && GRAB_GESTURES.includes(top.categoryName) && top.score >= GESTURE_MIN_SCORE;
 
       // palm center (wrist + middle-knuckle midpoint) -- stable even
       // when fingers are curled into a fist, unlike a fingertip pair
