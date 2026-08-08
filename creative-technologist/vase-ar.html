@@ -369,7 +369,10 @@
 
       updateProfile(sp.x, sp.y);
       rebuildVase();
-      status.textContent = `tracking  x:${sp.x.toFixed(0)} y:${sp.y.toFixed(0)}`;
+      const dbgCx = centerXFrac !== null ? getCenterX().toFixed(0) : '--';
+      const dbgBy = baseYFrac !== null ? getBaseY().toFixed(0) : '--';
+      const dbgTy = topYFrac !== null ? getTopY().toFixed(0) : '--';
+      status.textContent = `tip x:${sp.x.toFixed(0)} y:${sp.y.toFixed(0)} | anchor cx:${dbgCx} baseY:${dbgBy} topY:${dbgTy} | win:${window.innerWidth}x${window.innerHeight}`;
     } else if (now - lastSeenAt < TRACKING_GRACE_MS) {
       status.textContent = 'reacquiring...';
     } else {
