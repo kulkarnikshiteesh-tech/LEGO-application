@@ -84,7 +84,7 @@
     <button id="gate-btn">
       <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
     </button>
-    <p>Rear camera + hand tracking. Tap once, then it's hands-free: close your hand into a fist around the joystick to grab, open it to drop.</p>
+    <p>Rear camera + hand tracking. Tap once, then it's hands-free: bring your hand into frame near the joystick to pick the model up, move it toward the laptop, then move your hand out of frame to drop it.</p>
   </div>
 
 <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
@@ -232,20 +232,20 @@
     renderer.render(scene, camera);
   }
 
-  // ---- grab detection (Closed_Fist gesture) + follow + drop ----
-  // Three phases: 'idle' (hidden) -> 'growing' (quick pop-in right where
-  // you grab) -> 'following' (tracks your hand every frame while still
-  // gripped) -> 'dropped' (settles with a small bounce on release).
-  const GESTURE_MIN_SCORE = 0.5;
+  // ---- hand PRESENCE (not gesture) drives grab/drop ----
+  // Gesture classification (fist/thumbs-up) proved unreliable for this
+  // setup -- false positives on an open hand, false negatives on a real
+  // grip. Hand presence is much more robust: model follows your hand
+  // whenever the camera can see it, and settles ("drops") once your
+  // hand has been out of frame for longer than the grace window.
+  // Phases: 'idle' (hidden) -> 'growing' (pop-in where your hand first
+  // appears) -> 'following' (tracks every frame) -> 'dropped' (settles
+  // once your hand's been gone past TRACKING_GRACE_MS; re-appearing
+  // your hand picks it back up again).
   const TARGET_SCALE = 1.4;
   const TRACKING_GRACE_MS = 500; // tolerate a brief AF/AE hunting blip
                                   // without treating it as hand-lost
-  const GRAB_CONFIRM_MS = 120; // gesture must hold steady this long before
-                                // it counts as a real grab/release, filters
-                                // single-frame classifier flicker
-  let pinching = false; // true while gripping (name kept for minimal diff)
-  let candidateGrab = null; // pending state we're confirming, or null
-  let candidateSince = 0;
+  let pinching = false; // true while hand is present/tracked (name kept for minimal diff)
   let phase = 'idle';
   let t = 0;
   let lastSeenAt = 0;
@@ -307,7 +307,6 @@
     applyScale();
     model.visible = false;
     pinching = false;
-    candidateGrab = null;
   }
   resetBtn.addEventListener('click', resetAll);
 
@@ -328,9 +327,10 @@
       const delegate = delegateParam === 'gpu' ? 'GPU' : 'CPU';
       status.textContent = `delegate: ${delegate}`;
 
-      // Pretrained gesture classifier instead of a hand-rolled distance
-      // threshold -- Closed_Fist is one of its built-in, trained gesture
-      // classes, far more robust than measuring two fingertip landmarks.
+      // Only using this for its hand landmarks/presence now (gesture
+      // classification turned out unreliable for this setup) -- kept
+      // the GestureRecognizer model since it's already wired up and
+      // returns the same landmarks HandLandmarker would.
       gestureRecognizer = await GestureRecognizer.createFromOptions(vision, {
         baseOptions: {
           modelAssetPath: "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task",
@@ -381,16 +381,9 @@
     if (result.landmarks && result.landmarks.length > 0) {
       lastSeenAt = now;
       const lm = result.landmarks[0];
-      const gestureList = (result.gestures && result.gestures[0]) || [];
-      const top = gestureList[0];
-      // Gripping the actual joystick stick reads as Thumb_Up (thumb rides
-      // up along the stick, not tucked into a bare fist) far more often
-      // than Closed_Fist -- accept either as the grab trigger.
-      const GRAB_GESTURES = ['Closed_Fist', 'Thumb_Up'];
-      const isFist = top && GRAB_GESTURES.includes(top.categoryName) && top.score >= GESTURE_MIN_SCORE;
 
       // palm center (wrist + middle-knuckle midpoint) -- stable even
-      // when fingers are curled into a fist, unlike a fingertip pair
+      // when fingers move around, unlike a fingertip pair
       const wrist = lm[0], midKnuckle = lm[9];
       const palmPt = videoPointToScreen(
         (wrist.x + midKnuckle.x) / 2,
@@ -398,8 +391,7 @@
       );
       const fx = palmPt.x, fy = palmPt.y;
 
-      // draw every landmark so you can see exactly what the camera
-      // sees, and where in frame it starts losing the hand
+      // draw every landmark so you can see exactly what the camera sees
       debugCtx.fillStyle = 'rgba(46, 125, 50, 0.85)';
       for (const p of lm) {
         const sp = videoPointToScreen(p.x, p.y);
@@ -407,32 +399,20 @@
         debugCtx.arc(sp.x, sp.y, 5, 0, Math.PI * 2);
         debugCtx.fill();
       }
-      debugCtx.fillStyle = isFist ? 'rgba(232, 93, 20, 0.95)' : 'rgba(245, 241, 232, 0.95)';
+      debugCtx.fillStyle = 'rgba(232, 93, 20, 0.95)';
       debugCtx.beginPath();
       debugCtx.arc(fx, fy, 9, 0, Math.PI * 2);
       debugCtx.fill();
 
-      // Debounce: a raw reading that disagrees with the current confirmed
-      // state has to hold for GRAB_CONFIRM_MS straight before it commits.
-      // A single flickered frame (classifier noise, motion blur) no
-      // longer flips state on its own.
-      if (isFist !== pinching) {
-        if (candidateGrab !== isFist) {
-          candidateGrab = isFist;
-          candidateSince = now;
-        } else if (now - candidateSince >= GRAB_CONFIRM_MS) {
-          pinching = isFist;
-          candidateGrab = null;
-          if (pinching) startGrab(fx, fy); else releaseGrab();
-        }
+      // Presence alone drives pickup: hand visible = carrying it.
+      if (!pinching) {
+        pinching = true;
+        startGrab(fx, fy);
       } else {
-        candidateGrab = null;
+        updateGrabPosition(fx, fy);
       }
 
-      if (pinching) updateGrabPosition(fx, fy); // track every frame while gripping
-
-      const label = top ? `${top.categoryName} ${top.score.toFixed(2)}` : 'no gesture';
-      status.textContent = `${label} ${pinching ? 'GRIPPING' : ''}`;
+      status.textContent = `hand tracked ${pinching ? 'CARRYING' : ''}`;
     } else if (now - lastSeenAt < TRACKING_GRACE_MS) {
       // brief dropout (likely AF/AE hunting on a background change) --
       // hold position and pinch state instead of dropping the model
@@ -442,7 +422,6 @@
         pinching = false;
         releaseGrab();
       }
-      candidateGrab = null;
       status.textContent = 'no hand';
     }
 
