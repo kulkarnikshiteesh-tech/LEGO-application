@@ -2,51 +2,84 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Vase AR</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html, body {
     height:100%; background:#16181C; overflow:hidden;
     font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
   #cam {
     position:fixed; inset:0; width:100%; height:100%;
-    object-fit:cover; transform:scaleX(-1);
+    object-fit:cover;
+    /* rear camera: no mirror -- what you see is what's actually there */
   }
   #overlay {
     position:fixed; inset:0; width:100%; height:100%;
-    transform:scaleX(-1); /* match mirrored camera so the vase sits where the hand is */
+  }
+  #debug-dots {
+    position:fixed; inset:0; width:100%; height:100%;
+    z-index:15; pointer-events:none;
   }
 
-  #topbar {
-    position:fixed; top:20px; left:0; right:0;
-    display:flex; justify-content:space-between; align-items:center;
-    padding:0 24px; z-index:10;
+  /* ---- pre-start gate, matches the joystick pop-out pattern ---- */
+  #gate {
+    position:fixed; inset:0; z-index:20;
+    background:#16181C;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:18px;
+    transition:opacity .4s ease;
   }
-  button {
-    font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
-    background:#16181C; color:#F5F1E8; border:none;
-    padding:10px 16px; border-radius:6px; cursor:pointer;
+  #gate.hidden { opacity:0; pointer-events:none; }
+  #gate-btn {
+    width:110px; height:110px; border-radius:50%;
+    background:#E85D14; border:none;
+    display:flex; align-items:center; justify-content:center;
   }
-  button.on { background:#2E7D32; }
+  #gate-btn svg { width:40px; height:40px; fill:#16181C; }
+  #gate p {
+    color:#8A8D94; font-size:14px; max-width:280px; text-align:center; line-height:1.5;
+  }
+  #gate.loading #gate-btn { opacity:0.5; }
 
+  #chrome { position:fixed; inset:0; z-index:10; pointer-events:none; }
   #status {
-    position:fixed; bottom:20px; left:20px;
-    color:#F5F1E8; font-size:12px; opacity:0.6; z-index:10;
+    position:fixed; bottom:16px; left:16px;
+    color:#F5F1E8; font-size:11px; opacity:0.55;
   }
+  #reset {
+    position:fixed; top:16px; right:16px;
+    width:36px; height:36px; border-radius:8px;
+    background:rgba(22,24,28,0.55); border:none;
+    display:flex; align-items:center; justify-content:center;
+    pointer-events:auto;
+  }
+  #reset svg { width:18px; height:18px; stroke:#F5F1E8; }
 </style>
 </head>
 <body>
 
   <video id="cam" autoplay playsinline muted></video>
   <canvas id="overlay"></canvas>
+  <canvas id="debug-dots"></canvas>
 
-  <div id="topbar">
-    <button id="start">Start camera</button>
-    <button id="reset">Reset vase</button>
+  <div id="chrome">
+    <div id="status">--</div>
+    <button id="reset" title="Reset (for retakes)">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>
+    </button>
   </div>
-  <div id="status">--</div>
+
+  <div id="gate">
+    <button id="gate-btn">
+      <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <p>Rear camera + hand tracking. Tap once, then it's hands-free: move your fingertip up from the disc to shape the vase.</p>
+  </div>
 
 <script type="module">
   import { HandLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs";
@@ -54,16 +87,36 @@
   const camEl = document.getElementById('cam');
   const canvas = document.getElementById('overlay');
   const ctx = canvas.getContext('2d');
-  const startBtn = document.getElementById('start');
+  const debugCanvas = document.getElementById('debug-dots');
+  const debugCtx = debugCanvas.getContext('2d');
+  const gate = document.getElementById('gate');
+  const gateBtn = document.getElementById('gate-btn');
+  const gateText = gate.querySelector('p');
   const resetBtn = document.getElementById('reset');
   const status = document.getElementById('status');
 
   function resize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    debugCanvas.width = window.innerWidth;
+    debugCanvas.height = window.innerHeight;
   }
   window.addEventListener('resize', resize);
   resize();
+
+  // Same crop-aware mapping as the joystick pop-out: the <video> is
+  // object-fit:cover (cropped/scaled to fill the screen), but landmark
+  // coordinates come back normalized against the RAW camera frame.
+  function videoPointToScreen(nx, ny) {
+    const vw = camEl.videoWidth || window.innerWidth;
+    const vh = camEl.videoHeight || window.innerHeight;
+    const dw = window.innerWidth, dh = window.innerHeight;
+    const scale = Math.max(dw / vw, dh / vh);
+    const renderedW = vw * scale, renderedH = vh * scale;
+    const offsetX = (dw - renderedW) / 2;
+    const offsetY = (dh - renderedH) / 2;
+    return { x: nx * vw * scale + offsetX, y: ny * vh * scale + offsetY };
+  }
 
   // Vase profile: one radius per vertical bin, built bottom-up as the
   // fingertip rises. BASE_Y/TOP_Y define the build zone on screen.
@@ -86,13 +139,11 @@
     if (known.length < 2 || centerX === null) return;
 
     ctx.beginPath();
-    // right edge, bottom to top
     for (const p of known) {
       const y = baseY - (p.i / BIN_COUNT) * (baseY - topY);
       const x = centerX + p.r;
       if (p === known[0]) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     }
-    // left edge, top to bottom
     for (let k = known.length - 1; k >= 0; k--) {
       const p = known[k];
       const y = baseY - (p.i / BIN_COUNT) * (baseY - topY);
@@ -113,7 +164,6 @@
     const t = (baseY - fy) / (baseY - topY); // 0 at base, 1 at top
     const bin = Math.round(Math.max(0, Math.min(1, t)) * (BIN_COUNT - 1));
 
-    // fill from the last known bin up to this one, so fast moves don't gap
     let lastKnown = -1;
     for (let i = bin; i >= 0; i--) { if (profile[i] !== null) { lastKnown = i; break; } }
     if (lastKnown === -1) {
@@ -129,53 +179,103 @@
 
   resetBtn.addEventListener('click', resetVase);
 
+  const TRACKING_GRACE_MS = 500; // tolerate a brief AF/AE hunting blip
   let handLandmarker, running = false;
+  let lastSeenAt = 0;
 
   async function start() {
-    startBtn.textContent = 'Loading model...';
-    const vision = await FilesetResolver.forVisionTasks(
-      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
-    );
-    handLandmarker = await HandLandmarker.createFromOptions(vision, {
-      baseOptions: {
-        modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
-        delegate: "GPU"
-      },
-      runningMode: "VIDEO",
-      numHands: 1
-    });
+    gate.classList.add('loading');
+    gateText.textContent = 'Loading...';
+    try {
+      const vision = await FilesetResolver.forVisionTasks(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+      );
+      // CPU delegate: GPU is known to be flaky on some Android GPUs
+      // in-browser (same lesson as the joystick pop-out). Override
+      // with ?delegate=gpu to A/B test without redeploying.
+      const delegateParam = new URLSearchParams(location.search).get('delegate');
+      const delegate = delegateParam === 'gpu' ? 'GPU' : 'CPU';
+      status.textContent = `delegate: ${delegate}`;
 
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    camEl.srcObject = stream;
-    await new Promise(r => camEl.onloadedmetadata = r);
-    camEl.play();
+      handLandmarker = await HandLandmarker.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+          delegate
+        },
+        runningMode: "VIDEO",
+        numHands: 1,
+        minHandDetectionConfidence: 0.3,
+        minHandPresenceConfidence: 0.3,
+        minTrackingConfidence: 0.3
+      });
 
-    running = true;
-    startBtn.textContent = 'Running';
-    startBtn.classList.add('on');
-    loop();
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
+      });
+      camEl.srcObject = stream;
+      await new Promise(r => camEl.onloadedmetadata = r);
+      camEl.play();
+
+      running = true;
+      gate.classList.add('hidden');
+      loop();
+    } catch (err) {
+      gate.classList.remove('loading');
+      gateText.textContent = 'Failed to start: ' + err.message;
+    }
   }
 
   function loop() {
     if (!running) return;
     const now = performance.now();
-    const result = handLandmarker.detectForVideo(camEl, now);
+    let result;
+    try {
+      result = handLandmarker.detectForVideo(camEl, now);
+    } catch (err) {
+      status.textContent = 'detect error: ' + err.message;
+      requestAnimationFrame(loop);
+      return;
+    }
+
+    debugCtx.clearRect(0, 0, debugCanvas.width, debugCanvas.height);
 
     if (result.landmarks && result.landmarks.length > 0) {
-      const tip = result.landmarks[0][8]; // index fingertip, normalized 0-1
-      const fx = tip.x * canvas.width;
-      const fy = tip.y * canvas.height;
-      updateProfile(fx, fy);
-      status.textContent = `tracking  x:${fx.toFixed(0)} y:${fy.toFixed(0)}`;
+      lastSeenAt = now;
+      const lm = result.landmarks[0];
+      const tip = lm[8]; // index fingertip
+      const sp = videoPointToScreen(tip.x, tip.y);
+
+      debugCtx.fillStyle = 'rgba(46, 125, 50, 0.85)';
+      for (const p of lm) {
+        const dp = videoPointToScreen(p.x, p.y);
+        debugCtx.beginPath();
+        debugCtx.arc(dp.x, dp.y, 5, 0, Math.PI * 2);
+        debugCtx.fill();
+      }
+      debugCtx.fillStyle = 'rgba(232, 93, 20, 0.95)';
+      debugCtx.beginPath();
+      debugCtx.arc(sp.x, sp.y, 9, 0, Math.PI * 2);
+      debugCtx.fill();
+
+      updateProfile(sp.x, sp.y);
+      status.textContent = `tracking  x:${sp.x.toFixed(0)} y:${sp.y.toFixed(0)}`;
+    } else if (now - lastSeenAt < TRACKING_GRACE_MS) {
+      status.textContent = 'reacquiring...';
     } else {
-      status.textContent = 'no hand detected';
+      status.textContent = 'no hand';
     }
 
     drawVase();
     requestAnimationFrame(loop);
   }
 
-  startBtn.addEventListener('click', () => { if (!running) start(); });
+  gateBtn.addEventListener('click', () => {
+    if (running) return;
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+    start();
+  });
 </script>
 </body>
 </html>
