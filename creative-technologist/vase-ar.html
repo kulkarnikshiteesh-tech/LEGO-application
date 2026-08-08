@@ -78,7 +78,7 @@
     <button id="gate-btn">
       <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
     </button>
-    <p>Rear camera + hand tracking. Tap once, then it's hands-free: move your fingertip up from the disc to shape the vase.</p>
+    <p>Rear camera + hand tracking. Tap once, then it's hands-free: keep your whole hand in frame and move it up from the disc to shape the vase.</p>
   </div>
 
 <script type="importmap">
@@ -333,7 +333,9 @@
     if (result.landmarks && result.landmarks.length > 0) {
       lastSeenAt = now;
       const lm = result.landmarks[0];
-      const tip = lm[8]; // index fingertip
+      const tip = lm[18]; // pinky PIP joint (3rd point in from the tip: 20 tip, 19 DIP, 18 PIP)
+                          // -- stays part of the palm shape, more stable than an
+                          // isolated extended fingertip
       const rawSp = videoPointToScreen(tip.x, tip.y);
 
       // Smooth the fingertip position itself, not just the resulting
