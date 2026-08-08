@@ -255,6 +255,9 @@
   let phase = 'idle';
   let t = 0;
   let lastSeenAt = 0;
+  let delivered = false; // true once the real drop has fired -- stops the
+                          // model popping back up if your hand re-enters
+                          // frame later in a continuous, uncut recording
 
   function applyScale(mult = 1) {
     const factor = model.userData.baseScale || 1;
@@ -277,6 +280,11 @@
       // re-grabbing after a drop -- already visible/full-size, just
       // resume tracking instead of re-running the pop-in animation
       phase = 'following';
+    } else if (phase === 'fading') {
+      // caught it mid-fade -- snap back to full size and resume
+      currentScale = TARGET_SCALE;
+      applyScale();
+      phase = 'following';
     }
   }
 
@@ -284,6 +292,7 @@
     if (phase === 'growing' || phase === 'following') {
       phase = 'dropped';
       t = 0;
+      delivered = true; // no more pickups after this -- one drop per take
       RemoteTrigger.fire(); // tells the laptop to build the interface in
     }
   }
@@ -303,6 +312,18 @@
       const squash = Math.sin(Math.min(t, 1) * Math.PI) * Math.exp(-t * 2.5);
       currentScale = TARGET_SCALE;
       applyScale(1 + squash * 0.15); // small landing bounce, then settles flat
+      if (t >= 1.5) { phase = 'fading'; t = 0; } // bounce settled, start the fade-out
+    } else if (phase === 'fading') {
+      t += 0.025;
+      const p = Math.min(1, t);
+      currentScale = TARGET_SCALE * (1 - p); // shrink away rather than relying on material opacity
+      applyScale();
+      model.position.y += 0.6; // drift gently upward as it disappears
+      if (p >= 1) {
+        model.visible = false;
+        phase = 'idle';
+        currentScale = 0;
+      }
     }
   }
 
@@ -313,6 +334,7 @@
     applyScale();
     model.visible = false;
     pinching = false;
+    delivered = false;
   }
   resetBtn.addEventListener('click', resetAll);
 
@@ -411,14 +433,18 @@
       debugCtx.fill();
 
       // Presence alone drives pickup: hand visible = carrying it.
-      if (!pinching) {
-        pinching = true;
-        startGrab(fx, fy);
-      } else {
-        updateGrabPosition(fx, fy);
+      // Skipped entirely once delivered -- one drop per take, so your
+      // hand re-entering frame later doesn't pop the model back up.
+      if (!delivered) {
+        if (!pinching) {
+          pinching = true;
+          startGrab(fx, fy);
+        } else {
+          updateGrabPosition(fx, fy);
+        }
       }
 
-      status.textContent = `hand tracked, phase=${phase}`;
+      status.textContent = `hand tracked, phase=${phase}, delivered=${delivered}`;
     } else if (now - lastSeenAt < TRACKING_GRACE_MS) {
       // brief dropout (likely AF/AE hunting on a background change) --
       // hold position and pinch state instead of dropping the model
