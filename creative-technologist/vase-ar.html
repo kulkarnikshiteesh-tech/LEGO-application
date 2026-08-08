@@ -163,9 +163,9 @@
   // bottom-up as the fingertip rises. Revolved into a real 3D lathe
   // mesh each frame, not a flat 2D fill.
   const BIN_COUNT = 140;
-  const BUILD_HEIGHT_PX_FRACTION = 0.7; // how far up from your actual
-                                          // starting point you can build,
-                                          // as a fraction of screen height
+  const TOP_MARGIN_FRAC = 0.05; // ceiling of the build zone, as a fraction
+                                 // from the top of the screen -- always
+                                 // reachable regardless of where you start
   let profile = new Array(BIN_COUNT).fill(null);
   // Stored as FRACTIONS of window width/height, not raw pixels -- entering
   // fullscreen (triggered on the same tap that starts tracking) can change
@@ -257,7 +257,13 @@
       // be on screen.
       centerXFrac = fx / window.innerWidth;
       baseYFrac = fy / window.innerHeight;
-      topYFrac = (fy - window.innerHeight * BUILD_HEIGHT_PX_FRACTION) / window.innerHeight;
+      // Ceiling is always near the actual top of the screen, NOT a fixed
+      // height above the start point -- a fixed height could (and did)
+      // land above the visible frame if your hand starts partway down,
+      // making part of the range physically unreachable. This way the
+      // full bin range always maps to your full actual available travel,
+      // wherever you happen to start.
+      topYFrac = TOP_MARGIN_FRAC;
     }
     const centerX = getCenterX(), baseY = getBaseY(), topY = getTopY();
     const radius = Math.abs(fx - centerX);
