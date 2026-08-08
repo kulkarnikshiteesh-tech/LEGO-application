@@ -15,7 +15,7 @@
     object-fit:cover;
     /* rear camera: no mirror -- what you see is what's actually there */
   }
-  #overlay {
+  #three-canvas {
     position:fixed; inset:0; width:100%; height:100%;
   }
   #debug-dots {
@@ -61,7 +61,7 @@
 <body>
 
   <video id="cam" autoplay playsinline muted></video>
-  <canvas id="overlay"></canvas>
+  <canvas id="three-canvas"></canvas>
   <canvas id="debug-dots"></canvas>
 
   <div id="chrome">
@@ -81,12 +81,15 @@
     <p>Rear camera + hand tracking. Tap once, then it's hands-free: move your fingertip up from the disc to shape the vase.</p>
   </div>
 
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js" } }
+</script>
 <script type="module">
+  import * as THREE from "three";
   import { HandLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs";
 
   const camEl = document.getElementById('cam');
-  const canvas = document.getElementById('overlay');
-  const ctx = canvas.getContext('2d');
+  const canvasEl = document.getElementById('three-canvas');
   const debugCanvas = document.getElementById('debug-dots');
   const debugCtx = debugCanvas.getContext('2d');
   const gate = document.getElementById('gate');
@@ -95,18 +98,52 @@
   const resetBtn = document.getElementById('reset');
   const status = document.getElementById('status');
 
+  // ---- three.js scene, orthographic camera mapped 1:1 to screen pixels
+  // (same pattern as the joystick pop-out) so the lathe sits exactly
+  // where your fingertip is. ----
+  const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, alpha: true, antialias: true });
+  const scene = new THREE.Scene();
+  let camera;
+
+  function makeCamera() {
+    const w = window.innerWidth, h = window.innerHeight;
+    camera = new THREE.OrthographicCamera(-w / 2, w / 2, h / 2, -h / 2, 0.1, 2000);
+    camera.position.z = 500;
+  }
+
   function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    makeCamera();
     debugCanvas.width = window.innerWidth;
     debugCanvas.height = window.innerHeight;
   }
   window.addEventListener('resize', resize);
   resize();
 
-  // Same crop-aware mapping as the joystick pop-out: the <video> is
-  // object-fit:cover (cropped/scaled to fill the screen), but landmark
-  // coordinates come back normalized against the RAW camera frame.
+  scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+  const keyLight = new THREE.DirectionalLight(0xfff4e6, 0.9);
+  keyLight.position.set(1, 1, 1.5);
+  scene.add(keyLight);
+  const rimLight = new THREE.DirectionalLight(0xe85d14, 0.35);
+  rimLight.position.set(-1, 0.3, -1);
+  scene.add(rimLight);
+
+  const vaseGroup = new THREE.Group();
+  scene.add(vaseGroup);
+  let vaseMesh = null;
+  const CLAY_COLOR = 0xC7A97C; // warm stoneware tan, not terracotta
+
+  function screenToWorld(x, y) {
+    return { x: x - window.innerWidth / 2, y: -(y - window.innerHeight / 2) };
+  }
+
+  function render() {
+    vaseGroup.rotation.y += 0.006; // slow turntable spin, reads as "on the wheel"
+    renderer.render(scene, camera);
+  }
+
+  // Same crop-aware mapping as the joystick pop-out.
   function videoPointToScreen(nx, ny) {
     const vw = camEl.videoWidth || window.innerWidth;
     const vh = camEl.videoHeight || window.innerHeight;
@@ -118,8 +155,9 @@
     return { x: nx * vw * scale + offsetX, y: ny * vh * scale + offsetY };
   }
 
-  // Vase profile: one radius per vertical bin, built bottom-up as the
-  // fingertip rises. BASE_Y/TOP_Y define the build zone on screen.
+  // Vase profile: one radius per vertical bin (screen pixels), built
+  // bottom-up as the fingertip rises. Revolved into a real 3D lathe
+  // mesh each frame, not a flat 2D fill.
   const BIN_COUNT = 140;
   let profile = new Array(BIN_COUNT).fill(null);
   let centerX = null;
@@ -128,34 +166,46 @@
   function resetVase() {
     profile = new Array(BIN_COUNT).fill(null);
     centerX = null;
-    baseY = canvas.height * 0.92;
-    topY = canvas.height * 0.12;
+    baseY = window.innerHeight * 0.92;
+    topY = window.innerHeight * 0.12;
+    if (vaseMesh) {
+      vaseGroup.remove(vaseMesh);
+      vaseMesh.geometry.dispose();
+      vaseMesh.material.dispose();
+      vaseMesh = null;
+    }
   }
   resetVase();
 
-  function drawVase() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  function rebuildVase() {
     const known = profile.map((r, i) => ({ r, i })).filter(p => p.r !== null);
     if (known.length < 2 || centerX === null) return;
 
-    ctx.beginPath();
-    for (const p of known) {
-      const y = baseY - (p.i / BIN_COUNT) * (baseY - topY);
-      const x = centerX + p.r;
-      if (p === known[0]) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    // LatheGeometry points: local (radius, height), bottom to top.
+    // Radius floor keeps the base from pinching to a zero-width point.
+    const points = known.map(p => {
+      const worldY = screenToWorld(centerX, baseY - (p.i / BIN_COUNT) * (baseY - topY)).y;
+      return new THREE.Vector2(Math.max(6, p.r), worldY);
+    });
+
+    const geometry = new THREE.LatheGeometry(points, 32);
+
+    if (vaseMesh) {
+      vaseMesh.geometry.dispose();
+      vaseMesh.geometry = geometry;
+    } else {
+      const material = new THREE.MeshStandardMaterial({
+        color: CLAY_COLOR,
+        roughness: 0.85,
+        metalness: 0.05,
+        side: THREE.DoubleSide,
+      });
+      vaseMesh = new THREE.Mesh(geometry, material);
+      vaseGroup.add(vaseMesh);
     }
-    for (let k = known.length - 1; k >= 0; k--) {
-      const p = known[k];
-      const y = baseY - (p.i / BIN_COUNT) * (baseY - topY);
-      const x = centerX - p.r;
-      ctx.lineTo(x, y);
-    }
-    ctx.closePath();
-    ctx.fillStyle = 'rgba(227, 185, 138, 0.88)'; // warm sand, matches the palette
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(58, 46, 0, 0.35)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+
+    const worldCenter = screenToWorld(centerX, 0);
+    vaseGroup.position.x = worldCenter.x;
   }
 
   function updateProfile(fx, fy) {
@@ -258,6 +308,7 @@
       debugCtx.fill();
 
       updateProfile(sp.x, sp.y);
+      rebuildVase();
       status.textContent = `tracking  x:${sp.x.toFixed(0)} y:${sp.y.toFixed(0)}`;
     } else if (now - lastSeenAt < TRACKING_GRACE_MS) {
       status.textContent = 'reacquiring...';
@@ -265,7 +316,7 @@
       status.textContent = 'no hand';
     }
 
-    drawVase();
+    render();
     requestAnimationFrame(loop);
   }
 
