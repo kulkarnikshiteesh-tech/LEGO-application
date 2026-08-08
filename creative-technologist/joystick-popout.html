@@ -18,6 +18,10 @@
   #three-canvas {
     position:fixed; inset:0; width:100%; height:100%;
   }
+  #debug-dots {
+    position:fixed; inset:0; width:100%; height:100%;
+    z-index:15; pointer-events:none;
+  }
 
   /* ---- pre-start gate: big touch target, both hands are busy once running ---- */
   #gate {
@@ -64,6 +68,7 @@
 
   <video id="cam" autoplay playsinline muted></video>
   <canvas id="three-canvas"></canvas>
+  <canvas id="debug-dots"></canvas>
 
   <div id="chrome">
     <div id="status">--</div>
@@ -94,6 +99,8 @@
 
   const camEl = document.getElementById('cam');
   const canvasEl = document.getElementById('three-canvas');
+  const debugCanvas = document.getElementById('debug-dots');
+  const debugCtx = debugCanvas.getContext('2d');
   const gate = document.getElementById('gate');
   const gateBtn = document.getElementById('gate-btn');
   const gateText = gate.querySelector('p');
@@ -117,6 +124,28 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     makeCamera();
+    debugCanvas.width = window.innerWidth;
+    debugCanvas.height = window.innerHeight;
+  }
+
+  // The <video> is object-fit:cover, so the on-screen image is a CROPPED,
+  // scaled view of the raw camera frame. Landmark coordinates come back
+  // normalized (0-1) against the RAW frame, not the cropped display -- so
+  // they need to go through this same crop math or they land in the
+  // wrong place (and by enough that a hand near the crop edge can look
+  // "lost" even though it's still fine in the raw frame).
+  function videoPointToScreen(nx, ny) {
+    const vw = camEl.videoWidth || window.innerWidth;
+    const vh = camEl.videoHeight || window.innerHeight;
+    const dw = window.innerWidth, dh = window.innerHeight;
+    const scale = Math.max(dw / vw, dh / vh);
+    const renderedW = vw * scale, renderedH = vh * scale;
+    const offsetX = (dw - renderedW) / 2;
+    const offsetY = (dh - renderedH) / 2;
+    return {
+      x: nx * vw * scale + offsetX,
+      y: ny * vh * scale + offsetY,
+    };
   }
   window.addEventListener('resize', resize);
   resize();
@@ -332,14 +361,33 @@
       return;
     }
 
+    debugCtx.clearRect(0, 0, debugCanvas.width, debugCanvas.height);
+
     if (result.landmarks && result.landmarks.length > 0) {
       const lm = result.landmarks[0];
       const thumb = lm[4], index = lm[8];
       const d = dist(thumb, index);
 
-      // rear camera is NOT mirrored, so map coordinates directly
-      const fx = ((thumb.x + index.x) / 2) * window.innerWidth;
-      const fy = ((thumb.y + index.y) / 2) * window.innerHeight;
+      // rear camera is NOT mirrored, and this accounts for the
+      // object-fit:cover crop between raw video and display
+      const thumbPt = videoPointToScreen(thumb.x, thumb.y);
+      const indexPt = videoPointToScreen(index.x, index.y);
+      const fx = (thumbPt.x + indexPt.x) / 2;
+      const fy = (thumbPt.y + indexPt.y) / 2;
+
+      // draw every landmark so you can see exactly what the camera
+      // sees, and where in frame it starts losing the hand
+      debugCtx.fillStyle = 'rgba(46, 125, 50, 0.85)';
+      for (const p of lm) {
+        const sp = videoPointToScreen(p.x, p.y);
+        debugCtx.beginPath();
+        debugCtx.arc(sp.x, sp.y, 5, 0, Math.PI * 2);
+        debugCtx.fill();
+      }
+      debugCtx.fillStyle = pinching ? 'rgba(232, 93, 20, 0.95)' : 'rgba(245, 241, 232, 0.95)';
+      debugCtx.beginPath();
+      debugCtx.arc(fx, fy, 9, 0, Math.PI * 2);
+      debugCtx.fill();
 
       if (!pinching && d < PINCH_ON_DIST) {
         pinching = true;
