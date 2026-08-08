@@ -8,44 +8,56 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   html, body {
     height:100%;
-    background:#F5F1E8;
+    background:#0B0C0E;
     font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  /* ---- bounded app card, not full screen ---- */
+  #app {
+    position:relative;
+    width:min(980px, 92vw);
+    height:min(680px, 88vh);
+    background:#F5F1E8;
+    border-radius:20px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
     overflow:hidden;
   }
 
   #stage {
-    position:fixed; inset:0;
+    position:absolute; inset:0;
     display:flex; align-items:center; justify-content:center;
   }
 
   /* ---- top bar ---- */
   #topbar {
-    position:fixed; top:20px; left:0; right:0;
+    position:absolute; top:18px; left:0; right:0;
     display:flex; justify-content:space-between; align-items:center;
-    padding:0 24px;
+    padding:0 20px;
     z-index:10;
   }
   #connect {
-    font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+    font-size:11px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
     background:#16181C; color:#F5F1E8; border:none;
-    padding:10px 16px; border-radius:6px; cursor:pointer;
+    padding:9px 14px; border-radius:6px; cursor:pointer;
   }
   #connect.connected { background:#2E7D32; }
   #refresh {
-    width:40px; height:40px; border-radius:8px;
+    width:36px; height:36px; border-radius:8px;
     background:#16181C; border:none; cursor:pointer;
     display:flex; align-items:center; justify-content:center;
   }
-  #refresh svg { width:20px; height:20px; stroke:#F5F1E8; }
+  #refresh svg { width:18px; height:18px; stroke:#F5F1E8; }
 
   /* ---- cross layout ---- */
   #cross {
     position:relative;
-    width:640px; height:640px;
+    width:460px; height:460px;
   }
   .brick {
     position:absolute;
-    width:230px; height:230px;
+    width:165px; height:165px;
     border:none; background:none; cursor:pointer;
     padding:0;
     transition: transform .12s ease, filter .12s ease;
@@ -53,13 +65,13 @@
   .brick img { width:100%; height:100%; object-fit:contain; display:block; }
   .brick:active, .brick.pressed {
     transform: scale(0.94);
-    filter: drop-shadow(0 0 14px rgba(232,93,20,0.55));
+    filter: drop-shadow(0 0 12px rgba(232,93,20,0.55));
   }
 
-  #up    { top:6px;    left:50%; transform:translateX(-50%); }
-  #down  { bottom:6px; left:50%; transform:translateX(-50%); }
-  #left  { left:6px;   top:50%;  transform:translateY(-50%); }
-  #right { right:6px;  top:50%;  transform:translateY(-50%); }
+  #up    { top:2px;    left:50%; transform:translateX(-50%); }
+  #down  { bottom:2px; left:50%; transform:translateX(-50%); }
+  #left  { left:2px;   top:50%;  transform:translateY(-50%); }
+  #right { right:2px;  top:50%;  transform:translateY(-50%); }
 
   #up.pressed    { transform:translateX(-50%) scale(0.94); }
   #down.pressed  { transform:translateX(-50%) scale(0.94); }
@@ -70,7 +82,7 @@
   #minifig-wrap {
     position:absolute; top:50%; left:50%;
     transform: translate(-50%, -50%);
-    width:170px; height:170px;
+    width:120px; height:120px;
     z-index:5;
     cursor:pointer; /* click = simulated JOY:CLICK, for rehearsal without hardware */
   }
@@ -81,68 +93,89 @@
 
   /* ---- caption plate ---- */
   #caption {
-    position:fixed; left:50%; bottom:56px; transform:translateX(-50%);
-    max-width:640px; width:90%;
+    position:absolute; left:50%; bottom:24px; transform:translateX(-50%);
+    max-width:88%; width:auto;
     background:#16181C; color:#F5F1E8;
-    padding:20px 26px; border-radius:10px;
-    font-size:18px; font-weight:500; letter-spacing:-0.01em;
+    padding:14px 20px; border-radius:10px;
+    font-size:15px; font-weight:500; letter-spacing:-0.01em;
     text-align:center;
     opacity:0; pointer-events:none;
-    transition: opacity .3s ease, transform .3s ease;
+    transition: opacity .3s ease;
+    z-index:10;
   }
-  #caption.visible { opacity:1; transform:translateX(-50%) translateY(0); }
+  #caption.visible { opacity:1; }
 
-  /* ---- dismantle / core state ---- */
+  /* ---- dismantle ---- */
   #cross.dismantled .brick {
     transition: transform .6s ease, opacity .6s ease;
     opacity:0;
   }
-  #cross.dismantled #up    { transform: translateX(-50%) translateY(-360px); }
-  #cross.dismantled #down  { transform: translateX(-50%) translateY(360px); }
-  #cross.dismantled #left  { transform: translateY(-50%) translateX(-360px); }
-  #cross.dismantled #right { transform: translateY(-50%) translateX(360px); }
+  #cross.dismantled #up    { transform: translateX(-50%) translateY(-260px); }
+  #cross.dismantled #down  { transform: translateX(-50%) translateY(260px); }
+  #cross.dismantled #left  { transform: translateY(-50%) translateX(-260px); }
+  #cross.dismantled #right { transform: translateY(-50%) translateX(260px); }
 
-  #core-line {
-    position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(0.8);
-    font-size:clamp(28px, 4.5vw, 46px);
-    font-weight:700; letter-spacing:-0.01em;
-    color:#16181C;
-    opacity:0;
-    text-align:center;
-    transition: opacity .5s ease .4s, transform .5s ease .4s;
+  /* ---- maker reveal: full photo, text overlaid on it ---- */
+  #maker-reveal {
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none;
+    transition: opacity .5s ease .3s;
     z-index:6;
-    pointer-events:none;
   }
-  #core-line.visible { opacity:1; transform:translate(-50%,-50%) scale(1); }
+  #maker-reveal.visible { opacity:1; }
+  #maker-reveal img {
+    width:100%; height:100%; object-fit:cover;
+    display:block;
+  }
+  #maker-reveal .scrim {
+    position:absolute; left:0; right:0; bottom:0; height:42%;
+    background:linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0));
+  }
+  #maker-reveal .line {
+    position:absolute; left:0; right:0; bottom:28px;
+    text-align:center;
+    color:#F5F1E8;
+    font-size:clamp(22px, 3.4vw, 34px);
+    font-weight:700; letter-spacing:-0.01em;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
 </style>
 </head>
 <body>
 
-  <div id="topbar">
-    <button id="connect">Connect Joystick</button>
-    <button id="refresh" title="Reset (for retakes)">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
-        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-      </svg>
-    </button>
-  </div>
+  <div id="app">
+    <div id="topbar">
+      <button id="connect">Connect Joystick</button>
+      <button id="refresh" title="Reset (for retakes)">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+      </button>
+    </div>
 
-  <div id="stage">
-    <div id="cross">
-      <button class="brick" id="up"    data-dir="up">   <img src="./assets/lego_yellow.png" alt=""></button>
-      <button class="brick" id="right" data-dir="right"><img src="./assets/lego_red.png" alt=""></button>
-      <button class="brick" id="down"  data-dir="down"> <img src="./assets/lego_blue.png" alt=""></button>
-      <button class="brick" id="left"  data-dir="left"> <img src="./assets/lego_green.png" alt=""></button>
+    <div id="stage">
+      <div id="cross">
+        <button class="brick" id="up"    data-dir="up">   <img src="./assets/lego_yellow.png" alt=""></button>
+        <button class="brick" id="right" data-dir="right"><img src="./assets/lego_red.png" alt=""></button>
+        <button class="brick" id="down"  data-dir="down"> <img src="./assets/lego_blue.png" alt=""></button>
+        <button class="brick" id="left"  data-dir="left"> <img src="./assets/lego_green.png" alt=""></button>
 
-      <div id="minifig-wrap">
-        <img id="minifig-img" src="./assets/minifig_default.png" alt="">
+        <div id="minifig-wrap">
+          <img id="minifig-img" src="./assets/minifig_default.png" alt="">
+        </div>
       </div>
     </div>
-  </div>
 
-  <div id="caption"></div>
-  <div id="core-line">AT THE CORE<br>I AM A MAKER</div>
+    <div id="caption"></div>
+
+    <div id="maker-reveal">
+      <img src="./assets/minifig_maker.png" alt="">
+      <div class="scrim"></div>
+      <div class="line">AT THE CORE, I AM A MAKER.</div>
+    </div>
+  </div>
 
 <script src="./serial-hub.js"></script>
 <script>
@@ -167,7 +200,7 @@
   const cross = document.getElementById('cross');
   const minifigImg = document.getElementById('minifig-img');
   const caption = document.getElementById('caption');
-  const coreLine = document.getElementById('core-line');
+  const makerReveal = document.getElementById('maker-reveal');
   const connectBtn = document.getElementById('connect');
   const refreshBtn = document.getElementById('refresh');
 
@@ -200,14 +233,14 @@
     cross.classList.add('dismantled');
     caption.classList.remove('visible');
     document.getElementById('minifig-wrap').style.opacity = '0';
-    coreLine.classList.add('visible');
+    makerReveal.classList.add('visible');
   }
 
   function reset() {
     dismantled = false;
     cross.classList.remove('dismantled');
     document.getElementById('minifig-wrap').style.opacity = '1';
-    coreLine.classList.remove('visible');
+    makerReveal.classList.remove('visible');
     clearDirection();
   }
 
