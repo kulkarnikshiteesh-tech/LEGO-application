@@ -72,6 +72,7 @@
 
   <div id="chrome">
     <div id="status">--</div>
+    <div id="mqtt-status" style="position:fixed; bottom:36px; left:16px; color:#F5F1E8; font-size:11px; opacity:0.55;">signal: --</div>
     <button id="reset" title="Reset (for retakes)">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
@@ -107,6 +108,11 @@
   const chromeEl = document.getElementById('chrome');
   const resetBtn = document.getElementById('reset');
   const status = document.getElementById('status');
+  const mqttStatusEl = document.getElementById('mqtt-status');
+  window.addEventListener('remote-trigger-status', (e) => {
+    mqttStatusEl.textContent = 'signal: ' + e.detail;
+  });
+  RemoteTrigger.preconnect(); // connect early so status is known before the drop happens
 
   // ---- three.js scene, orthographic camera mapped 1:1 to screen pixels ----
   // so the model can be placed exactly under the pinch point.
@@ -412,17 +418,17 @@
         updateGrabPosition(fx, fy);
       }
 
-      status.textContent = `hand tracked ${pinching ? 'CARRYING' : ''}`;
+      status.textContent = `hand tracked, phase=${phase}`;
     } else if (now - lastSeenAt < TRACKING_GRACE_MS) {
       // brief dropout (likely AF/AE hunting on a background change) --
       // hold position and pinch state instead of dropping the model
-      status.textContent = 'reacquiring...';
+      status.textContent = `reacquiring... phase=${phase}`;
     } else {
       if (pinching) {
         pinching = false;
         releaseGrab();
       }
-      status.textContent = 'no hand';
+      status.textContent = `no hand, phase=${phase}`;
     }
 
     tickPopAnim();

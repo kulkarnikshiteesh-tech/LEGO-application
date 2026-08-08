@@ -243,6 +243,10 @@
   RemoteTrigger.onTrigger(playEntrance);
   testSignalBtn.addEventListener('click', playEntrance); // rehearsal without the phone
 
+  window.addEventListener('remote-trigger-status', (e) => {
+    waitingLabel.textContent = `waiting for drop signal... (${e.detail})`;
+  });
+
   function pointAt(dir) {
     minifigImg.src = MINIFIG_IMG[dir || 'default'];
   }
