@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Joystick — LEGO Digital Play</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body {
+    height:100%;
+    background:#F5F1E8;
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow:hidden;
+  }
+
+  #stage {
+    position:fixed; inset:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  /* ---- top bar ---- */
+  #topbar {
+    position:fixed; top:20px; left:0; right:0;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:0 24px;
+    z-index:10;
+  }
+  #connect {
+    font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+    background:#16181C; color:#F5F1E8; border:none;
+    padding:10px 16px; border-radius:6px; cursor:pointer;
+  }
+  #connect.connected { background:#2E7D32; }
+  #refresh {
+    width:40px; height:40px; border-radius:8px;
+    background:#16181C; border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  #refresh svg { width:20px; height:20px; stroke:#F5F1E8; }
+
+  /* ---- cross layout ---- */
+  #cross {
+    position:relative;
+    width:640px; height:640px;
+  }
+  .brick {
+    position:absolute;
+    width:230px; height:230px;
+    border:none; background:none; cursor:pointer;
+    padding:0;
+    transition: transform .12s ease, filter .12s ease;
+  }
+  .brick img { width:100%; height:100%; object-fit:contain; display:block; }
+  .brick:active, .brick.pressed {
+    transform: scale(0.94);
+    filter: drop-shadow(0 0 14px rgba(232,93,20,0.55));
+  }
+
+  #up    { top:6px;    left:50%; transform:translateX(-50%); }
+  #down  { bottom:6px; left:50%; transform:translateX(-50%); }
+  #left  { left:6px;   top:50%;  transform:translateY(-50%); }
+  #right { right:6px;  top:50%;  transform:translateY(-50%); }
+
+  #up.pressed    { transform:translateX(-50%) scale(0.94); }
+  #down.pressed  { transform:translateX(-50%) scale(0.94); }
+  #left.pressed  { transform:translateY(-50%) scale(0.94); }
+  #right.pressed { transform:translateY(-50%) scale(0.94); }
+
+  /* ---- minifigure, center ---- */
+  #minifig-wrap {
+    position:absolute; top:50%; left:50%;
+    transform: translate(-50%, -50%);
+    width:170px; height:170px;
+    z-index:5;
+    cursor:pointer; /* click = simulated JOY:CLICK, for rehearsal without hardware */
+  }
+  #minifig-wrap img {
+    width:100%; height:100%; object-fit:contain;
+    transition: opacity .25s ease;
+  }
+
+  /* ---- caption plate ---- */
+  #caption {
+    position:fixed; left:50%; bottom:56px; transform:translateX(-50%);
+    max-width:640px; width:90%;
+    background:#16181C; color:#F5F1E8;
+    padding:20px 26px; border-radius:10px;
+    font-size:18px; font-weight:500; letter-spacing:-0.01em;
+    text-align:center;
+    opacity:0; pointer-events:none;
+    transition: opacity .3s ease, transform .3s ease;
+  }
+  #caption.visible { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* ---- dismantle / core state ---- */
+  #cross.dismantled .brick {
+    transition: transform .6s ease, opacity .6s ease;
+    opacity:0;
+  }
+  #cross.dismantled #up    { transform: translateX(-50%) translateY(-360px); }
+  #cross.dismantled #down  { transform: translateX(-50%) translateY(360px); }
+  #cross.dismantled #left  { transform: translateY(-50%) translateX(-360px); }
+  #cross.dismantled #right { transform: translateY(-50%) translateX(360px); }
+
+  #core-line {
+    position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(0.8);
+    font-size:clamp(28px, 4.5vw, 46px);
+    font-weight:700; letter-spacing:-0.01em;
+    color:#16181C;
+    opacity:0;
+    text-align:center;
+    transition: opacity .5s ease .4s, transform .5s ease .4s;
+    z-index:6;
+    pointer-events:none;
+  }
+  #core-line.visible { opacity:1; transform:translate(-50%,-50%) scale(1); }
+</style>
+</head>
+<body>
+
+  <div id="topbar">
+    <button id="connect">Connect Joystick</button>
+    <button id="refresh" title="Reset (for retakes)">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>
+    </button>
+  </div>
+
+  <div id="stage">
+    <div id="cross">
+      <button class="brick" id="up"    data-dir="up">   <img src="./assets/lego_yellow.png" alt=""></button>
+      <button class="brick" id="right" data-dir="right"><img src="./assets/lego_red.png" alt=""></button>
+      <button class="brick" id="down"  data-dir="down"> <img src="./assets/lego_blue.png" alt=""></button>
+      <button class="brick" id="left"  data-dir="left"> <img src="./assets/lego_green.png" alt=""></button>
+
+      <div id="minifig-wrap">
+        <img id="minifig-img" src="./assets/minifig_default.png" alt="">
+      </div>
+    </div>
+  </div>
+
+  <div id="caption"></div>
+  <div id="core-line">AT THE CORE<br>I AM A MAKER</div>
+
+<script src="./serial-hub.js"></script>
+<script>
+  const COPY = {
+    up:    "I am an Industrial / Product Designer and a Mechanical Engineer.",
+    right: "I am Head of Product and Design at OIMake, a DIY tech toy brand in India.",
+    down:  "I am an early stage entrepreneur.",
+    left:  "I am building Makeable, to help people with DFM for injection moulded parts, and its correct costing."
+  };
+
+  // The generated minifig_left/minifig_right poses point the OPPOSITE
+  // way their filenames suggest (arm extended toward the other side of
+  // frame) -- mapped here by what they actually show, not their names.
+  const MINIFIG_IMG = {
+    up:      './assets/minifig_up.png',
+    down:    './assets/minifig_down.png',
+    left:    './assets/minifig_right.png', // shows arm pointing screen-left
+    right:   './assets/minifig_left.png',  // shows arm pointing screen-right
+    default: './assets/minifig_default.png',
+  };
+
+  const cross = document.getElementById('cross');
+  const minifigImg = document.getElementById('minifig-img');
+  const caption = document.getElementById('caption');
+  const coreLine = document.getElementById('core-line');
+  const connectBtn = document.getElementById('connect');
+  const refreshBtn = document.getElementById('refresh');
+
+  let dismantled = false;
+
+  function pointAt(dir) {
+    minifigImg.src = MINIFIG_IMG[dir || 'default'];
+  }
+
+  function showDirection(dir) {
+    if (dismantled) return;
+    document.querySelectorAll('.brick').forEach(b => b.classList.remove('pressed'));
+    const btn = document.querySelector(`.brick[data-dir="${dir}"]`);
+    if (btn) btn.classList.add('pressed');
+    pointAt(dir);
+    caption.textContent = COPY[dir];
+    caption.classList.add('visible');
+  }
+
+  function clearDirection() {
+    if (dismantled) return;
+    document.querySelectorAll('.brick').forEach(b => b.classList.remove('pressed'));
+    pointAt(null);
+    caption.classList.remove('visible');
+  }
+
+  function dismantle() {
+    if (dismantled) return;
+    dismantled = true;
+    cross.classList.add('dismantled');
+    caption.classList.remove('visible');
+    document.getElementById('minifig-wrap').style.opacity = '0';
+    coreLine.classList.add('visible');
+  }
+
+  function reset() {
+    dismantled = false;
+    cross.classList.remove('dismantled');
+    document.getElementById('minifig-wrap').style.opacity = '1';
+    coreLine.classList.remove('visible');
+    clearDirection();
+  }
+
+  // mouse/touch fallback, also useful for rehearsal without hardware
+  document.querySelectorAll('.brick').forEach(b => {
+    b.addEventListener('click', () => showDirection(b.dataset.dir));
+  });
+
+  refreshBtn.addEventListener('click', reset);
+  document.getElementById('minifig-wrap').addEventListener('click', dismantle); // rehearsal without hardware
+
+  window.addEventListener('serial-msg', (e) => {
+    const msg = e.detail;
+    if (msg === 'JOY:UP') showDirection('up');
+    else if (msg === 'JOY:DOWN') showDirection('down');
+    else if (msg === 'JOY:LEFT') showDirection('left');
+    else if (msg === 'JOY:RIGHT') showDirection('right');
+    else if (msg === 'JOY:CENTER') clearDirection();
+    else if (msg === 'JOY:CLICK') dismantle();
+  });
+
+  window.addEventListener('serial-status', (e) => {
+    if (e.detail === 'connected') {
+      connectBtn.textContent = 'Connected';
+      connectBtn.classList.add('connected');
+    } else if (e.detail === 'disconnected' || e.detail === 'error') {
+      connectBtn.textContent = 'Connect Joystick';
+      connectBtn.classList.remove('connected');
+    }
+  });
+
+  connectBtn.addEventListener('click', async () => {
+    try { await SerialHub.connect(); }
+    catch (err) { alert(err.message); }
+  });
+</script>
+</body>
+</html>

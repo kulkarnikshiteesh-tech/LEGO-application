@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact — Kshiteesh Kulkarni</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body {
+    height:100%; background:#16181C; overflow:hidden;
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  #topbar {
+    position:fixed; top:20px; left:0; right:0;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:0 24px; z-index:10;
+  }
+  button {
+    font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+    background:#2C2F36; color:#F5F1E8; border:none;
+    padding:10px 16px; border-radius:6px; cursor:pointer;
+  }
+  button.connected { background:#2E7D32; }
+
+  #idle {
+    text-align:center; color:#6B6E75;
+  }
+  #idle .ring {
+    width:88px; height:88px; border-radius:50%;
+    border:1.5px dashed #3A3D44;
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 20px;
+  }
+  #idle svg { width:32px; height:32px; stroke:#6B6E75; }
+  #idle p { font-size:14px; letter-spacing:0.02em; }
+
+  #card {
+    width:min(440px, 86vw);
+    background:#F5F1E8;
+    border-radius:16px;
+    padding:36px 34px;
+    opacity:0;
+    transform:scale(0.92) translateY(14px);
+    transition:opacity .45s cubic-bezier(.2,.8,.2,1), transform .45s cubic-bezier(.2,.8,.2,1);
+  }
+  #card.visible { opacity:1; transform:scale(1) translateY(0); }
+
+  #card .rule { height:3px; width:44px; background:#E85D14; border-radius:2px; margin-bottom:22px; }
+  #card h1 { font-size:26px; font-weight:600; color:#16181C; letter-spacing:-0.01em; }
+  #card .role { font-size:14px; color:#6B6E75; margin-top:4px; margin-bottom:26px; }
+
+  #card .row {
+    display:flex; align-items:center; gap:10px;
+    padding:11px 0;
+    border-top:1px solid #E4DFD3;
+    font-size:14px; color:#3A3A3A;
+  }
+  #card .row:first-of-type { border-top:none; }
+  #card .row .k { color:#8A8D94; width:78px; flex-shrink:0; }
+
+  #stage-wrap { position:relative; }
+</style>
+</head>
+<body>
+
+  <div id="topbar">
+    <button id="connect">Connect RFID</button>
+    <button id="test">Simulate tap</button>
+  </div>
+
+  <div id="stage-wrap">
+    <div id="idle">
+      <div class="ring">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="6" width="20" height="13" rx="2"/><path d="M6 10h4M6 14h2"/>
+        </svg>
+      </div>
+      <p>Tap card to connect</p>
+    </div>
+
+    <div id="card">
+      <div class="rule"></div>
+      <h1>Kshiteesh Kulkarni</h1>
+      <div class="role">Designer. Maker. Engineer.</div>
+      <div class="row"><span class="k">Email</span><span>kulkarnikshiteesh@gmail.com</span></div>
+      <div class="row"><span class="k">LinkedIn</span><span>linkedin.com/in/kshiteeshkulkarni</span></div>
+      <div class="row"><span class="k">Portfolio</span><span>iamadesigneer.framer.website</span></div>
+      <div class="row"><span class="k">Makeable</span><span>makeable-dfm.vercel.app</span></div>
+    </div>
+  </div>
+
+<script src="./serial-hub.js"></script>
+<script>
+  const idle = document.getElementById('idle');
+  const card = document.getElementById('card');
+  const connectBtn = document.getElementById('connect');
+  const testBtn = document.getElementById('test');
+
+  function reveal() {
+    idle.style.display = 'none';
+    card.classList.add('visible');
+  }
+
+  window.addEventListener('serial-msg', (e) => {
+    if (e.detail.startsWith('RFID:')) reveal();
+  });
+
+  window.addEventListener('serial-status', (e) => {
+    if (e.detail === 'connected') {
+      connectBtn.textContent = 'Connected';
+      connectBtn.classList.add('connected');
+    } else if (e.detail === 'disconnected' || e.detail === 'error') {
+      connectBtn.textContent = 'Connect RFID';
+      connectBtn.classList.remove('connected');
+    }
+  });
+
+  connectBtn.addEventListener('click', async () => {
+    try { await SerialHub.connect(); }
+    catch (err) { alert(err.message); }
+  });
+
+  testBtn.addEventListener('click', reveal); // rehearsal without hardware
+</script>
+</body>
+</html>

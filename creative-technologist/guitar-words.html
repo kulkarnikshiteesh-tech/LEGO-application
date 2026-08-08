@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guitar Words</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body {
+    height:100%; background:#16181C; overflow:hidden;
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  #cam {
+    position:fixed; inset:0; width:100%; height:100%;
+    object-fit:cover; transform:scaleX(-1);
+  }
+  #veil {
+    position:fixed; inset:0; background:rgba(0,0,0,0.15);
+  }
+
+  #topbar {
+    position:fixed; top:20px; left:0; right:0;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:0 24px; z-index:10;
+  }
+  button {
+    font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+    background:#16181C; color:#F5F1E8; border:none;
+    padding:10px 16px; border-radius:6px; cursor:pointer;
+  }
+  button.on { background:#2E7D32; }
+
+  #readout {
+    position:fixed; bottom:20px; left:20px;
+    color:#F5F1E8; font-size:12px; opacity:0.55;
+    font-variant-numeric:tabular-nums;
+    z-index:10;
+  }
+  #readout.hidden { display:none; }
+
+  #wordlayer {
+    position:fixed; inset:0;
+    display:flex; align-items:flex-end; justify-content:center;
+    pointer-events:none;
+    overflow:hidden;
+  }
+  .word {
+    position:absolute;
+    bottom:18%;
+    font-size:clamp(28px, 6vw, 64px);
+    font-weight:600;
+    letter-spacing:-0.01em;
+    color:#F5F1E8;
+    text-shadow: 0 2px 18px rgba(0,0,0,0.5);
+    animation: rise 2.4s ease-out forwards;
+  }
+  @keyframes rise {
+    0%   { transform: translateY(0) scale(0.9); opacity:0; }
+    12%  { opacity:1; }
+    100% { transform: translateY(-220px) scale(1.05); opacity:0; }
+  }
+</style>
+</head>
+<body>
+
+  <video id="cam" autoplay playsinline muted></video>
+  <div id="veil"></div>
+
+  <div id="topbar">
+    <button id="start">Start</button>
+    <button id="toggle-readout">Hide readout</button>
+  </div>
+
+  <div id="wordlayer"></div>
+  <div id="readout">--</div>
+
+<script>
+  // ---- EDIT THIS: real note -> word mapping goes here ----
+  // Placeholder uses standard open-string notes (low to high).
+  // Match by nearest note name; tolerance in CENTS below.
+  const NOTE_WORDS = {
+    'E2': 'PLACEHOLDER_1',
+    'A2': 'PLACEHOLDER_2',
+    'D3': 'PLACEHOLDER_3',
+    'G3': 'PLACEHOLDER_4',
+    'B3': 'PLACEHOLDER_5',
+    'E4': 'PLACEHOLDER_6',
+  };
+  const CENTS_TOLERANCE = 45;   // how far off-pitch still counts as a match
+  const TRIGGER_COOLDOWN_MS = 550; // min gap between word triggers
+  const MIN_CLARITY = 0.9;     // autocorrelation confidence threshold (0-1)
+
+  const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+  function freqToNote(freq) {
+    const midi = 69 + 12 * Math.log2(freq / 440);
+    const rounded = Math.round(midi);
+    const cents = Math.round((midi - rounded) * 100);
+    const name = NOTE_NAMES[((rounded % 12) + 12) % 12];
+    const octave = Math.floor(rounded / 12) - 1;
+    return { name: name + octave, cents, midi: rounded };
+  }
+
+  // Standard autocorrelation pitch detector (ACF2+), no external deps.
+  function autoCorrelate(buf, sampleRate) {
+    const SIZE = buf.length;
+    let rms = 0;
+    for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+    rms = Math.sqrt(rms / SIZE);
+    if (rms < 0.01) return { freq: -1, clarity: 0 };
+
+    let r1 = 0, r2 = SIZE - 1;
+    const thres = 0.2;
+    for (let i = 0; i < SIZE / 2; i++) { if (Math.abs(buf[i]) < thres) { r1 = i; break; } }
+    for (let i = 1; i < SIZE / 2; i++) { if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; } }
+
+    const trimmed = buf.slice(r1, r2);
+    const n = trimmed.length;
+    const c = new Array(n).fill(0);
+    for (let lag = 0; lag < n; lag++) {
+      for (let i = 0; i < n - lag; i++) c[lag] += trimmed[i] * trimmed[i + lag];
+    }
+    let d = 0;
+    while (d < n - 1 && c[d] > c[d + 1]) d++;
+    let maxval = -1, maxpos = -1;
+    for (let i = d; i < n; i++) {
+      if (c[i] > maxval) { maxval = c[i]; maxpos = i; }
+    }
+    let T0 = maxpos;
+    if (T0 <= 0) return { freq: -1, clarity: 0 };
+
+    const x1 = c[T0 - 1] || 0, x2 = c[T0], x3 = c[T0 + 1] || 0;
+    const a = (x1 + x3 - 2 * x2) / 2;
+    const b = (x3 - x1) / 2;
+    if (a) T0 = T0 - b / (2 * a);
+
+    const clarity = c[0] ? maxval / c[0] : 0;
+    return { freq: sampleRate / T0, clarity };
+  }
+
+  const startBtn = document.getElementById('start');
+  const toggleReadoutBtn = document.getElementById('toggle-readout');
+  const readout = document.getElementById('readout');
+  const wordlayer = document.getElementById('wordlayer');
+  const camEl = document.getElementById('cam');
+
+  let audioCtx, analyser, dataArray, rafId;
+  let lastTriggerAt = 0;
+
+  function spawnWord(text) {
+    const el = document.createElement('div');
+    el.className = 'word';
+    el.textContent = text;
+    el.style.left = (40 + Math.random() * 20) + '%';
+    wordlayer.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+
+  function tick() {
+    analyser.getFloatTimeDomainData(dataArray);
+    const { freq, clarity } = autoCorrelate(dataArray, audioCtx.sampleRate);
+
+    if (freq > 0 && clarity > MIN_CLARITY) {
+      const { name, cents } = freqToNote(freq);
+      readout.textContent = `${name}  ${cents >= 0 ? '+' : ''}${cents}c  ${freq.toFixed(1)}Hz  clarity ${clarity.toFixed(2)}`;
+
+      const word = NOTE_WORDS[name];
+      const now = performance.now();
+      if (word && Math.abs(cents) <= CENTS_TOLERANCE && now - lastTriggerAt > TRIGGER_COOLDOWN_MS) {
+        spawnWord(word);
+        lastTriggerAt = now;
+      }
+    } else {
+      readout.textContent = '--';
+    }
+    rafId = requestAnimationFrame(tick);
+  }
+
+  async function start() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      camEl.srcObject = stream;
+
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtx.createMediaStreamSource(stream);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 2048;
+      dataArray = new Float32Array(analyser.fftSize);
+      source.connect(analyser);
+
+      tick();
+      startBtn.textContent = 'Running';
+      startBtn.classList.add('on');
+    } catch (err) {
+      alert('Camera/mic permission needed: ' + err.message);
+    }
+  }
+
+  startBtn.addEventListener('click', () => {
+    if (!audioCtx) start();
+  });
+
+  toggleReadoutBtn.addEventListener('click', () => {
+    readout.classList.toggle('hidden');
+  });
+</script>
+</body>
+</html>
