@@ -178,7 +178,10 @@
 
   async function start() {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'user' } }, // front/selfie camera
+        audio: true
+      });
       camEl.srcObject = stream;
 
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -197,7 +200,13 @@
   }
 
   startBtn.addEventListener('click', () => {
-    if (!audioCtx) start();
+    if (audioCtx) return;
+    // must be requested synchronously inside the click handler, before
+    // any await, or the browser won't treat it as a real user gesture
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+    start();
   });
 
   toggleReadoutBtn.addEventListener('click', () => {
