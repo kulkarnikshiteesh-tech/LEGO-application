@@ -135,17 +135,50 @@
   const vaseGroup = new THREE.Group();
   scene.add(vaseGroup);
   let vaseMesh = null;
-  const CLAY_COLOR = 0xC7A97C; // warm stoneware tan, not terracotta
+  let wireMesh = null;
+  const CLAY_COLOR = 0x1FBFFF; // neon blue, not terracotta/clay anymore
 
   function screenToWorld(x, y) {
     return { x: x - window.innerWidth / 2, y: -(y - window.innerHeight / 2) };
   }
 
   // ---- finishing sparkle burst: fires once when your hand leaves frame
-  // after a vase exists. Simple particle system, self-disposing. ----
-  const SPARKLE_COUNT = 60;
+  // after a vase exists. Real star-shaped sprites (not plain dots),
+  // varied sizes, white/blue mix. Self-disposing. ----
+  const SPARKLE_COUNT = 50;
   const SPARKLE_LIFETIME = 0.8; // seconds
-  let sparklePoints = null, sparkleVelocities = null, sparkleAge = 0, sparkleActive = false;
+
+  function makeStarTexture() {
+    const size = 64;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const cx = size / 2, cy = size / 2;
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, size / 2);
+    grad.addColorStop(0, 'rgba(255,255,255,1)');
+    grad.addColorStop(0.25, 'rgba(255,255,255,0.9)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, size, size);
+    ctx.strokeStyle = 'rgba(255,255,255,0.95)';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(cx, 1); ctx.lineTo(cx, size - 1);
+    ctx.moveTo(1, cy); ctx.lineTo(size - 1, cy);
+    ctx.stroke();
+    return new THREE.CanvasTexture(canvas);
+  }
+  const starTexture = makeStarTexture();
+  const sparkleMaterialWhite = new THREE.SpriteMaterial({
+    map: starTexture, color: 0xffffff, transparent: true,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const sparkleMaterialBlue = new THREE.SpriteMaterial({
+    map: starTexture, color: 0x6ecbff, transparent: true,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+
+  let sparkleSprites = [], sparkleVelocities = [], sparkleAge = 0, sparkleActive = false;
 
   function triggerSparkles() {
     if (!vaseMesh) return;
@@ -157,36 +190,35 @@
     const radius = Math.max(size.x, size.z) / 2 || 40;
     const height = size.y || 100;
 
-    const positions = new Float32Array(SPARKLE_COUNT * 3);
-    sparkleVelocities = new Float32Array(SPARKLE_COUNT * 3);
+    sparkleSprites = [];
+    sparkleVelocities = [];
     for (let i = 0; i < SPARKLE_COUNT; i++) {
-      // start scattered around the vase's silhouette, not all from one point
+      const sprite = new THREE.Sprite(Math.random() < 0.5 ? sparkleMaterialWhite : sparkleMaterialBlue);
+      const scale = 6 + Math.random() * 22; // varied sizes, small to fairly large
+      sprite.scale.set(scale, scale, 1);
+
       const angle = Math.random() * Math.PI * 2;
       const r = radius * (0.7 + Math.random() * 0.6);
       const y = center.y + (Math.random() - 0.3) * height;
-      positions[i * 3] = vaseGroup.position.x + Math.cos(angle) * r;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = Math.sin(angle) * r;
+      sprite.position.set(
+        vaseGroup.position.x + Math.cos(angle) * r,
+        y,
+        Math.sin(angle) * r
+      );
 
-      sparkleVelocities[i * 3] = Math.cos(angle) * (20 + Math.random() * 30);
-      sparkleVelocities[i * 3 + 1] = 40 + Math.random() * 60;
-      sparkleVelocities[i * 3 + 2] = Math.sin(angle) * (20 + Math.random() * 30);
+      sparkleVelocities.push({
+        x: Math.cos(angle) * (20 + Math.random() * 30),
+        y: 40 + Math.random() * 60,
+        z: Math.sin(angle) * (20 + Math.random() * 30),
+        spin: (Math.random() - 0.5) * 6,
+      });
+      scene.add(sprite);
+      sparkleSprites.push(sprite);
     }
-
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const material = new THREE.PointsMaterial({
-      color: 0xF2CD37,
-      size: 10,
-      transparent: true,
-      opacity: 1,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    });
-    sparklePoints = new THREE.Points(geometry, material);
-    scene.add(sparklePoints);
     sparkleAge = 0;
     sparkleActive = true;
+    sparkleMaterialWhite.opacity = 1;
+    sparkleMaterialBlue.opacity = 1;
   }
 
   function tickSparkles(dt) {
@@ -194,22 +226,23 @@
     sparkleAge += dt;
     const t = sparkleAge / SPARKLE_LIFETIME;
     if (t >= 1) {
-      scene.remove(sparklePoints);
-      sparklePoints.geometry.dispose();
-      sparklePoints.material.dispose();
-      sparklePoints = null;
+      for (const sprite of sparkleSprites) scene.remove(sprite);
+      sparkleSprites = [];
       sparkleActive = false;
       return;
     }
-    const pos = sparklePoints.geometry.attributes.position.array;
-    for (let i = 0; i < SPARKLE_COUNT; i++) {
-      pos[i * 3] += sparkleVelocities[i * 3] * dt;
-      pos[i * 3 + 1] += sparkleVelocities[i * 3 + 1] * dt;
-      sparkleVelocities[i * 3 + 1] -= 60 * dt; // gentle gravity, arcs back down
-      pos[i * 3 + 2] += sparkleVelocities[i * 3 + 2] * dt;
+    for (let i = 0; i < sparkleSprites.length; i++) {
+      const sprite = sparkleSprites[i];
+      const v = sparkleVelocities[i];
+      sprite.position.x += v.x * dt;
+      sprite.position.y += v.y * dt;
+      sprite.position.z += v.z * dt;
+      v.y -= 60 * dt; // gentle gravity, arcs back down
+      sprite.material.rotation += v.spin * dt; // sprites can rotate individually
     }
-    sparklePoints.geometry.attributes.position.needsUpdate = true;
-    sparklePoints.material.opacity = 1 - t;
+    const opacity = 1 - t;
+    sparkleMaterialWhite.opacity = opacity;
+    sparkleMaterialBlue.opacity = opacity;
   }
 
   let lastRenderAt = null;
@@ -300,6 +333,11 @@
       vaseMesh.material.dispose();
       vaseMesh = null;
     }
+    if (wireMesh) {
+      vaseGroup.remove(wireMesh);
+      wireMesh.material.dispose(); // geometry already disposed via vaseMesh (shared reference)
+      wireMesh = null;
+    }
   }
   resetVase();
 
@@ -340,17 +378,34 @@
     if (vaseMesh) {
       vaseMesh.geometry.dispose();
       vaseMesh.geometry = geometry;
+      wireMesh.geometry.dispose();
+      wireMesh.geometry = geometry;
     } else {
       const material = new THREE.MeshPhysicalMaterial({
         color: CLAY_COLOR,
-        roughness: 0.55,
-        metalness: 0.0,
-        clearcoat: 0.25,
-        clearcoatRoughness: 0.35,
+        emissive: CLAY_COLOR,
+        emissiveIntensity: 0.45, // self-lit glow, reads as "neon" without full bloom postprocessing
+        roughness: 0.3,
+        metalness: 0.1,
+        clearcoat: 0.4,
+        clearcoatRoughness: 0.2,
         side: THREE.DoubleSide,
       });
       vaseMesh = new THREE.Mesh(geometry, material);
       vaseGroup.add(vaseMesh);
+
+      // Subtle mesh-line overlay: same geometry, wireframe, low opacity,
+      // slightly scaled out so it doesn't z-fight with the solid surface.
+      const wireMaterial = new THREE.MeshBasicMaterial({
+        color: 0xBFF3FF,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.18,
+        depthWrite: false,
+      });
+      wireMesh = new THREE.Mesh(geometry, wireMaterial);
+      wireMesh.scale.setScalar(1.01);
+      vaseGroup.add(wireMesh);
     }
   }
 
