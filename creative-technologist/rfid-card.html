@@ -2,127 +2,235 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Contact — Kshiteesh Kulkarni</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  :root {
+    --sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --accent: #E85D14;
+    --ink: #16181C;
+    --paper: #F5F1E8;
+    --hair: rgba(255,255,255,0.1);
+  }
   html, body {
     height:100%; background:#16181C; overflow:hidden;
-    font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family:var(--sans);
+  }
+  #cam {
+    position:fixed; inset:0; width:100%; height:100%;
+    object-fit:cover;
+    /* rear camera: no mirror -- what you see is what's actually there */
+  }
+  #veil {
+    position:fixed; inset:0; background:rgba(0,0,0,0.25);
+  }
+
+  /* ---- corner HUD brackets, same language as the joystick page ---- */
+  .bracket {
+    position:fixed; width:24px; height:24px;
+    border:1.5px solid rgba(232,93,20,0.5);
+    pointer-events:none; z-index:5;
+  }
+  .bracket.tl { top:20px; left:20px; border-right:none; border-bottom:none; }
+  .bracket.tr { top:20px; right:20px; border-left:none; border-bottom:none; }
+  .bracket.bl { bottom:20px; left:20px; border-right:none; border-top:none; }
+  .bracket.br { bottom:20px; right:20px; border-left:none; border-top:none; }
+
+  /* ---- pre-start gate ---- */
+  #gate {
+    position:fixed; inset:0; z-index:20;
+    background:#16181C;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:18px;
+    transition:opacity .4s ease;
+  }
+  #gate.hidden { opacity:0; pointer-events:none; }
+  #gate-btn {
+    width:110px; height:110px; border-radius:50%;
+    background:var(--accent); border:none;
     display:flex; align-items:center; justify-content:center;
   }
-
-  #topbar {
-    position:fixed; top:20px; left:0; right:0;
-    display:flex; justify-content:space-between; align-items:center;
-    padding:0 24px; z-index:10;
+  #gate-btn svg { width:40px; height:40px; fill:var(--ink); }
+  #gate p {
+    color:#8A8D94; font-size:14px; max-width:280px; text-align:center; line-height:1.5;
+    font-family:var(--mono);
   }
-  button {
-    font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
-    background:#2C2F36; color:#F5F1E8; border:none;
-    padding:10px 16px; border-radius:6px; cursor:pointer;
-  }
-  button.connected { background:#2E7D32; }
+  #gate.loading #gate-btn { opacity:0.5; }
 
+  #status {
+    position:fixed; bottom:16px; left:16px;
+    color:var(--paper); font-family:var(--mono); font-size:11px; opacity:0.65;
+    z-index:10;
+  }
+
+  /* ---- idle prompt ---- */
   #idle {
-    text-align:center; color:#6B6E75;
+    position:fixed; inset:0; z-index:6;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:16px;
+    pointer-events:none;
   }
   #idle .ring {
-    width:88px; height:88px; border-radius:50%;
-    border:1.5px dashed #3A3D44;
+    width:84px; height:84px; border-radius:50%;
+    border:1.5px dashed rgba(232,93,20,0.55);
     display:flex; align-items:center; justify-content:center;
-    margin:0 auto 20px;
+    animation: spin 10s linear infinite;
   }
-  #idle svg { width:32px; height:32px; stroke:#6B6E75; }
-  #idle p { font-size:14px; letter-spacing:0.02em; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  #idle svg { width:30px; height:30px; stroke:var(--paper); animation:none; }
+  #idle p {
+    font-family:var(--mono); font-size:12px; letter-spacing:.04em;
+    color:#8A8D94;
+  }
 
+  /* ---- the card itself: dark glass panel, not a paper card ---- */
   #card {
-    width:min(440px, 86vw);
-    background:#F5F1E8;
-    border-radius:16px;
-    padding:36px 34px;
-    opacity:0;
-    transform:scale(0.92) translateY(14px);
-    transition:opacity .45s cubic-bezier(.2,.8,.2,1), transform .45s cubic-bezier(.2,.8,.2,1);
+    position:fixed; left:50%; top:50%;
+    transform:translate(-50%,-50%) scale(0.9);
+    width:min(420px, 86vw);
+    background:
+      linear-gradient(160deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02)),
+      rgba(15,17,20,0.72);
+    backdrop-filter: blur(14px);
+    border:1px solid var(--hair);
+    border-radius:18px;
+    padding:30px 28px 26px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(232,93,20,0.15), inset 0 0 40px rgba(232,93,20,0.05);
+    opacity:0; pointer-events:none;
+    transition: opacity .4s cubic-bezier(.2,.8,.2,1), transform .4s cubic-bezier(.2,.8,.2,1);
+    z-index:8;
   }
-  #card.visible { opacity:1; transform:scale(1) translateY(0); }
+  #card.visible { opacity:1; transform:translate(-50%,-50%) scale(1); }
+  #card.flash::before {
+    content:''; position:absolute; inset:0; border-radius:18px; z-index:2; pointer-events:none;
+    background:linear-gradient(100deg, transparent 40%, rgba(232,93,20,0.4) 50%, transparent 60%);
+    background-size:250% 100%; background-position:150% 0;
+    animation: sweep .7s ease-out;
+  }
+  @keyframes sweep { from { background-position:150% 0; } to { background-position:-50% 0; } }
 
-  #card .rule { height:3px; width:44px; background:#E85D14; border-radius:2px; margin-bottom:22px; }
-  #card h1 { font-size:26px; font-weight:600; color:#16181C; letter-spacing:-0.01em; }
-  #card .role { font-size:14px; color:#6B6E75; margin-top:4px; margin-bottom:26px; }
-
+  #card .tag {
+    font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); margin-bottom:14px; display:flex; align-items:center; gap:8px;
+  }
+  #card .tag .dot {
+    width:6px; height:6px; border-radius:50%; background:var(--accent);
+    box-shadow:0 0 8px rgba(232,93,20,0.8);
+  }
+  #card h1 {
+    font-size:24px; font-weight:600; color:var(--paper); letter-spacing:-0.01em;
+  }
+  #card .role {
+    font-size:13px; color:#9A9DA5; margin-top:4px; margin-bottom:24px;
+    font-family:var(--mono);
+  }
   #card .row {
-    display:flex; align-items:center; gap:10px;
-    padding:11px 0;
-    border-top:1px solid #E4DFD3;
-    font-size:14px; color:#3A3A3A;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:12px 0;
+    border-top:1px solid var(--hair);
+    font-size:13px; color:#D8D5CC;
   }
   #card .row:first-of-type { border-top:none; }
-  #card .row .k { color:#8A8D94; width:78px; flex-shrink:0; }
-
-  #stage-wrap { position:relative; }
+  #card .row .k {
+    color:#6B6E75; font-family:var(--mono); font-size:11px; letter-spacing:.04em; text-transform:uppercase;
+    flex-shrink:0;
+  }
+  #card .row .v { text-align:right; word-break:break-word; }
 </style>
 </head>
 <body>
 
-  <div id="topbar">
-    <button id="connect">Connect RFID</button>
-    <button id="test">Simulate tap</button>
+  <video id="cam" autoplay playsinline muted></video>
+  <div id="veil"></div>
+  <div class="bracket tl"></div>
+  <div class="bracket tr"></div>
+  <div class="bracket bl"></div>
+  <div class="bracket br"></div>
+
+  <div id="idle">
+    <div class="ring">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="6" width="20" height="13" rx="2"/><path d="M6 10h4M6 14h2"/>
+      </svg>
+    </div>
+    <p id="idle-text">waiting for card tap...</p>
   </div>
 
-  <div id="stage-wrap">
-    <div id="idle">
-      <div class="ring">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="6" width="20" height="13" rx="2"/><path d="M6 10h4M6 14h2"/>
-        </svg>
-      </div>
-      <p>Tap card to connect</p>
-    </div>
-
-    <div id="card">
-      <div class="rule"></div>
-      <h1>Kshiteesh Kulkarni</h1>
-      <div class="role">Designer. Maker. Engineer.</div>
-      <div class="row"><span class="k">Email</span><span>kulkarnikshiteesh@gmail.com</span></div>
-      <div class="row"><span class="k">LinkedIn</span><span>linkedin.com/in/kshiteeshkulkarni</span></div>
-      <div class="row"><span class="k">Portfolio</span><span>iamadesigneer.framer.website</span></div>
-      <div class="row"><span class="k">Makeable</span><span>makeable-dfm.vercel.app</span></div>
-    </div>
+  <div id="card">
+    <div class="tag"><span class="dot"></span>Contact transmitted</div>
+    <h1>Kshiteesh Kulkarni</h1>
+    <div class="role">Designer. Maker. Engineer.</div>
+    <div class="row"><span class="k">Email</span><span class="v">kulkarnikshiteesh@gmail.com</span></div>
+    <div class="row"><span class="k">LinkedIn</span><span class="v">linkedin.com/in/kshiteeshkulkarni</span></div>
+    <div class="row"><span class="k">Portfolio</span><span class="v">iamadesigneer.framer.website</span></div>
+    <div class="row"><span class="k">Makeable</span><span class="v">makeable-dfm.vercel.app</span></div>
   </div>
 
-<script src="./serial-hub.js"></script>
+  <div id="status">--</div>
+
+  <div id="gate">
+    <button id="gate-btn">
+      <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <p>Rear camera. Tap once, then place the card on the reader -- the contact card appears live, wirelessly, no cable.</p>
+  </div>
+
+<script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+<script src="./remote-trigger-rfid.js"></script>
 <script>
+  const camEl = document.getElementById('cam');
+  const gate = document.getElementById('gate');
+  const gateBtn = document.getElementById('gate-btn');
+  const gateText = gate.querySelector('p');
+  const status = document.getElementById('status');
   const idle = document.getElementById('idle');
+  const idleText = document.getElementById('idle-text');
   const card = document.getElementById('card');
-  const connectBtn = document.getElementById('connect');
-  const testBtn = document.getElementById('test');
 
-  function reveal() {
+  window.addEventListener('rfid-trigger-status', (e) => {
+    status.textContent = 'signal: ' + e.detail;
+  });
+
+  function revealCard(uid) {
     idle.style.display = 'none';
-    card.classList.add('visible');
+    card.classList.add('visible', 'flash');
+    setTimeout(() => card.classList.remove('flash'), 700);
   }
 
-  window.addEventListener('serial-msg', (e) => {
-    if (e.detail.startsWith('RFID:')) reveal();
-  });
+  RfidTrigger.onTrigger(revealCard);
+  RfidTrigger.preconnect(); // connect early so status is known before the tap happens
 
-  window.addEventListener('serial-status', (e) => {
-    if (e.detail === 'connected') {
-      connectBtn.textContent = 'Connected';
-      connectBtn.classList.add('connected');
-    } else if (e.detail === 'disconnected' || e.detail === 'error') {
-      connectBtn.textContent = 'Connect RFID';
-      connectBtn.classList.remove('connected');
+  let running = false;
+  async function start() {
+    gate.classList.add('loading');
+    gateText.textContent = 'Loading...';
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
+      });
+      camEl.srcObject = stream;
+      await new Promise(r => camEl.onloadedmetadata = r);
+      camEl.play();
+      running = true;
+      gate.classList.add('hidden');
+    } catch (err) {
+      gate.classList.remove('loading');
+      gateText.textContent = 'Failed to start: ' + err.message;
     }
-  });
+  }
 
-  connectBtn.addEventListener('click', async () => {
-    try { await SerialHub.connect(); }
-    catch (err) { alert(err.message); }
+  gateBtn.addEventListener('click', () => {
+    if (running) return;
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+    start();
   });
-
-  testBtn.addEventListener('click', reveal); // rehearsal without hardware
 </script>
 </body>
 </html>
