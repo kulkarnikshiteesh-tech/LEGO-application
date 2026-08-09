@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Guitar Words</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -75,14 +75,19 @@
   <div id="readout">--</div>
 
 <script>
-  // "If you think this application makes sense then..." split across
-  // the 5 working open strings -- low E is broken, so no E2 entry.
+  // "If you think this application makes sense then..." -- one word per
+  // note, ascending G major scale (one octave), first position. No
+  // repeated notes (each note can only map to one word) and nothing
+  // on the broken low E string.
   const NOTE_WORDS = {
-    'A2': 'If you think',
-    'D3': 'this application',
-    'G3': 'makes',
-    'B3': 'sense',
-    'E4': 'then',
+    'G3':  'If',
+    'A3':  'you',
+    'B3':  'think',
+    'C4':  'this',
+    'D4':  'application',
+    'E4':  'makes',
+    'F#4': 'sense',
+    'G4':  'then',
   };
   const CENTS_TOLERANCE = 45;   // how far off-pitch still counts as a match
   const TRIGGER_COOLDOWN_MS = 550; // min gap between word triggers
