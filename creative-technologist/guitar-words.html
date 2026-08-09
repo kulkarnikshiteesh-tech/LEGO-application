@@ -75,16 +75,14 @@
   <div id="readout">--</div>
 
 <script>
-  // ---- EDIT THIS: real note -> word mapping goes here ----
-  // Placeholder uses standard open-string notes (low to high).
-  // Match by nearest note name; tolerance in CENTS below.
+  // "If you think this application makes sense then..." split across
+  // the 5 working open strings -- low E is broken, so no E2 entry.
   const NOTE_WORDS = {
-    'E2': 'PLACEHOLDER_1',
-    'A2': 'PLACEHOLDER_2',
-    'D3': 'PLACEHOLDER_3',
-    'G3': 'PLACEHOLDER_4',
-    'B3': 'PLACEHOLDER_5',
-    'E4': 'PLACEHOLDER_6',
+    'A2': 'If you think',
+    'D3': 'this application',
+    'G3': 'makes',
+    'B3': 'sense',
+    'E4': 'then',
   };
   const CENTS_TOLERANCE = 45;   // how far off-pitch still counts as a match
   const TRIGGER_COOLDOWN_MS = 550; // min gap between word triggers
