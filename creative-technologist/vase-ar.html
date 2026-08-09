@@ -141,9 +141,85 @@
     return { x: x - window.innerWidth / 2, y: -(y - window.innerHeight / 2) };
   }
 
+  // ---- finishing sparkle burst: fires once when your hand leaves frame
+  // after a vase exists. Simple particle system, self-disposing. ----
+  const SPARKLE_COUNT = 60;
+  const SPARKLE_LIFETIME = 1.6; // seconds
+  let sparklePoints = null, sparkleVelocities = null, sparkleAge = 0, sparkleActive = false;
+
+  function triggerSparkles() {
+    if (!vaseMesh) return;
+    const box = new THREE.Box3().setFromObject(vaseMesh);
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    const radius = Math.max(size.x, size.z) / 2 || 40;
+    const height = size.y || 100;
+
+    const positions = new Float32Array(SPARKLE_COUNT * 3);
+    sparkleVelocities = new Float32Array(SPARKLE_COUNT * 3);
+    for (let i = 0; i < SPARKLE_COUNT; i++) {
+      // start scattered around the vase's silhouette, not all from one point
+      const angle = Math.random() * Math.PI * 2;
+      const r = radius * (0.7 + Math.random() * 0.6);
+      const y = center.y + (Math.random() - 0.3) * height;
+      positions[i * 3] = vaseGroup.position.x + Math.cos(angle) * r;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = Math.sin(angle) * r;
+
+      sparkleVelocities[i * 3] = Math.cos(angle) * (20 + Math.random() * 30);
+      sparkleVelocities[i * 3 + 1] = 40 + Math.random() * 60;
+      sparkleVelocities[i * 3 + 2] = Math.sin(angle) * (20 + Math.random() * 30);
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({
+      color: 0xF2CD37,
+      size: 10,
+      transparent: true,
+      opacity: 1,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    sparklePoints = new THREE.Points(geometry, material);
+    scene.add(sparklePoints);
+    sparkleAge = 0;
+    sparkleActive = true;
+  }
+
+  function tickSparkles(dt) {
+    if (!sparkleActive) return;
+    sparkleAge += dt;
+    const t = sparkleAge / SPARKLE_LIFETIME;
+    if (t >= 1) {
+      scene.remove(sparklePoints);
+      sparklePoints.geometry.dispose();
+      sparklePoints.material.dispose();
+      sparklePoints = null;
+      sparkleActive = false;
+      return;
+    }
+    const pos = sparklePoints.geometry.attributes.position.array;
+    for (let i = 0; i < SPARKLE_COUNT; i++) {
+      pos[i * 3] += sparkleVelocities[i * 3] * dt;
+      pos[i * 3 + 1] += sparkleVelocities[i * 3 + 1] * dt;
+      sparkleVelocities[i * 3 + 1] -= 60 * dt; // gentle gravity, arcs back down
+      pos[i * 3 + 2] += sparkleVelocities[i * 3 + 2] * dt;
+    }
+    sparklePoints.geometry.attributes.position.needsUpdate = true;
+    sparklePoints.material.opacity = 1 - t;
+  }
+
+  let lastRenderAt = null;
   function render() {
     // No continuous spin -- it was fighting the live rebuild every
     // frame and made the growth direction hard to read while forming.
+    const now = performance.now();
+    const dt = lastRenderAt === null ? 0 : (now - lastRenderAt) / 1000;
+    lastRenderAt = now;
+    tickSparkles(dt);
     renderer.render(scene, camera);
   }
 
@@ -208,6 +284,8 @@
   function getBaseY() { return baseYFrac * window.innerHeight; }
   function getTopY() { return topYFrac * window.innerHeight; }
 
+  let sparklesFired = false;
+
   function resetVase() {
     profile = new Array(BIN_COUNT).fill(null);
     centerXFrac = null;
@@ -215,6 +293,7 @@
     topYFrac = null;
     smoothTipX = null;
     smoothTipY = null;
+    sparklesFired = false;
     if (vaseMesh) {
       vaseGroup.remove(vaseMesh);
       vaseMesh.geometry.dispose();
@@ -427,6 +506,12 @@
       status.textContent = 'reacquiring...';
     } else {
       status.textContent = 'no hand';
+      // Hand genuinely left frame (past the grace window) after a vase
+      // was actually built -- fire the finishing sparkle burst once.
+      if (vaseMesh && !sparklesFired) {
+        sparklesFired = true;
+        triggerSparkles();
+      }
     }
 
     syncVasePosition(); // every frame, unconditionally -- see comment above
