@@ -165,7 +165,7 @@
   // the real GLB loads in the background, then swapped out.
   function buildPlaceholder() {
     // Local origin is the TOP of the knob (not the model's center) --
-    // that's the point that gets pinned to your pinch.
+    // that's the point that gets pinned to the tracked pinch position.
     const group = new THREE.Group();
     const base = new THREE.Mesh(
       new THREE.CylinderGeometry(45, 55, 22, 24),
@@ -204,7 +204,7 @@
     const center = new THREE.Vector3();
     box.getCenter(center);
     // Anchor at the TOP center, not the geometric center, so the top of
-    // the model is what gets pinned to your pinch point as you drag.
+    // the model is what gets pinned to the tracked pinch point while dragging.
     const topAnchor = new THREE.Vector3(center.x, box.max.y, center.z);
     real.position.sub(topAnchor);
 
@@ -241,12 +241,12 @@
   // ---- hand PRESENCE (not gesture) drives grab/drop ----
   // Gesture classification (fist/thumbs-up) proved unreliable for this
   // setup -- false positives on an open hand, false negatives on a real
-  // grip. Hand presence is much more robust: model follows your hand
-  // whenever the camera can see it, and settles ("drops") once your
+  // grip. Hand presence is much more robust: model follows the tracked
+  // hand whenever the camera can see it, and settles ("drops") once the
   // hand has been out of frame for longer than the grace window.
-  // Phases: 'idle' (hidden) -> 'growing' (pop-in where your hand first
+  // Phases: 'idle' (hidden) -> 'growing' (pop-in where the hand first
   // appears) -> 'following' (tracks every frame) -> back to 'idle',
-  // instantly invisible, once your hand's been gone past
+  // instantly invisible, once the hand has been gone past
   // TRACKING_GRACE_MS. No bounce/fade -- disappearing and the laptop's
   // signal firing need to read as the same instant.
   const TARGET_SCALE = 1.4;
@@ -257,7 +257,7 @@
   let t = 0;
   let lastSeenAt = 0;
   let delivered = false; // true once the real drop has fired -- stops the
-                          // model popping back up if your hand re-enters
+                          // model popping back up if the hand re-enters
                           // frame later in a continuous, uncut recording
 
   function applyScale(mult = 1) {
@@ -403,7 +403,7 @@
       );
       const fx = palmPt.x, fy = palmPt.y;
 
-      // draw every landmark so you can see exactly what the camera sees
+      // draw every landmark for visibility into what the camera sees
       debugCtx.fillStyle = 'rgba(46, 125, 50, 0.85)';
       for (const p of lm) {
         const sp = videoPointToScreen(p.x, p.y);
@@ -417,7 +417,7 @@
       debugCtx.fill();
 
       // Presence alone drives pickup: hand visible = carrying it.
-      // Skipped entirely once delivered -- one drop per take, so your
+      // Skipped entirely once delivered -- one drop per take, so the
       // hand re-entering frame later doesn't pop the model back up.
       if (!delivered) {
         if (!pinching) {

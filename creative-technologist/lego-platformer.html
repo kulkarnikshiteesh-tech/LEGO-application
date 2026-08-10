@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lego Platformer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Press+Start+2P&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  :root {
+    --sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --pixel: 'Press Start 2P', var(--mono);
+    --accent: #E85D14;
+    --ink: #16181C;
+    --sky-top: #1b2a4a;
+    --sky-bottom: #3a5a8c;
+  }
+  html, body {
+    height:100%; background:#0B0C0E; color:#F5F1E8;
+    font-family:var(--sans);
+    display:flex; flex-direction:column; align-items:center;
+    overflow:hidden;
+  }
+  #topbar {
+    width:100%; max-width:960px;
+    display:flex; align-items:center; justify-content:flex-end;
+    padding:14px 6px;
+  }
+  #connectBtn {
+    font-family:var(--pixel); font-size:10px; font-weight:400; letter-spacing:.02em; text-transform:uppercase;
+    background:var(--accent); color:var(--ink); border:none; border-radius:6px;
+    padding:11px 14px; cursor:pointer;
+  }
+  #connectBtn:disabled { background:#2E7D32; color:#F5F1E8; cursor:default; }
+  #telemetry {
+    font-family:var(--mono); font-size:11px; color:#8A8D94;
+    padding:0 6px 8px; width:100%; max-width:960px;
+  }
+
+  #stage-wrap {
+    position:relative;
+    width:min(960px, 96vw);
+    aspect-ratio: 960 / 400;
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06);
+  }
+  canvas { display:block; width:100%; height:100%; }
+
+  #overlay {
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:14px;
+    background:rgba(11,12,14,0.72);
+    backdrop-filter: blur(3px);
+    text-align:center;
+    padding:20px;
+  }
+  #overlay.hidden { display:none; }
+  #overlay p { font-family:var(--pixel); font-size:10px; color:#C9CCD3; max-width:480px; line-height:1.8; }
+  #overlay h2 { font-family:var(--pixel); font-size:15px; font-weight:400; line-height:1.6; }
+
+  #tryAgain {
+    position:absolute; left:50%; top:38%; width:min(70%, 380px);
+    transform:translate(-50%,-50%) scale(0.9);
+    font-family:var(--pixel); font-weight:400; font-size:11px; letter-spacing:.02em;
+    line-height:1.8; text-align:center;
+    color:#FF5A4E;
+    background:rgba(11,12,14,0.85);
+    border-radius:8px;
+    padding:14px 16px;
+    box-shadow: 0 0 0 1px rgba(255,90,78,0.25);
+    opacity:0; pointer-events:none;
+    transition: opacity .15s ease, transform .15s ease;
+  }
+  #tryAgain.show { opacity:1; transform:translate(-50%,-50%) scale(1); }
+</style>
+</head>
+<body>
+
+  <div id="topbar">
+    <button id="connectBtn">Connect Sensor</button>
+  </div>
+  <div id="telemetry">waiting for accelerometer...</div>
+
+  <div id="stage-wrap">
+    <canvas id="game" width="960" height="400"></canvas>
+    <div id="tryAgain">TRY AGAIN</div>
+    <div id="overlay">
+      <h2>Tilt your hand to move. A sharp upward jerk to jump.</h2>
+      <p>Clear both gaps, then reach the wall, you'll need a real jump for that one. Connect the sensor above to begin.</p>
+    </div>
+  </div>
+
+<script>
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  const W = canvas.width, H = canvas.height;
+  const GROUND_Y = 320;
+
+  // ---------- pixel-art rendering ----------
+  // The world is drawn at low resolution onto this offscreen canvas,
+  // then scaled up with smoothing off, the standard technique for a
+  // crisp blocky pixel-art look instead of smooth/blended shapes.
+  const PIX = 4; // scale factor
+  const pcanvas = document.createElement('canvas');
+  pcanvas.width = W / PIX;
+  pcanvas.height = H / PIX;
+  const pctx = pcanvas.getContext('2d');
+  pctx.imageSmoothingEnabled = false;
+
+  // ---------- assets (pixel-art minifig renders + the real logo) ----------
+  // The pixel-art renders are flat JPEGs (solid white background, no
+  // alpha), so on load each is processed once: white pixels become
+  // transparent, then cropped to the character's bounding box so it
+  // fills its sprite slot instead of sitting in a sea of padding.
+  const sprites = {};
+  function loadPixelSprite(key, src) {
+    const img = new Image();
+    img.onload = () => {
+      const w = img.width, h = img.height;
+      const buf = document.createElement('canvas');
+      buf.width = w; buf.height = h;
+      const bctx = buf.getContext('2d');
+      bctx.drawImage(img, 0, 0);
+      try {
+        const imgData = bctx.getImageData(0, 0, w, h);
+        const d = imgData.data;
+        const isWhite = (idx) => d[idx * 4] > 235 && d[idx * 4 + 1] > 235 && d[idx * 4 + 2] > 235;
+
+        // flood-fill white starting from the border only, so enclosed
+        // white shapes that are actually part of the artwork (like the
+        // white lettering inside the LEGO logo) survive -- naive
+        // "any near-white pixel" removal was erasing those too
+        const visited = new Uint8Array(w * h);
+        const queue = new Int32Array(w * h);
+        let qHead = 0, qTail = 0;
+        function trySeed(idx) {
+          if (!visited[idx] && isWhite(idx)) { visited[idx] = 1; queue[qTail++] = idx; }
+        }
+        for (let x = 0; x < w; x++) { trySeed(x); trySeed((h - 1) * w + x); }
+        for (let y = 0; y < h; y++) { trySeed(y * w); trySeed(y * w + w - 1); }
+        while (qHead < qTail) {
+          const idx = queue[qHead++];
+          d[idx * 4 + 3] = 0;
+          const x = idx % w, y = (idx / w) | 0;
+          if (x > 0) trySeed(idx - 1);
+          if (x < w - 1) trySeed(idx + 1);
+          if (y > 0) trySeed(idx - w);
+          if (y < h - 1) trySeed(idx + w);
+        }
+
+        let minX = w, minY = h, maxX = 0, maxY = 0;
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            const idx = y * w + x;
+            if (d[idx * 4 + 3] !== 0) {
+              if (x < minX) minX = x;
+              if (x > maxX) maxX = x;
+              if (y < minY) minY = y;
+              if (y > maxY) maxY = y;
+            }
+          }
+        }
+        bctx.putImageData(imgData, 0, 0);
+        sprites[key] = { canvas: buf, bbox: { x: minX, y: minY, w: Math.max(1, maxX - minX), h: Math.max(1, maxY - minY) } };
+      } catch (err) {
+        // getImageData can throw on some browsers/origins (e.g. certain
+        // file:// setups) -- fall back to the raw image, un-cropped,
+        // rather than leaving the sprite missing entirely
+        console.warn('Sprite pixel processing failed, using raw image for', key, err);
+        sprites[key] = { canvas: img, bbox: { x: 0, y: 0, w, h } };
+      }
+    };
+    img.onerror = () => console.error('Failed to load sprite image:', src);
+    img.src = src;
+  }
+  loadPixelSprite('idle', './assets/minifig_idle_pixel.jpeg');
+  loadPixelSprite('walk', './assets/minifig_walk_pixel.jpeg'); // content faces right
+  loadPixelSprite('jump', './assets/minifig_jump_pixel.jpeg');
+  loadPixelSprite('tower', './assets/lego_tower.jpeg'); // the wall/building, logo already baked in
+
+  const LEGO_RED = '#D01012', LEGO_YELLOW = '#FFD400', LEGO_BLUE = '#0055BF', LEGO_GREEN = '#237841';
+  const brickColors = [LEGO_RED, LEGO_YELLOW, LEGO_BLUE, LEGO_GREEN];
+
+  // ---------- sound effects (synthesized square-wave beeps, no audio files) ----------
+  let audioCtx = null;
+  function ensureAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+  function beep(freq, duration, delay = 0, volume = 0.15) {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.value = freq;
+    const t0 = audioCtx.currentTime + delay;
+    gain.gain.setValueAtTime(volume, t0);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(t0);
+    osc.stop(t0 + duration);
+  }
+  function sfxJump() { beep(520, 0.12); beep(760, 0.08, 0.06); }
+  function sfxLand() { beep(120, 0.08, 0, 0.12); }
+  function sfxFail() { beep(300, 0.15); beep(180, 0.2, 0.12); }
+  function sfxWin() { [523, 659, 784, 1047].forEach((f, i) => beep(f, 0.18, i * 0.13, 0.18)); }
+
+  // ---------- level geometry ----------
+  // ground segments: [x0, x1], gaps between them are pits (hurdles)
+  const groundSegs = [
+    [0, 260],
+    [340, 560],
+    [640, 765], // wider ledge right at the wall's base, so the last jump is height-only
+  ];
+  const WALL_X = 780;
+  const WALL_TOP_Y = 70; // top of the wall the player must reach -- taller tower now
+  const WALL_W = 160;
+
+  function onGroundAt(x) {
+    for (const [a, b] of groundSegs) if (x >= a && x <= b) return true;
+    return false;
+  }
+
+  // each pit, in order (including the one right before the wall), gets
+  // its own rejection-letter-style message on a fall
+  const pits = [[260, 340], [560, 640], [765, W]]; // 3rd zone covers past the wall too, catches an overshot jump
+  const pitMessages = [
+    'Thank you for applying, try again',
+    'Thank you for applying, we found a better candidate, try again',
+    'We are sorry, this is not the outcome you were hoping for, try again',
+  ];
+  function pitIndexAt(x) {
+    for (let i = 0; i < pits.length; i++) {
+      if (x > pits[i][0] && x < pits[i][1]) return i;
+    }
+    return -1;
+  }
+
+  // ---------- player ----------
+  const player = {
+    x: 60, y: GROUND_Y, vx: 0, vy: 0,
+    w: 46, h: 64,
+    onGround: true,
+    facing: 1, // 1 = right, -1 = left
+    state: 'idle', // idle | walk | jump | win
+    climbing: false,
+  };
+
+  const GRAVITY = 1400;
+  const MAX_SPEED = 220;
+  const HURDLE_JUMP_V = 520;
+  const BIG_JUMP_V = 950; // enough to clear the taller wall with margin
+  const WALL_CLIMB_MIN_V = 760; // minimum jerk magnitude required at the wall
+
+  let gameWon = false;
+  let tryAgainTimer = 0;
+  let fallingPitIdx = -1;
+
+  // ---------- accelerometer input ----------
+  let tiltXSmoothed = 0; // the filter's own running memory, never deadzone-clamped
+  let tiltX = 0;         // the deadzone-clamped value actually used for control
+  let lastMag = 9.8;
+  let jerkPending = 0;
+
+  const TILT_DEADZONE = 1.2; // ignore small noise/jitter near zero
+  let lastSampleAt = 0;
+  function handleSample(x, y, z) {
+    lastSampleAt = performance.now();
+    tiltXSmoothed = tiltXSmoothed * 0.7 + x * 0.3; // low-pass filter to kill jitter
+    tiltX = Math.abs(tiltXSmoothed) < TILT_DEADZONE ? 0 : tiltXSmoothed;
+    const mag = Math.sqrt(x*x + y*y + z*z);
+    const jerk = mag - lastMag;
+    lastMag = lastMag * 0.7 + mag * 0.3; // smooth the baseline
+    if (jerk > 6) jerkPending = Math.max(jerkPending, jerk);
+    document.getElementById('telemetry').textContent =
+      `x ${x.toFixed(1)}  y ${y.toFixed(1)}  z ${z.toFixed(1)}  |mag| ${mag.toFixed(1)}`;
+  }
+  // safety net: if the data stream ever stalls (no sample for a while),
+  // force neutral instead of letting a stale reading drive the sprite
+  // forever with no way for the player to correct it
+  function tiltIsStale() {
+    return lastSampleAt > 0 && performance.now() - lastSampleAt > 400;
+  }
+
+  // ---------- Web Serial ----------
+  const connectBtn = document.getElementById('connectBtn');
+  connectBtn.addEventListener('click', async () => {
+    ensureAudio(); // must happen directly inside a user gesture
+    if (!('serial' in navigator)) {
+      alert('Web Serial not supported in this browser, use desktop Chrome or Edge.');
+      return;
+    }
+    try {
+      const port = await navigator.serial.requestPort();
+      await port.open({ baudRate: 115200 });
+      connectBtn.textContent = 'Connected';
+      connectBtn.disabled = true;
+      document.getElementById('overlay').classList.add('hidden');
+
+      const reader = port.readable.getReader();
+      const decoder = new TextDecoder();
+      let buf = '';
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        let idx;
+        while ((idx = buf.indexOf('\n')) >= 0) {
+          const line = buf.slice(0, idx).trim();
+          buf = buf.slice(idx + 1);
+          const parts = line.split(',').map(Number);
+          if (parts.length === 3 && parts.every(n => !isNaN(n))) {
+            handleSample(parts[0], parts[1], parts[2]);
+          }
+        }
+      }
+    } catch (err) {
+      alert('Could not connect: ' + err.message);
+    }
+  });
+
+  // ---------- physics / game step ----------
+  function tryJump(vy) {
+    if (!player.onGround || gameWon) return;
+    player.vy = -vy;
+    player.onGround = false;
+    player.state = 'jump';
+    sfxJump();
+  }
+
+  function update(dt) {
+    if (gameWon) return;
+
+    // horizontal control from tilt
+    const effectiveTiltX = tiltIsStale() ? 0 : tiltX;
+    player.vx = Math.max(-1, Math.min(1, effectiveTiltX / 7)) * MAX_SPEED;
+    if (Math.abs(player.vx) > 10) player.facing = player.vx > 0 ? 1 : -1;
+
+    // jump trigger from jerk
+    if (jerkPending > 0) {
+      const atWall = player.x + player.w >= WALL_X - 10 && player.x <= WALL_X + WALL_W && player.onGround;
+      if (atWall) {
+        if (jerkPending * 60 >= WALL_CLIMB_MIN_V) {
+          tryJump(BIG_JUMP_V);
+        } else {
+          showTryAgain();
+        }
+      } else {
+        tryJump(Math.min(HURDLE_JUMP_V + jerkPending * 20, HURDLE_JUMP_V * 1.4));
+      }
+      jerkPending = 0;
+    }
+
+    player.x += player.vx * dt;
+    player.x = Math.max(0, Math.min(W - player.w, player.x));
+
+    player.vy += GRAVITY * dt;
+    player.y += player.vy * dt;
+
+    const feetX = player.x + player.w / 2;
+    const grounded = onGroundAt(feetX);
+    const wasAirborne = !player.onGround;
+
+    if (player.y >= GROUND_Y && grounded) {
+      // solid ground right under the feet -- land here
+      player.y = GROUND_Y;
+      player.vy = 0;
+      player.onGround = true;
+      player.state = Math.abs(player.vx) > 10 ? 'walk' : 'idle';
+      if (wasAirborne) sfxLand();
+    } else {
+      // the instant the feet leave solid ground, remember which pit
+      // (if any) -- horizontal drift during the fall can carry feetX
+      // past a narrow gap by the time it's fully off-screen, so this
+      // has to be captured now, not recomputed later
+      if (player.onGround) {
+        const idx = pitIndexAt(feetX);
+        if (idx >= 0) fallingPitIdx = idx;
+      }
+      player.onGround = false;
+      if (player.state !== 'win') player.state = 'jump';
+
+      // only once fully off the bottom of the screen (visibly fallen
+      // into the pit) does it count as a fail and respawn
+      if (player.y > H + 20) {
+        if (fallingPitIdx >= 0) showMessage(pitMessages[fallingPitIdx]);
+        fallingPitIdx = -1;
+        player.x = Math.max(0, feetX - 120);
+        player.y = GROUND_Y;
+        player.vy = 0;
+        player.onGround = true;
+      }
+    }
+
+    // reaching the top of the wall with enough height = win
+    if (!gameWon && player.x + player.w > WALL_X + 10 && player.y <= WALL_TOP_Y + 20) {
+      gameWon = true;
+      player.state = 'win';
+      player.y = WALL_TOP_Y + 6; // feet resting on the roofline (player.y is the feet baseline, not the top)
+      player.x = WALL_X + 20;
+      spawnFireworks();
+      sfxWin();
+      // a fail message from a moment ago might still be fading out --
+      // a win takes priority, don't let it linger on top of the win screen
+      tryAgainTimer = 0;
+      document.getElementById('tryAgain').classList.remove('show');
+    }
+
+    if (tryAgainTimer > 0) {
+      tryAgainTimer -= dt;
+      if (tryAgainTimer <= 0) document.getElementById('tryAgain').classList.remove('show');
+    }
+  }
+
+  function showMessage(text, holdSeconds) {
+    const el = document.getElementById('tryAgain');
+    el.textContent = text;
+    el.classList.add('show');
+    tryAgainTimer = holdSeconds || 1.8;
+    sfxFail();
+  }
+
+  function showTryAgain() {
+    showMessage('TRY AGAIN', 1.1);
+    // small bounce-back so it reads as a failed attempt
+    player.vy = -260;
+    player.onGround = false;
+  }
+
+  // ---------- fireworks particles ----------
+  let particles = [];
+  function spawnFireworks() {
+    for (let burst = 0; burst < 3; burst++) {
+      setTimeout(() => {
+        const cx = 200 + Math.random() * 500;
+        const cy = 60 + Math.random() * 80;
+        const color = brickColors[Math.floor(Math.random() * brickColors.length)];
+        for (let i = 0; i < 40; i++) {
+          const angle = (Math.PI * 2 * i) / 40;
+          const speed = 80 + Math.random() * 120;
+          particles.push({
+            x: cx, y: cy,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 1, color,
+          });
+        }
+      }, burst * 350);
+    }
+  }
+  function updateParticles(dt) {
+    particles.forEach(p => {
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vy += 140 * dt;
+      p.life -= dt * 0.7;
+    });
+    particles = particles.filter(p => p.life > 0);
+  }
+
+  // ---------- drawing (all at low-res onto pctx, then scaled up crisp) ----------
+  function drawSky() {
+    // banded flat sky instead of a smooth gradient, reads as pixel art
+    const bands = ['#0f1a33', '#16264a', '#1f3560', '#2c477a', '#3a5a8c'];
+    const bandH = Math.ceil(GROUND_Y / PIX / bands.length);
+    bands.forEach((color, i) => {
+      pctx.fillStyle = color;
+      pctx.fillRect(0, i * bandH, pcanvas.width, bandH);
+    });
+    // a few hard-edged pixel stars
+    pctx.fillStyle = '#F5F1E8';
+    for (let i = 0; i < 24; i++) {
+      const sx = (i * 37) % pcanvas.width;
+      const sy = (i * 19) % (GROUND_Y / PIX - 12);
+      pctx.fillRect(sx, sy, 1, 1);
+    }
+  }
+
+  function drawGround() {
+    const gy = GROUND_Y / PIX;
+    for (const [a, b] of groundSegs) {
+      const px = a / PIX, pw = (b - a) / PIX;
+      // mossy top edge
+      pctx.fillStyle = '#3c4f2b';
+      pctx.fillRect(px, gy, pw, 2);
+      // cobblestone body: alternating brick-like blocks, not a flat fill
+      const rowH = 4, colW = 6;
+      for (let ry = gy + 2, rowIdx = 0; ry < pcanvas.height; ry += rowH, rowIdx++) {
+        const offset = (rowIdx % 2) * (colW / 2);
+        for (let cx = px - colW + offset; cx < px + pw; cx += colW) {
+          const shade = (Math.floor(cx / colW) + rowIdx) % 2 === 0 ? '#2b2f36' : '#33383f';
+          pctx.fillStyle = shade;
+          const blockX = Math.max(cx, px);
+          const blockW = Math.min(cx + colW, px + pw) - blockX;
+          if (blockW > 0) pctx.fillRect(blockX, ry, blockW - 0.5, rowH - 0.5);
+        }
+      }
+    }
+  }
+
+  // the building/wall, drawn from the supplied tower image (logo
+  // already baked into it) instead of procedural bricks
+  function drawTower() {
+    const sp = sprites.tower;
+    if (!sp) return; // not loaded/processed yet
+    const bh = GROUND_Y - WALL_TOP_Y;
+    const bw = bh * (sp.bbox.w / sp.bbox.h);
+    const bx = WALL_X + (WALL_W - bw) / 2;
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(sp.canvas, sp.bbox.x, sp.bbox.y, sp.bbox.w, sp.bbox.h, bx, WALL_TOP_Y, bw, bh);
+    ctx.restore();
+  }
+
+  function drawPlayer() {
+    let key = 'idle';
+    if (player.state === 'jump' || player.state === 'win') key = 'jump';
+    else if (player.state === 'walk') key = 'walk';
+
+    const sp = sprites[key];
+    if (!sp) return; // not loaded/processed yet
+
+    // preserve the sprite's real aspect ratio instead of squishing it
+    // into a fixed box (that's what caused the hourglass distortion) --
+    // height stays fixed so feet stay planted, width follows naturally
+    const centerX = player.x + player.w / 2;
+    const h = player.h;
+    const w = h * (sp.bbox.w / sp.bbox.h);
+    const x = centerX - w / 2;
+    const y = player.y - h;
+
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    if (player.facing < 0) {
+      ctx.translate(x + w, y);
+      ctx.scale(-1, 1);
+      ctx.drawImage(sp.canvas, sp.bbox.x, sp.bbox.y, sp.bbox.w, sp.bbox.h, 0, 0, w, h);
+    } else {
+      ctx.drawImage(sp.canvas, sp.bbox.x, sp.bbox.y, sp.bbox.w, sp.bbox.h, x, y, w, h);
+    }
+    ctx.restore();
+  }
+
+  function drawFlag() {
+    if (!gameWon) return;
+    const fx = WALL_X + WALL_W / 2 + 10, fy = WALL_TOP_Y - 46;
+    ctx.save();
+    ctx.strokeStyle = '#C9CCD3';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(fx, fy);
+    ctx.lineTo(fx, fy + 46);
+    ctx.stroke();
+    const wave = Math.sin(performance.now() / 150) * 4;
+    ctx.fillStyle = LEGO_RED;
+    ctx.beginPath();
+    ctx.moveTo(fx, fy);
+    ctx.lineTo(fx + 24 + wave, fy + 6);
+    ctx.lineTo(fx, fy + 12);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawParticles() {
+    particles.forEach(p => {
+      pctx.fillStyle = p.color;
+      const px = Math.round(p.x / PIX), py = Math.round(p.y / PIX);
+      if (p.life > 0) pctx.fillRect(px, py, 1, 1);
+    });
+  }
+
+  function drawWinText() {
+    if (!gameWon) return;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#F5F1E8';
+    ctx.font = '16px "Press Start 2P", monospace';
+    ctx.fillText('YOU MADE IT', W / 2, 60);
+  }
+
+  // ---------- main loop ----------
+  let lastT = performance.now();
+  function frame(t) {
+    const dt = Math.min((t - lastT) / 1000, 0.033);
+    lastT = t;
+
+    update(dt);
+    updateParticles(dt);
+
+    pctx.clearRect(0, 0, pcanvas.width, pcanvas.height);
+    drawSky();
+    drawGround();
+    drawParticles();
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(pcanvas, 0, 0, pcanvas.width, pcanvas.height, 0, 0, W, H);
+
+    drawTower();
+    drawFlag();
+    drawPlayer();
+    drawWinText();
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+</script>
+</body>
+</html>

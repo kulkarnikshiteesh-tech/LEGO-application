@@ -100,7 +100,7 @@
 
   // ---- three.js scene, orthographic camera mapped 1:1 to screen pixels
   // (same pattern as the joystick pop-out) so the lathe sits exactly
-  // where your fingertip is. ----
+  // at the tracked fingertip position. ----
   const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, alpha: true, antialias: true });
   const scene = new THREE.Scene();
   let camera;
@@ -142,8 +142,8 @@
     return { x: x - window.innerWidth / 2, y: -(y - window.innerHeight / 2) };
   }
 
-  // ---- finishing sparkle burst: fires once when your hand leaves frame
-  // after a vase exists. Real star-shaped sprites (not plain dots),
+  // ---- finishing sparkle burst: fires once when the hand leaves frame
+  // after a vase exists. Star-shaped sprites (not plain dots),
   // varied sizes, white/blue mix. Self-disposing. ----
   const SPARKLE_COUNT = 50;
   const SPARKLE_LIFETIME = 0.8; // seconds
@@ -274,16 +274,14 @@
   const BIN_COUNT = 140;
   const TOP_MARGIN_FRAC = 0.05; // ceiling of the build zone, as a fraction
                                  // from the top of the screen -- always
-                                 // reachable regardless of where you start
+                                 // reachable regardless of the start point
 
-  // Fixed trigger zone: the disc and your hand's starting position are
+  // Fixed trigger zone: the disc and the hand's starting position are
   // both physically consistent take to take, so instead of anchoring to
   // "wherever tracking first happens to succeed" (which drifts, gets hit
   // by resize timing, and can trigger on a stray detection anywhere in
-  // frame), the vase only starts building once your tracked point is
-  // inside this zone. Estimated from your test footage (disc sits
-  // center-left, lower half of frame) -- ADJUST THESE if the drawn
-  // rectangle doesn't line up with your actual disc position.
+  // frame), the vase only starts building once the tracked point is
+  // inside this zone (disc sits center-left, lower half of frame).
   const DISC_ZONE_FRAC = { x0: 0.28, x1: 0.55, y0: 0.55, y1: 0.85 };
   function inDiscZone(fx, fy) {
     const xf = fx / window.innerWidth, yf = fy / window.innerHeight;
@@ -306,7 +304,7 @@
   let profile = new Array(BIN_COUNT).fill(null);
   // Stored as FRACTIONS of window width/height, not raw pixels -- entering
   // fullscreen (triggered on the same tap that starts tracking) can change
-  // window.innerWidth/innerHeight shortly after your first touch is
+  // window.innerWidth/innerHeight shortly after the first touch is
   // captured, and raw pixel anchors would then be silently wrong for
   // every frame after that resize. Fractions stay valid regardless.
   let centerXFrac = null;
@@ -432,10 +430,10 @@
       baseYFrac = fy / window.innerHeight;
       // Ceiling is always near the actual top of the screen, NOT a fixed
       // height above the start point -- a fixed height could (and did)
-      // land above the visible frame if your hand starts partway down,
+      // land above the visible frame if the hand starts partway down,
       // making part of the range physically unreachable. This way the
-      // full bin range always maps to your full actual available travel,
-      // wherever you happen to start.
+      // full bin range always maps to the full actual available travel,
+      // regardless of the start point.
       topYFrac = TOP_MARGIN_FRAC;
     }
     const centerX = getCenterX(), baseY = getBaseY(), topY = getTopY();
@@ -517,7 +515,7 @@
     }
 
     debugCtx.clearRect(0, 0, debugCanvas.width, debugCanvas.height);
-    drawDiscZone(debugCtx); // white dashed = waiting for you to enter it, green = anchored
+    drawDiscZone(debugCtx); // white dashed = waiting for entry, green = anchored
 
     if (result.landmarks && result.landmarks.length > 0) {
       lastSeenAt = now;

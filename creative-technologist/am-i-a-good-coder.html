@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Am I a good coder?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  :root {
+    --sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --accent: #E85D14;
+    --ink: #16181C;
+    --paper: #F5F1E8;
+    --green: #3ECF6B;
+  }
+  html, body {
+    height:100%; background:#0B0C0E; color:var(--paper);
+    font-family:var(--sans);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .screen {
+    position:fixed; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:56px;
+    opacity:0; pointer-events:none;
+    transition: opacity .5s ease;
+  }
+  .screen.active { opacity:1; pointer-events:auto; }
+
+  h1 {
+    font-size:clamp(24px, 4vw, 40px);
+    font-weight:600; letter-spacing:-0.01em;
+    text-align:center;
+    max-width:700px;
+  }
+
+  .row { display:flex; gap:28px; position:relative; }
+
+  button {
+    font-family:var(--mono); font-size:15px; font-weight:600; letter-spacing:.03em; text-transform:uppercase;
+    padding:16px 34px; border-radius:8px; border:none; cursor:pointer;
+    background:var(--paper); color:var(--ink);
+  }
+  button.no { background:transparent; border:1.5px solid rgba(245,241,232,0.35); color:var(--paper); }
+  #yesBtn {
+    position:relative;
+    transition: transform .12s ease-out;
+  }
+
+  #correctLine {
+    font-family:var(--mono); font-size:16px; font-weight:600; letter-spacing:.03em;
+    color:var(--green);
+    opacity:0; transform:translateY(6px);
+    transition: opacity .4s ease, transform .4s ease;
+  }
+  #correctLine.show { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+
+  <div class="screen active" id="screen1">
+    <h1>Am I a good coder?</h1>
+    <div class="row" id="row1">
+      <button id="yesBtn">Yes</button>
+      <button class="no" id="noBtn">No</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen2">
+    <h1>Do I ever doubt myself?</h1>
+    <div class="row">
+      <button id="mostlyBtn">Yes, mostly</button>
+      <button class="no" id="neverBtn">Never</button>
+    </div>
+    <div id="correctLine">correct answer</div>
+  </div>
+
+<script>
+  // ---- screen 1: the "Yes" button dodges the cursor ----
+  const yesBtn = document.getElementById('yesBtn');
+  const noBtn = document.getElementById('noBtn');
+  const row1 = document.getElementById('row1');
+  let yesOffset = { x: 0, y: 0 };
+  const DODGE_RADIUS = 110;
+  const DODGE_STRENGTH = 140;
+
+  document.getElementById('screen1').addEventListener('mousemove', (e) => {
+    const rect = yesBtn.getBoundingClientRect();
+    const bx = rect.left + rect.width / 2;
+    const by = rect.top + rect.height / 2;
+    const dx = bx - e.clientX;
+    const dy = by - e.clientY;
+    const dist = Math.max(Math.hypot(dx, dy), 0.01);
+    if (dist < DODGE_RADIUS) {
+      const push = (DODGE_RADIUS - dist) / DODGE_RADIUS;
+      yesOffset.x += (dx / dist) * push * DODGE_STRENGTH;
+      yesOffset.y += (dy / dist) * push * DODGE_STRENGTH;
+      // keep it roughly within the row's bounds so it doesn't fly off-screen
+      const bounds = row1.getBoundingClientRect();
+      const maxX = bounds.width * 0.6, maxY = 80;
+      yesOffset.x = Math.max(-maxX, Math.min(maxX, yesOffset.x));
+      yesOffset.y = Math.max(-maxY, Math.min(maxY, yesOffset.y));
+      yesBtn.style.transform = `translate(${yesOffset.x}px, ${yesOffset.y}px)`;
+    }
+  });
+
+  function goToScreen2() {
+    document.getElementById('screen1').classList.remove('active');
+    document.getElementById('screen2').classList.add('active');
+  }
+  yesBtn.addEventListener('click', goToScreen2);
+  noBtn.addEventListener('click', goToScreen2);
+
+  // ---- screen 2: "Never" morphs into "Yes, mostly", then any click reveals the answer ----
+  const mostlyBtn = document.getElementById('mostlyBtn');
+  const neverBtn = document.getElementById('neverBtn');
+  const correctLine = document.getElementById('correctLine');
+  let neverMorphed = false;
+
+  function showCorrect() {
+    correctLine.classList.add('show');
+  }
+
+  neverBtn.addEventListener('click', () => {
+    if (!neverMorphed) {
+      neverMorphed = true;
+      neverBtn.textContent = 'Yes, mostly';
+      neverBtn.classList.remove('no');
+      return;
+    }
+    showCorrect();
+  });
+
+  mostlyBtn.addEventListener('click', showCorrect);
+</script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kshiteesh Kulkarni — Creative Technologist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  :root {
+    --sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --accent: #E85D14;
+    --ink: #F5F1E8;
+    --bg: #0B0C0E;
+  }
+  html, body {
+    height:100%; width:100%;
+    background:var(--bg); color:var(--ink);
+    font-family:var(--sans);
+    overflow:hidden;
+    position:fixed; inset:0;
+  }
+
+  /* subtle grain + scanline texture, consistent dark sci-fi surface */
+  body::before {
+    content:''; position:fixed; inset:0; z-index:1; pointer-events:none;
+    opacity:0.04;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .screen {
+    position:fixed; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none;
+    transition:opacity .6s ease;
+  }
+  .screen.active { opacity:1; pointer-events:auto; }
+
+  /* ---- GATE ---- */
+  #gate { flex-direction:column; gap:22px; z-index:5; }
+  .gate-name {
+    font-size:clamp(28px, 5vw, 52px); font-weight:600; letter-spacing:-0.02em;
+    text-align:center;
+  }
+  .gate-tagline {
+    font-family:var(--mono); font-size:13px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--accent);
+  }
+  #gate-btn {
+    margin-top:20px;
+    width:84px; height:84px; border-radius:50%;
+    background:var(--accent); border:none;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    box-shadow:0 0 40px rgba(232,93,20,0.4);
+  }
+  #gate-btn svg { width:28px; height:28px; fill:var(--bg); margin-left:3px; }
+  .gate-hint {
+    font-family:var(--mono); font-size:11px; color:rgba(245,241,232,0.4);
+    letter-spacing:.04em;
+  }
+
+  /* corner HUD brackets */
+  .bracket { position:fixed; width:22px; height:22px; border:1.5px solid rgba(232,93,20,0.4); pointer-events:none; z-index:6; }
+  .bracket.tl { top:20px; left:20px; border-right:none; border-bottom:none; }
+  .bracket.tr { top:20px; right:20px; border-left:none; border-bottom:none; }
+  .bracket.bl { bottom:20px; left:20px; border-right:none; border-top:none; }
+  .bracket.br { bottom:20px; right:20px; border-left:none; border-top:none; }
+
+  /* ---- VIDEO ---- */
+  #video-screen { background:#000; z-index:4; }
+  #video-screen.active { pointer-events:none; }
+  #app-video { width:100%; height:100%; object-fit:cover; display:block; }
+
+  /* ---- LINKS ---- */
+  #links-screen { flex-direction:column; gap:36px; z-index:3; }
+  .links-name {
+    font-size:clamp(22px, 3.5vw, 34px); font-weight:600; letter-spacing:-0.01em;
+    text-align:center;
+  }
+  .links-role {
+    font-family:var(--mono); font-size:12px; letter-spacing:.1em; text-transform:uppercase;
+    color:rgba(245,241,232,0.5); margin-top:6px; text-align:center;
+  }
+  .links-list { display:flex; flex-direction:column; gap:12px; width:min(360px, 84vw); }
+  .link-row {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px; border-radius:8px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.08);
+    text-decoration:none; color:var(--ink);
+    font-family:var(--mono); font-size:13px; letter-spacing:.02em;
+    transition:border-color .15s ease, background .15s ease, transform .15s ease;
+  }
+  .link-row:hover {
+    border-color:rgba(232,93,20,0.5);
+    background:rgba(232,93,20,0.06);
+    transform:translateY(-1px);
+  }
+  .link-row .arrow { color:var(--accent); }
+</style>
+</head>
+<body>
+
+  <div class="bracket tl"></div>
+  <div class="bracket tr"></div>
+  <div class="bracket bl"></div>
+  <div class="bracket br"></div>
+
+  <div class="screen active" id="gate">
+    <div class="gate-name">Kshiteesh Kulkarni</div>
+    <div class="gate-tagline">Designer. Maker. Engineer.</div>
+    <button id="gate-btn" aria-label="Play">
+      <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <div class="gate-hint">tap to begin</div>
+  </div>
+
+  <div class="screen" id="video-screen">
+    <video id="app-video" playsinline src="./assets/application.mp4"></video>
+  </div>
+
+  <div class="screen" id="links-screen">
+    <div>
+      <div class="links-name">Kshiteesh Kulkarni</div>
+      <div class="links-role">Designer. Maker. Engineer.</div>
+    </div>
+    <div class="links-list">
+      <a class="link-row" href="https://www.linkedin.com/in/kshiteeshkulkarni" target="_blank" rel="noopener">
+        <span>LinkedIn</span><span class="arrow">&#8594;</span>
+      </a>
+      <a class="link-row" href="https://iamadesigneer.framer.website" target="_blank" rel="noopener">
+        <span>Design portfolio</span><span class="arrow">&#8594;</span>
+      </a>
+      <a class="link-row" href="https://oimake.com" target="_blank" rel="noopener">
+        <span>OIMake</span><span class="arrow">&#8594;</span>
+      </a>
+      <a class="link-row" href="https://makeable-dfm.vercel.app" target="_blank" rel="noopener">
+        <span>Makeable</span><span class="arrow">&#8594;</span>
+      </a>
+      <a class="link-row" href="https://github.com/kulkarnikshiteesh-tech/LEGO-application" target="_blank" rel="noopener">
+        <span>Project source (GitHub)</span><span class="arrow">&#8594;</span>
+      </a>
+    </div>
+  </div>
+
+<script>
+  const gate = document.getElementById('gate');
+  const gateBtn = document.getElementById('gate-btn');
+  const videoScreen = document.getElementById('video-screen');
+  const linksScreen = document.getElementById('links-screen');
+  const video = document.getElementById('app-video');
+
+  gateBtn.addEventListener('click', () => {
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+    gate.classList.remove('active');
+    videoScreen.classList.add('active');
+    video.play().catch(() => {});
+  });
+
+  video.addEventListener('ended', () => {
+    videoScreen.classList.remove('active');
+    linksScreen.classList.add('active');
+  });
+</script>
+</body>
+</html>
