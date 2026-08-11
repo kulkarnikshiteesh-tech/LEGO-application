@@ -24,9 +24,11 @@
     position:fixed; inset:0;
   }
 
-  /* subtle grain + scanline texture, consistent dark sci-fi surface */
+  /* Subtle grain, sits above every layer (including the video) so the
+     whole page carries one uniform texture and the background reads as
+     a single flat value everywhere. */
   body::before {
-    content:''; position:fixed; inset:0; z-index:1; pointer-events:none;
+    content:''; position:fixed; inset:0; z-index:10; pointer-events:none;
     opacity:0.04;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
@@ -71,12 +73,21 @@
   .bracket.br { bottom:20px; right:20px; border-left:none; border-top:none; }
 
   /* ---- VIDEO ---- */
-  #video-screen { background:#000; z-index:4; }
+  #video-screen { background:var(--bg); z-index:4; }
   #video-screen.active { pointer-events:none; }
   #app-video { width:100%; height:100%; object-fit:cover; display:block; }
 
-  /* ---- LINKS ---- */
-  #links-screen { flex-direction:column; gap:36px; z-index:3; }
+  /* ---- LINKS ----
+     This screen is the only one that can exceed the viewport, so it
+     scrolls internally while the gate and video stay locked. */
+  #links-screen {
+    flex-direction:column; z-index:3;
+    align-items:center; justify-content:flex-start;
+    overflow-y:auto; -webkit-overflow-scrolling:touch;
+    padding:7vh 20px 10vh;
+  }
+  .links-inner { width:min(520px, 100%); display:flex; flex-direction:column; gap:34px; }
+
   .links-name {
     font-size:clamp(22px, 3.5vw, 34px); font-weight:600; letter-spacing:-0.01em;
     text-align:center;
@@ -85,22 +96,65 @@
     font-family:var(--mono); font-size:12px; letter-spacing:.1em; text-transform:uppercase;
     color:rgba(245,241,232,0.5); margin-top:6px; text-align:center;
   }
-  .links-list { display:flex; flex-direction:column; gap:12px; width:min(360px, 84vw); }
-  .link-row {
-    display:flex; align-items:center; justify-content:space-between;
-    padding:16px 20px; border-radius:8px;
+
+  .card-list { display:flex; flex-direction:column; gap:12px; }
+
+  .card {
+    display:flex; align-items:center; gap:16px;
+    padding:14px 18px 14px 14px; border-radius:10px;
     background:rgba(255,255,255,0.03);
     border:1px solid rgba(255,255,255,0.08);
     text-decoration:none; color:var(--ink);
-    font-family:var(--mono); font-size:13px; letter-spacing:.02em;
     transition:border-color .15s ease, background .15s ease, transform .15s ease;
   }
-  .link-row:hover {
+  a.card:hover, .card.hoverable:hover {
     border-color:rgba(232,93,20,0.5);
     background:rgba(232,93,20,0.06);
     transform:translateY(-1px);
   }
-  .link-row .arrow { color:var(--accent); }
+
+  /* icon tile: same footprint for every card so the row reads evenly,
+     whether it holds a wide lockup or a small glyph */
+  .tile {
+    flex:0 0 auto; width:96px; height:56px; border-radius:6px;
+    background:rgba(255,255,255,0.05);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .tile img { width:100%; height:100%; object-fit:cover; display:block; }
+  .tile.glyph svg { width:24px; height:24px; fill:var(--ink); opacity:0.9; }
+  .tile.sq { width:56px; height:56px; }
+  .tile.sq img { object-fit:cover; }
+
+  .card-text { display:flex; flex-direction:column; gap:3px; min-width:0; }
+  .card-title {
+    font-size:15px; font-weight:600; letter-spacing:-0.005em; color:var(--ink);
+    text-decoration:none;
+  }
+  a.card-title:hover { color:var(--accent); }
+  .card-sub {
+    font-family:var(--mono); font-size:11px; line-height:1.5;
+    color:rgba(245,241,232,0.5);
+  }
+  .card-sub a { color:var(--accent); text-decoration:none; border-bottom:1px solid rgba(232,93,20,0.4); }
+  .card-sub a:hover { border-bottom-color:var(--accent); }
+  .card .chev { margin-left:auto; color:var(--accent); font-family:var(--mono); font-size:14px; flex:0 0 auto; }
+
+  .sec-label {
+    font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:rgba(245,241,232,0.38); font-weight:500;
+    display:flex; align-items:center; gap:12px; margin-bottom:14px;
+  }
+  .sec-label::after {
+    content:''; flex:1; height:1px;
+    background:linear-gradient(90deg, rgba(255,255,255,0.12), transparent);
+  }
+
+  @media (max-width:420px) {
+    .tile { width:74px; height:44px; }
+    .tile.sq { width:44px; height:44px; }
+    .card { gap:12px; padding:12px 14px 12px 12px; }
+  }
 </style>
 </head>
 <body>
@@ -124,26 +178,80 @@
   </div>
 
   <div class="screen" id="links-screen">
-    <div>
-      <div class="links-name">Kshiteesh Kulkarni</div>
-      <div class="links-role">Designer. Maker. Engineer.</div>
-    </div>
-    <div class="links-list">
-      <a class="link-row" href="https://www.linkedin.com/in/kshiteeshkulkarni" target="_blank" rel="noopener">
-        <span>LinkedIn</span><span class="arrow">&#8594;</span>
-      </a>
-      <a class="link-row" href="https://iamadesigneer.framer.website" target="_blank" rel="noopener">
-        <span>Design portfolio</span><span class="arrow">&#8594;</span>
-      </a>
-      <a class="link-row" href="https://oimake.com" target="_blank" rel="noopener">
-        <span>OIMake</span><span class="arrow">&#8594;</span>
-      </a>
-      <a class="link-row" href="https://makeable-dfm.vercel.app" target="_blank" rel="noopener">
-        <span>Makeable</span><span class="arrow">&#8594;</span>
-      </a>
-      <a class="link-row" href="https://github.com/kulkarnikshiteesh-tech/LEGO-application" target="_blank" rel="noopener">
-        <span>Project source (GitHub)</span><span class="arrow">&#8594;</span>
-      </a>
+    <div class="links-inner">
+
+      <header>
+        <div class="links-name">Kshiteesh Kulkarni</div>
+        <div class="links-role">Designer. Maker. Engineer.</div>
+      </header>
+
+      <nav class="card-list">
+        <!-- Portfolio card is a plain container, not an anchor, because its
+             subtitle holds its own link and anchors cannot nest. -->
+        <div class="card hoverable">
+          <span class="tile"><img src="./assets/icon-designeer.png" alt="I am a Designeer"></span>
+          <span class="card-text">
+            <a class="card-title" href="https://iamadesigneer.framer.website" target="_blank" rel="noopener">My design portfolio</a>
+            <span class="card-sub">Don't miss the <a href="https://iamadesigneer.framer.website/unearthing" target="_blank" rel="noopener">Unearthing</a> page</span>
+          </span>
+          <span class="chev">&#8594;</span>
+        </div>
+
+        <a class="card" href="https://www.linkedin.com/in/kshiteeshkulkarni" target="_blank" rel="noopener">
+          <span class="tile glyph">
+            <svg viewBox="0 0 448 512" aria-hidden="true"><path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"/></svg>
+          </span>
+          <span class="card-text">
+            <span class="card-title">LinkedIn profile</span>
+            <span class="card-sub">Testimonials are organic</span>
+          </span>
+          <span class="chev">&#8594;</span>
+        </a>
+
+        <a class="card" href="https://oimake.com" target="_blank" rel="noopener">
+          <span class="tile"><img src="./assets/icon-oimake.png" alt="OIMake"></span>
+          <span class="card-text">
+            <span class="card-title">OIMake</span>
+            <span class="card-sub">DIY tech toys, where I lead product and design</span>
+          </span>
+          <span class="chev">&#8594;</span>
+        </a>
+
+        <a class="card" href="https://github.com/kulkarnikshiteesh-tech/LEGO-application" target="_blank" rel="noopener">
+          <span class="tile glyph">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          </span>
+          <span class="card-text">
+            <span class="card-title">This video repo</span>
+            <span class="card-sub">Try these projects yourself</span>
+          </span>
+          <span class="chev">&#8594;</span>
+        </a>
+      </nav>
+
+      <section>
+        <h2 class="sec-label">Things I am working on</h2>
+        <div class="card-list">
+          <a class="card" href="./no-code-robot.html">
+            <span class="tile sq"><img src="./assets/icon-nocode.png" alt="No-code Robot"></span>
+            <span class="card-text">
+              <span class="card-title">No-code Robot</span>
+              <span class="card-sub">Teaching 4-6 year olds to sequence instructions, no screen involved</span>
+            </span>
+            <span class="chev">&#8594;</span>
+          </a>
+
+          <a class="card" href="https://makeable-dfm.in" target="_blank" rel="noopener">
+            <span class="tile sq"><img src="./assets/icon-makeable.png" alt="Makeable"></span>
+            <span class="card-text">
+              <span class="card-title">Makeable</span>
+              <span class="card-sub">Injection-moulding DFM analysis: undercuts, wall thickness, tooling cost</span>
+            </span>
+            <span class="chev">&#8594;</span>
+          </a>
+        </div>
+      </section>
+
     </div>
   </div>
 
@@ -166,6 +274,18 @@
   video.addEventListener('ended', () => {
     videoScreen.classList.remove('active');
     linksScreen.classList.add('active');
+  });
+
+  // The portfolio card can't be an anchor (its subtitle contains one),
+  // so give its background the same click behaviour without swallowing
+  // the real links inside it.
+  document.querySelectorAll('.card.hoverable').forEach((card) => {
+    const target = card.querySelector('.card-title');
+    if (!target) return;
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('a')) return;
+      window.open(target.href, '_blank', 'noopener');
+    });
   });
 </script>
 </body>

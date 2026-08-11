@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>No-code Robot — Kshiteesh Kulkarni</title>
+<meta name="description" content="A robot that builds computational thinking in 4-6 year olds. Concept, interaction model and physical design.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  :root {
+    --sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --accent: #E85D14;
+    --ink: #F5F1E8;
+    --bg: #0B0C0E;
+  }
+  html { scroll-behavior:smooth; }
+  body {
+    background:var(--bg); color:var(--ink);
+    font-family:var(--sans); line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* same grain as the entry page, above everything, uniform surface */
+  body::before {
+    content:''; position:fixed; inset:0; z-index:10; pointer-events:none;
+    opacity:0.04;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .wrap { width:min(760px, 90vw); margin:0 auto; padding:34px 0 90px; }
+
+  .back {
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--mono); font-size:12px; letter-spacing:.04em;
+    color:rgba(245,241,232,0.55); text-decoration:none;
+    padding:8px 0; margin-bottom:30px;
+    transition:color .15s ease;
+  }
+  .back:hover { color:var(--accent); }
+
+  .status {
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); border:1px solid rgba(232,93,20,0.35);
+    padding:5px 12px; border-radius:3px; margin-bottom:20px;
+  }
+  .status::before {
+    content:''; width:5px; height:5px; border-radius:50%;
+    background:var(--accent); box-shadow:0 0 8px var(--accent);
+  }
+
+  h1 { font-size:clamp(30px, 5.5vw, 48px); font-weight:600; letter-spacing:-0.02em; line-height:1.08; }
+  .deck {
+    font-family:var(--mono); font-size:12px; letter-spacing:.06em; text-transform:uppercase;
+    color:rgba(245,241,232,0.45); margin-top:12px;
+  }
+  .role {
+    font-family:var(--mono); font-size:12px; color:rgba(245,241,232,0.55);
+    margin-top:8px; letter-spacing:.02em;
+  }
+
+  .body-copy { margin-top:30px; display:flex; flex-direction:column; gap:18px; }
+  .body-copy p { font-size:16px; color:rgba(245,241,232,0.82); max-width:62ch; }
+
+  .tags { display:flex; flex-wrap:wrap; gap:8px; margin-top:26px; }
+  .tag {
+    font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+    color:rgba(245,241,232,0.6);
+    border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.03);
+    padding:5px 11px; border-radius:3px;
+  }
+
+  .rule { height:1px; background:linear-gradient(90deg, rgba(255,255,255,0.12), transparent); margin:44px 0 34px; }
+
+  figure { margin-bottom:32px; }
+  .frame {
+    border:1px solid rgba(255,255,255,0.09); border-radius:10px;
+    overflow:hidden; background:#05070A; line-height:0;
+  }
+  .frame video, .frame img { width:100%; height:auto; display:block; }
+  figcaption {
+    font-family:var(--mono); font-size:11px; line-height:1.6;
+    color:rgba(245,241,232,0.45); margin-top:10px; max-width:62ch;
+  }
+
+  .foot { margin-top:50px; display:flex; flex-wrap:wrap; gap:12px; }
+  .foot a {
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--mono); font-size:12px; text-decoration:none;
+    color:var(--ink); border:1px solid rgba(255,255,255,0.12);
+    background:rgba(255,255,255,0.03);
+    padding:11px 16px; border-radius:8px;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .foot a:hover { border-color:rgba(232,93,20,0.5); background:rgba(232,93,20,0.06); }
+  .foot .arrow { color:var(--accent); }
+</style>
+</head>
+<body>
+  <main class="wrap">
+
+    <a class="back" href="./index.html">&#8592; Back</a>
+
+    <div class="status">In development</div>
+    <h1>No-code Robot</h1>
+    <div class="deck">Pre-primary &middot; computational thinking through play</div>
+    <div class="role">Concept &amp; design lead &middot; electronics R&amp;D owns the board</div>
+
+    <div class="body-copy">
+      <p>A robot that builds computational thinking in 4-6 year olds. Children sequence directional steps with buttons and watch it route across a printed map. I own the concept, the interaction model and the physical design; electronics R&amp;D, who report to me, own the board.</p>
+      <p>The hard design problem is orientation: keeping the cognitive load right for a child still learning to track a turn. We tested the first prototype in multiple kindergartens.</p>
+    </div>
+
+    <div class="tags">
+      <span class="tag">Interaction design</span>
+      <span class="tag">Embedded (ESP32)</span>
+      <span class="tag">Early childhood</span>
+      <span class="tag">Tested in kindergartens</span>
+    </div>
+
+    <div class="rule"></div>
+
+    <figure>
+      <div class="frame">
+        <video src="./assets/nocode/1.mp4" autoplay muted loop playsinline preload="metadata"></video>
+      </div>
+      <figcaption>Kids navigate a printed map by feeding the robot a sequence of arrow presses. The first-stage prototype was tested in multiple kindergartens.</figcaption>
+    </figure>
+
+    <figure>
+      <div class="frame">
+        <video src="./assets/nocode/2.mp4" autoplay muted loop playsinline preload="metadata"></video>
+      </div>
+      <figcaption>The current second-stage prototype, running on ESP32, BO motors and a buzzer.</figcaption>
+    </figure>
+
+    <figure>
+      <div class="frame"><img src="./assets/nocode/3.jpg" alt="Concept and interaction studies for the no-code robot" loading="lazy"></div>
+      <figcaption>Concept and interaction studies.</figcaption>
+    </figure>
+
+    <figure>
+      <div class="frame"><img src="./assets/nocode/4.jpg" alt="Swappable character skins concept" loading="lazy"></div>
+      <figcaption>A concept: swappable character skins that can change to match a theme.</figcaption>
+    </figure>
+
+    <div class="foot">
+      <a href="./index.html">&#8592; Back to the links</a>
+      <a href="https://iamadesigneer.framer.website" target="_blank" rel="noopener">Design portfolio <span class="arrow">&#8594;</span></a>
+    </div>
+
+  </main>
+</body>
+</html>
