@@ -41,8 +41,20 @@
   }
   .screen.active { opacity:1; pointer-events:auto; }
 
-  /* ---- GATE ---- */
+  /* ---- GATE ----
+     Shows the video's thumbnail behind the play button. Both are torn
+     down instantly on press (see .instant) rather than cross-fading,
+     because the opening moments of the video must not be obscured. */
   #gate { flex-direction:column; gap:22px; z-index:5; }
+  /* The "Sound ON" prompt is cropped out of the thumbnail and placed as
+     a normal flex item in the gate, rather than laying the whole 16:9
+     frame behind everything. As a background it had no relationship to
+     the text above it, so shrinking the frame slid the artwork straight
+     into the "tap to begin" line. As a flex item the gap keeps them
+     apart at every window size, and its width is set directly. */
+  .gate-sound { width:150px; height:auto; display:block; margin-top:6px; }
+  @media (max-width:420px) { .gate-sound { width:124px; } }
+  .screen.instant { transition:none !important; }
   .gate-name {
     font-size:clamp(28px, 5vw, 52px); font-weight:600; letter-spacing:-0.02em;
     text-align:center;
@@ -75,7 +87,10 @@
   /* ---- VIDEO ---- */
   #video-screen { background:var(--bg); z-index:4; }
   #video-screen.active { pointer-events:none; }
-  #app-video { width:100%; height:100%; object-fit:cover; display:block; }
+  /* contain so the full 16:9 frame is always visible. cover would crop
+     the sides off on any window that isn't 16:9, and this video has
+     content that must not be cut. */
+  #app-video { width:100%; height:100%; object-fit:contain; display:block; }
 
   /* ---- LINKS ----
      This screen is the only one that can exceed the viewport, so it
@@ -84,9 +99,16 @@
     flex-direction:column; z-index:3;
     align-items:center; justify-content:flex-start;
     overflow-y:auto; -webkit-overflow-scrolling:touch;
-    padding:7vh 20px 10vh;
+    padding:20px;
   }
-  .links-inner { width:min(520px, 100%); display:flex; flex-direction:column; gap:34px; }
+  /* margin:auto centres the block when it fits and still allows the top
+     to scroll into view when it doesn't. justify-content:center would
+     clip the top on overflow, and fixed vh padding was tipping the page
+     just past the viewport and summoning a scrollbar. */
+  .links-inner {
+    width:min(520px, 100%); margin:auto;
+    display:flex; flex-direction:column; gap:26px;
+  }
 
   .links-name {
     font-size:clamp(22px, 3.5vw, 34px); font-weight:600; letter-spacing:-0.01em;
@@ -171,10 +193,16 @@
       <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
     </button>
     <div class="gate-hint">tap to begin</div>
+    <img class="gate-sound" src="./assets/sound-on.png" alt="Sound on">
+
   </div>
 
   <div class="screen" id="video-screen">
-    <video id="app-video" playsinline src="./assets/application.mp4"></video>
+    <!-- No poster attribute: it would render the thumbnail at full size
+         for a moment, jumping visibly from the 70% version on the gate.
+         The artwork is near-black and matches the page background, so
+         there is nothing to flash in the gap before frame one. -->
+    <video id="app-video" playsinline preload="auto" src="./assets/application.mp4"></video>
   </div>
 
   <div class="screen" id="links-screen">
@@ -266,7 +294,14 @@
     if (document.documentElement.requestFullscreen) {
       document.documentElement.requestFullscreen().catch(() => {});
     }
+    // Hard cut, not a cross-fade: a fading play button would sit over
+    // the first second of the video. The video element carries the same
+    // thumbnail as its poster, so there is no gap or flash of background
+    // between the gate disappearing and the first frame arriving.
+    gate.classList.add('instant');
+    videoScreen.classList.add('instant');
     gate.classList.remove('active');
+    gate.style.display = 'none';
     videoScreen.classList.add('active');
     video.play().catch(() => {});
   });
@@ -275,6 +310,17 @@
     videoScreen.classList.remove('active');
     linksScreen.classList.add('active');
   });
+
+  // Arriving from a sub-page (#links) lands straight on the links,
+  // rather than replaying the whole video to get back to them.
+  function showLinksDirectly() {
+    gate.classList.add('instant');
+    gate.classList.remove('active');
+    gate.style.display = 'none';
+    videoScreen.classList.remove('active');
+    linksScreen.classList.add('instant', 'active');
+  }
+  if (location.hash === '#links') showLinksDirectly();
 
   // The portfolio card can't be an anchor (its subtitle contains one),
   // so give its background the same click behaviour without swallowing
